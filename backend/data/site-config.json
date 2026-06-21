@@ -1,0 +1,37 @@
+{
+  "defaultCountry": "kazakhstan",
+  "countries": {
+    "kazakhstan": {
+      "id": "kazakhstan",
+      "name": "Kazakhstan",
+      "siteName": "STADA Kazakhstan",
+      "domain": "stada.kz",
+      "siteUrl": "https://stada.kz/",
+      "aliases": ["kz", "kazakhstan", "stada.kz"],
+      "defaultLanguage": "ru",
+      "supportedLanguages": ["ru", "kz"],
+      "homepage": {
+        "htmlPath": "../main/index.html",
+        "translationScriptPath": "../main/js/script.js",
+        "countriesDataPath": "../main/js/worldwide/countries-data.js",
+        "assetsBaseUrl": "https://stada.kz/"
+      }
+    },
+    "kyrgyzstan": {
+      "id": "kyrgyzstan",
+      "name": "Kyrgyzstan",
+      "siteName": "STADA Kyrgyzstan",
+      "domain": "stada.kg",
+      "siteUrl": "https://stada.kg/",
+      "aliases": ["kg", "kyrgyzstan", "stada.kg"],
+      "defaultLanguage": "ru",
+      "supportedLanguages": ["ru", "kg"],
+      "homepage": {
+        "htmlPath": "../main/index.html",
+        "translationScriptPath": "../main/js/script.js",
+        "countriesDataPath": "../main/js/worldwide/countries-data.js",
+        "assetsBaseUrl": "https://stada.kg/"
+      }
+    }
+  }
+}
