@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-backend-text-id="history_text_001">STADA - История компании</title>
+  <link rel="icon" type="image/png" href="assets/logos/stada_logo.png">
+  <link rel="apple-touch-icon" href="assets/logos/stada_logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="history-page">
+    <nav>
+      <div class="nav-container">
+        <a href="index.html" class="logo" aria-label="STADA logo">
+          <img data-backend-image-id="history_image_001" src="assets/logos/stada_logo.png" alt="STADA logo" />
+        </a>
+        <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        <ul class="menu">
+          <li><a href="index.html#about" data-i18n-key="nav_about"></a></li>
+          <li><a href="culture.html" data-i18n-key="nav_culture"></a></li>
+          <li><a class="active" href="history.html" data-i18n-key="nav_history"></a></li>
+          <li><a href="worldwide.html" data-i18n-key="nav_worldwide"></a></li>
+          <li><a href="products/index.html" data-i18n-key="nav_products"></a></li>
+          <li class="menu-language">
+
+            <div class="lang-toggle">
+
+            <button class="lang-option" id="lang-ru" data-lang="ru" aria-label="Переключить язык на русский">RU</button>
+
+            <button class="lang-option" id="lang-kz" data-lang="kz" aria-label="Переключить язык на казахский">KZ</button>
+
+            </div>
+
+          </li>
+
+        </ul>
+      </div>
+    </nav>
+
+    <main>
+      <section class="hero-section stada-home-hero worldwide-hero worldwide-hero--static history-hero" id="history-top" aria-labelledby="history-hero-heading">
+        <div class="stada-home-hero__media worldwide-hero__media" aria-label="Historic STADA city map">
+          <img data-backend-image-id="history_image_002" src="assets/hero/history-stada-map.png" alt="Historic city map of Stada" />
+        </div>
+        <div class="stada-home-hero__copy worldwide-hero__copy">
+            <p data-backend-text-id="history_text_002" class="worldwide-hero__kicker">STADA 1895-2022</p>
+            <h1 data-backend-text-id="history_text_003" id="history-hero-heading">История компании</h1>
+            <p data-backend-text-id="history_text_004" class="worldwide-hero__lead">Более 130 лет качества, доступности и заботы о здоровье людей.</p>
+            <div class="history-hero__actions">
+              <a data-backend-text-id="history_text_005" class="hero-btn" href="#history-timeline">Смотреть хронологию</a>
+            </div>
+          </div>
+      </section>
+
+      <section class="history-summary" aria-label="Ключевые этапы STADA">
+        <div class="history-summary__inner">
+          <article class="history-summary-card">
+            <span data-backend-text-id="history_text_006">1895</span>
+            <h2 data-backend-text-id="history_text_007">Аптечные корни</h2>
+            <p data-backend-text-id="history_text_008">Фармацевты объединяются, чтобы производить препараты по единым стандартам, в одинаковой упаковке и по единой цене.</p>
+          </article>
+          <article class="history-summary-card">
+            <span data-backend-text-id="history_text_009">1975</span>
+            <h2 data-backend-text-id="history_text_010">Поворот к дженерикам</h2>
+            <p data-backend-text-id="history_text_011">STADA расширяет продуктовую линию дженериками и закладывает основу будущего международного роста.</p>
+          </article>
+          <article class="history-summary-card">
+            <span data-backend-text-id="history_text_012">1997</span>
+            <h2 data-backend-text-id="history_text_013">Выход на биржу</h2>
+            <p data-backend-text-id="history_text_014">Акции STADA впервые допускаются к официальным торгам на биржах Франкфурта и Дюссельдорфа.</p>
+          </article>
+          <article class="history-summary-card">
+            <span data-backend-text-id="history_text_015">2022</span>
+            <h2 data-backend-text-id="history_text_016">Устойчивый рост</h2>
+            <p data-backend-text-id="history_text_017">Компания расширяет производство, Specialty-направление, биосимиляры и публикует первый глобальный отчет об устойчивом развитии.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="history-periods" aria-label="Периоды истории">
+        <div class="history-periods__inner">
+          <a data-backend-text-id="history_text_018" href="#period-1895">1895-1933</a>
+          <a data-backend-text-id="history_text_019" href="#period-1933">1933-1948</a>
+          <a data-backend-text-id="history_text_020" href="#period-1948">1948-1961</a>
+          <a data-backend-text-id="history_text_021" href="#period-1961">1961-1975</a>
+          <a data-backend-text-id="history_text_022" href="#period-1975">1975-1993</a>
+          <a data-backend-text-id="history_text_023" href="#period-1993">1993-2000</a>
+          <a data-backend-text-id="history_text_024" href="#period-2000">2000-2005</a>
+          <a data-backend-text-id="history_text_025" href="#period-2005">2005-2010</a>
+          <a data-backend-text-id="history_text_026" href="#period-2010">2010-2015</a>
+          <a data-backend-text-id="history_text_027" href="#period-2016">2016-2022</a>
+        </div>
+      </section>
+
+      <section class="history-timeline" id="history-timeline" aria-labelledby="history-timeline-heading">
+        <div class="history-timeline__inner">
+          <div class="history-section-heading">
+            <p data-backend-text-id="history_text_028" class="history-eyebrow">Journey through time</p>
+            <h2 data-backend-text-id="history_text_029" id="history-timeline-heading">Путь STADA через поколения</h2>
+            <p data-i18n-key="history_source_note"></p>
+          </div>
+
+          <div class="history-period" id="period-1895">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_030">1895-1933</span>
+              <h3 data-backend-text-id="history_text_031">Рождение идеи единого стандарта</h3>
+              <p data-backend-text-id="history_text_032">Фармацевты объединяются, чтобы добиться большего вместе: препараты производятся по одинаковым правилам, упаковываются единообразно и продаются по единой цене.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_033">1895</time><h4 data-backend-text-id="history_text_034">Начало истории STADA</h4><p data-backend-text-id="history_text_035">14 марта 1895 года считается отправной точкой STADA: фармацевты в Берлине, Дрездене, Вюрцбурге, Дармштадте и других городах начинают совместно производить препараты.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_036">1903</time><h4 data-backend-text-id="history_text_037">Регулирование аптечных препаратов</h4><p data-backend-text-id="history_text_038">Немецкая ассоциация фармацевтов устанавливает правила самостоятельного производства фармацевтических специальностей: от выпуска и маркировки до упаковки и цены.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_039">1908</time><h4 data-backend-text-id="history_text_040">Специализированная компания ассоциации</h4><p data-backend-text-id="history_text_041">Создается специализированная компания Немецкой ассоциации фармацевтов, дающая участникам возможность выпускать препараты по идентичным требованиям.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_042">1933</time><h4 data-backend-text-id="history_text_043">Новая организационная форма</h4><p data-backend-text-id="history_text_044">После перехода ассоциации в профессиональное сообщество St.d.A специализированная компания становится отделом собственных препаратов Немецкой ассоциации фармацевтов.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-1933">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_045">1933-1948</span>
+              <h3 data-backend-text-id="history_text_046">STADA как ассоциативный знак</h3>
+              <p data-backend-text-id="history_text_047">После Второй мировой войны STADA становится ассоциативной торговой маркой, а бизнес перезапускается через две кооперативные структуры - Север и Юг.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_048">1935</time><h4 data-backend-text-id="history_text_049">Появление марки STADA</h4><p data-backend-text-id="history_text_050">Аббревиатура St.d.A превращается в зарегистрированный знак STADA и становится общим названием для аптечных препаратов, выпускаемых по стандартным формулам.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_051">1938</time><h4 data-backend-text-id="history_text_052">Филиал в Мюнхене</h4><p data-backend-text-id="history_text_053">STADA открывает филиал в Мюнхене. После бомбардировок 1944 года офисы переносят в Галле, но к концу войны работа прекращается.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_054">1948</time><h4 data-backend-text-id="history_text_055">Перезапуск после войны</h4><p data-backend-text-id="history_text_056">STADA заново создается в бывшей ФРГ как два кооператива: STADA North в Эссене и STADA South в Тюбингене, с фокусом на продуктах для самолечения.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-1948">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_057">1948-1961</span>
+              <h3 data-backend-text-id="history_text_058">Переход к производственной компании</h3>
+              <p data-backend-text-id="history_text_059">Две послевоенные кооперативные организации объединяются, а площадка в Бад-Фильбеле/Дортельвайле становится основой для будущего промышленного роста.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_060">1954</time><h4 data-backend-text-id="history_text_061">Единая компания</h4><p data-backend-text-id="history_text_062">STADA North и STADA South объединяются в Stada, Standardpräparate Deutscher Apotheken eGmbH, компания переезжает во Франкфурт-на-Майне, а товарный знак STADA регистрируется.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_063">1957</time><h4 data-backend-text-id="history_text_064">Площадка в Бад-Фильбеле</h4><p data-backend-text-id="history_text_065">Компания приобретает помещения рядом с Франкфуртом, где постепенно формируется современная фармацевтическая производственная база.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_066">1961</time><h4 data-backend-text-id="history_text_067">Централизованное производство</h4><p data-backend-text-id="history_text_068">Представительное собрание решает, что препараты STADA могут производиться не только в аптеках, но и централизованно в Дортельвайле.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-1961">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_069">1961-1975</span>
+              <h3 data-backend-text-id="history_text_070">Основа современной индустриальной компании</h3>
+              <p data-backend-text-id="history_text_071">STADA начинает оптовую торговлю собственными препаратами, меняет правовую форму и сохраняет тесную связь с фармацевтами.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_072">1970</time><h4 data-backend-text-id="history_text_073">Переход к акционерной модели</h4><p data-backend-text-id="history_text_074">Кооператив становится корпорацией, чтобы привлекать больше капитала и устойчиво развиваться; на этом этапе акции доступны только фармацевтам.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_075">1971</time><h4 data-backend-text-id="history_text_076">Новые компании группы</h4><p data-backend-text-id="history_text_077">Создаются NIDDAPHARM GmbH и STADA-CHEMIE GmbH, также STADA приобретает UZARA-Werk GmbH.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-1975">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_078">1975-1993</span>
+              <h3 data-backend-text-id="history_text_079">Дженерики и первые международные шаги</h3>
+              <p data-backend-text-id="history_text_080">Решение развивать дженерики становится ключевым: компания перестраивается, быстро растет и выходит на зарубежные рынки.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_081">1975</time><h4 data-backend-text-id="history_text_082">STADAPHARM и дженерики</h4><p data-backend-text-id="history_text_083">STADA расширяет линейку дженериками, учреждает STADAPHARM GmbH, получает первые лицензии; одним из успешных продуктов становится Nifedipin STADA.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_084">1986</time><h4 data-backend-text-id="history_text_085">Первые иностранные инвестиции</h4><p data-backend-text-id="history_text_086">С приобретением швейцарской Helvepharm AG STADA впервые выходит за рубеж. Позже появляются STADA GmbH Austria, Eurogenerics SA в Бельгии и Centrafarm BV в Нидерландах.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_087">1992</time><h4 data-backend-text-id="history_text_088">Старт в Азии</h4><p data-backend-text-id="history_text_089">STADA начинает деятельность в Азии через STADA Pharmaceuticals (Asia) Ltd. в Гонконге.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-1993">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_090">1993-2000</span>
+              <h3 data-backend-text-id="history_text_091">Глобальный игрок и биржевая история</h3>
+              <p data-backend-text-id="history_text_092">К 100-летию бизнес активно растет, STADA входит в топ-10 немецкой отрасли по продажам и продолжает международную экспансию.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_093">1993</time><h4 data-backend-text-id="history_text_094">Акции для нефармацевтов</h4><p data-backend-text-id="history_text_095">Впервые акционерами STADA могут стать не только фармацевты и сотрудники компании, но и другие инвесторы.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_096">1995</time><h4 data-backend-text-id="history_text_097">Холдинговая структура</h4><p data-backend-text-id="history_text_098">STADA реорганизуется в средний холдинг в Бад-Фильбеле; STADAPharm GmbH и STADA OTC Arzneimittel GmbH берут на себя ключевой маркетинг рецептурных и OTC-препаратов.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_099">1996</time><h4 data-backend-text-id="history_text_100">ALIUD и новые рынки</h4><p data-backend-text-id="history_text_101">STADA приобретает ALIUD PHARMA GmbH как вторую немецкую дженериковую линию и расширяется во Франции и Чехии.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_102">1997</time><h4 data-backend-text-id="history_text_103">IPO</h4><p data-backend-text-id="history_text_104">29 октября акции STADA впервые допускаются к официальной торговле на фондовых биржах Франкфурта и Дюссельдорфа.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_105">1998</time><h4 data-backend-text-id="history_text_106">Расширение портфеля</h4><p data-backend-text-id="history_text_107">Завершается IPO с именными акциями, STADA приобретает активы в Дании, Onkologika и пакет рецептурных брендов Fresenius.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_108">1999</time><h4 data-backend-text-id="history_text_109">Таиланд, Испания, Италия</h4><p data-backend-text-id="history_text_110">Международное развитие ускоряется: запускается STADA Asiatic Co. Inc. в Бангкоке, инвестиции в Ciclum Farma в Испании и EG S.p.A в Италии.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_111">2000</time><h4 data-backend-text-id="history_text_112">Ирландия и дробление акций</h4><p data-backend-text-id="history_text_113">STADA покупает Clonmel Healthcare Ltd., лидера ирландского рынка дженериков, и проводит дробление обыкновенных и привилегированных акций 1:10.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-2000">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_114">2000-2005</span>
+              <h3 data-backend-text-id="history_text_115">Индексы, биодженерики и Россия</h3>
+              <p data-backend-text-id="history_text_116">STADA входит в MDAX и Euro Stoxx 600, начинает разработку биодженериков и усиливает международное присутствие, включая стратегический вход в Россию.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_117">2001</time><h4 data-backend-text-id="history_text_118">Биодженерики и MDAX</h4><p data-backend-text-id="history_text_119">Запускается разработка биодженериков, расширяется азиатский бизнес, преодолен рубеж выручки 500 млн евро, привилегированные акции конвертируются в обыкновенные, STADA включается в MDAX.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_120">2002</time><h4 data-backend-text-id="history_text_121">США, Испания и EuroSTOXX 600</h4><p data-backend-text-id="history_text_122">Компания выходит в США через STADA Inc., усиливает позиции в Испании и Италии, покупает локальные бренды и включается в индекс EuroSTOXX 600.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_123">2003</time><h4 data-backend-text-id="history_text_124">Новые активы и образовательная инициатива</h4><p data-backend-text-id="history_text_125">STADA инвестирует в New Pharmajani в Италии, вместе с Europa Fachhochschule Fresenius объявляет профессорскую кафедру health management, приобретает Schein Pharmaceuticals UK и брендовый пакет redinomedica.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_126">2004</time><h4 data-backend-text-id="history_text_127">Nizhpharm</h4><p data-backend-text-id="history_text_128">Проводится фактическое дробление акций 1:1, усиливается брендовый портфель в Италии, а покупка около 97,5% Nizhpharm становится важным шагом в России.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_129">2005</time><h4 data-backend-text-id="history_text_130">Португалия, Китай и Mobilat</h4><p data-backend-text-id="history_text_131">STADA приобретает Ciclum Farma в Португалии, 58% Beijing Center-Lab Pharmaceutical Company в Китае и пакет из 11 европейских брендов, включая Mobilat.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-2005">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_132">2005-2010</span>
+              <h3 data-backend-text-id="history_text_133">Hemofarm, биосимиляры и эффективность</h3>
+              <p data-backend-text-id="history_text_134">Компания приобретает стратегически важный Hemofarm, запускает первый биосимиляр группы и размещает первый корпоративный bond.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_135">2006</time><h4 data-backend-text-id="history_text_136">Hemofarm</h4><p data-backend-text-id="history_text_137">STADA выходит из бизнеса в США и приобретает сербскую Hemofarm A.D. в Вршаце.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_138">2007</time><h4 data-backend-text-id="history_text_139">MAKIZ и Forum Bioscience</h4><p data-backend-text-id="history_text_140">STADA усиливает присутствие в России через MAKIZ Group и приобретает британскую Forum Bioscience Holdings Ltd.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_141">2008</time><h4 data-backend-text-id="history_text_142">Первый биосимиляр группы</h4><p data-backend-text-id="history_text_143">Немецкая cell pharm представляет первый биосимиляр STADA для лечения анемии при хронической почечной недостаточности и химиотерапии; в Германии препарат продается как Silapo.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_144">2010</time><h4 data-backend-text-id="history_text_145">Первый корпоративный bond</h4><p data-backend-text-id="history_text_146">STADA успешно размещает первый корпоративный bond и запускает программу эффективности STADA - build the future.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-2010">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_147">2010-2015</span>
+              <h3 data-backend-text-id="history_text_148">Рост брендового портфеля</h3>
+              <p data-backend-text-id="history_text_149">Компания активно приобретает брендовые продукты, завершает программу эффективности раньше срока и покупает британского OTC-производителя Thornton & Ross.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_150">2011</time><h4 data-backend-text-id="history_text_151">Cetraben и партнерство с Gedeon Richter</h4><p data-backend-text-id="history_text_152">STADA приобретает Cetraben, начинает разработку двух биосимиляров с Gedeon Richter и покупает портфель Grünenthal для Восточной Европы и Ближнего Востока.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_153">2012</time><h4 data-backend-text-id="history_text_154">Spirig и Австралия</h4><p data-backend-text-id="history_text_155">Покупается портфель Grünenthal для рынков ЕС в Центральной Европе, приобретается швейцарская Spirig Pharma AG, создается дочерняя компания в Австралии, а в рамках программы эффективности продаются отдельные производственные площадки.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_156">2013</time><h4 data-backend-text-id="history_text_157">STADA diagnostics и Thornton & Ross</h4><p data-backend-text-id="history_text_158">STADA входит в персонализированную терапию, первой в Германии внедряет 2D-штрихкод, приобретает Thornton & Ross, создает IT shared service center в Сербии, лицензирует Grastofil, расширяется в Мьянме и размещает второй corporate bond.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_159">2014</time><h4 data-backend-text-id="history_text_160">2 млрд евро продаж</h4><p data-backend-text-id="history_text_161">Открывается логистический центр в Дубае, STADA впервые превышает отметку 2 млрд евро продаж, приобретает Aqualor для России и права на Flexitol для Великобритании и Ирландии.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_162">2015</time><h4 data-backend-text-id="history_text_163">120-летие</h4><p data-backend-text-id="history_text_164">STADA отмечает 120 лет, расширяет STADA Diagnostik быстрым тестом на Ebola, лицензирует Pegfilgrastim для Европы, приобретает SCIOTEC и аргентинскую Laboratorio Vannier, а сотрудничество с CROMA-PHARMA усиливает aesthetics-направление.</p></article>
+            </div>
+          </div>
+
+          <div class="history-period" id="period-2016">
+            <div class="history-period__header">
+              <span data-backend-text-id="history_text_165">2016-2022</span>
+              <h3 data-backend-text-id="history_text_166">Новая культура роста и specialty-фокус</h3>
+              <p data-backend-text-id="history_text_167">STADA усиливает международные брендовые продукты, биосимиляры, specialty-направление и устойчивое развитие.</p>
+            </div>
+            <div class="history-events">
+              <article class="history-event"><time data-backend-text-id="history_text_168">2016</time><h4 data-backend-text-id="history_text_169">Фокус на брендовые продукты</h4><p data-backend-text-id="history_text_170">Начинается сфокусированная интернационализация успешных Branded Products.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_171">2017</time><h4 data-backend-text-id="history_text_172">Bain Capital и Cinven</h4><p data-backend-text-id="history_text_173">Успешно проходит добровольное публичное предложение о поглощении Bain Capital и Cinven; доля владения достигает примерно 65%.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_174">2018</time><h4 data-backend-text-id="history_text_175">Ladival, Nizoral и новый CEO</h4><p data-backend-text-id="history_text_176">STADA возвращает права на Ladival, приобретает EMEA-права на Nizoral, становится мажоритарным акционером BIOCEUTICALS, а Peter Goldschmidt становится CEO и запускает процесс корпоративной культуры; объявлен делистинг.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_177">2019</time><h4 data-backend-text-id="history_text_178">Сильный портфель и ценности One STADA</h4><p data-backend-text-id="history_text_179">Компания приобретает OTC-портфель GSK, запускает Movymia и Bortezomib STADA, начинает продажи Nizoral в EMEA, покупает Walmark, инвестирует в OTC-портфель Takeda в России/СНГ, заключает партнерство с Alvotech и приобретает бизнес Biopharma Ukraine.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_180">2020</time><h4 data-backend-text-id="history_text_181">Alvotech и Lobsor</h4><p data-backend-text-id="history_text_182">STADA заключает стратегическое партнерство с Alvotech по семи биосимилярам для Европы и приобретает Lobsor Pharmaceuticals вместе с правами на препарат для болезни Паркинсона.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_183">2021</time><h4 data-backend-text-id="history_text_184">Sanofi, Calliditas и биосимиляры</h4><p data-backend-text-id="history_text_185">Запускается новый продукт с современной помповой технологией для поздней стадии болезни Паркинсона, oncology-биосимиляр bevacizumab, приобретаются 16 consumer healthcare брендов Sanofi, а с Calliditas Therapeutics заключается партнерство по IgA-нефропатии в Европе.</p></article>
+              <article class="history-event"><time data-backend-text-id="history_text_186">2022</time><h4 data-backend-text-id="history_text_187">Производство, specialty и устойчивость</h4><p data-backend-text-id="history_text_188">STADA расширяет производственную сеть объектом стоимостью более 50 млн евро в Румынии, запускает Kinpeygo, выводит высококонцентрированный adalimumab biosimilar в Европе, публикует первый глобальный Sustainability Report и входит в топ-10% самых устойчивых фармкомпаний.</p></article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="site-footer">
+      <div class="footer-container footer-modern">
+        <div class="footer-main">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-logo" aria-label="STADA logo">
+              <img data-backend-image-id="history_image_003" src="assets/logos/stada_logo.png" alt="STADA logo" />
+            </a>
+            <p class="footer-eyebrow" data-i18n-key="site_name"></p>
+            <p class="footer-text" data-i18n-key="footer_brand_text"></p>
+            <div class="footer-trust" aria-label="STADA facts">
+              <span data-i18n-key="footer_trust_years"></span>
+              <span data-i18n-key="footer_trust_countries"></span>
+            </div>
+          </div>
+
+          <nav class="footer-nav" aria-label="Footer navigation">
+            <div class="footer-nav__group">
+              <h3 data-i18n-key="footer_company_title"></h3>
+              <a href="index.html#about" data-i18n-key="footer_nav_about"></a>
+              <a href="culture.html" data-i18n-key="footer_nav_culture"></a>
+              <a href="history.html" data-i18n-key="footer_nav_history"></a>
+              <a href="worldwide.html" data-i18n-key="footer_nav_worldwide"></a>
+              <a href="index.html#news" data-i18n-key="footer_nav_news"></a>
+              <a href="index.html#career" data-i18n-key="footer_nav_career"></a>
+              <a href="https://www.stada.com" target="_blank" rel="noopener" data-i18n-key="footer_global_link"></a>
+            </div>
+            <div class="footer-nav__group">
+              <h3 data-i18n-key="footer_products_title"></h3>
+              <a href="products/index.html" data-i18n-key="products_browse_catalog"></a>
+              <a href="products/coldrex.html" data-i18n-key="product_coldrex_name"></a>
+              <a href="products/enterogermina.html" data-i18n-key="product_enterogermina_name"></a>
+              <a href="products/vitrum-immunaktiv.html" data-i18n-key="product_vitrum_immunaktiv_name"></a>
+            </div>
+            <div class="footer-nav__group">
+              <h3 data-i18n-key="footer_access_title"></h3>
+              <a href="products/index.html#pharmacy-partners" data-i18n-key="where_to_buy_heading"></a>
+              <a href="products/index.html#products-catalog" data-i18n-key="products_filter_all"></a>
+              <a href="products/index.html#products-catalog" data-i18n-key="products_category_respiratory"></a>
+              <a href="products/index.html#products-catalog" data-i18n-key="products_category_cardio"></a>
+            </div>
+          </nav>
+        </div>
+
+        <div class="footer-warning">
+          <strong data-i18n-key="footer_warning_title"></strong>
+          <p data-i18n-key="footer_warning_text"></p>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; <span id="year"></span> STADA. <span data-i18n-key="footer_rights"></span></p>
+          <div class="footer-bottom__links">
+            <a data-backend-text-id="history_text_189" href="https://www.stada.com" target="_blank" rel="noopener">stada.com</a>
+            <a href="#" class="footer-top" data-i18n-key="footer_back_top" aria-label="Back to top"></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/script.js?v=country-page-backend-2"></script>
+  </body>
+</html>

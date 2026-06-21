@@ -11,9 +11,9 @@
       "defaultLanguage": "ru",
       "supportedLanguages": ["ru", "kz"],
       "homepage": {
-        "htmlPath": "../main/index.html",
-        "translationScriptPath": "../main/js/script.js",
-        "countriesDataPath": "../main/js/worldwide/countries-data.js",
+        "htmlPath": "content/main/index.html",
+        "translationScriptPath": "content/main/js/script.js",
+        "countriesDataPath": "content/main/js/worldwide/countries-data.js",
         "assetsBaseUrl": "https://stada.kz/"
       }
     },
@@ -27,9 +27,9 @@
       "defaultLanguage": "ru",
       "supportedLanguages": ["ru", "kg"],
       "homepage": {
-        "htmlPath": "../main/index.html",
-        "translationScriptPath": "../main/js/script.js",
-        "countriesDataPath": "../main/js/worldwide/countries-data.js",
+        "htmlPath": "content/main/index.html",
+        "translationScriptPath": "content/main/js/script.js",
+        "countriesDataPath": "content/main/js/worldwide/countries-data.js",
         "assetsBaseUrl": "https://stada.kg/"
       }
     }

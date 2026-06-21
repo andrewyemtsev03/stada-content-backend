@@ -24,6 +24,19 @@ password: StadaAdmin67
 
 For deployment, override them with `ADMIN_LOGIN` and `ADMIN_PASSWORD`.
 
+## Content Source
+
+The backend reads page HTML and translation keys from `backend/content/main`, so it can be deployed by itself without filesystem access to the root `main` frontend folder.
+
+When frontend pages or `main/js/script.js` change, refresh the backend snapshot locally before deploying:
+
+```bash
+cd backend
+npm run sync-content
+```
+
+Commit the updated files in `backend/content/main` with the backend.
+
 ## Endpoints
 
 ```http
