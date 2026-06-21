@@ -6,8 +6,8 @@ const { URL } = require("node:url");
 const { getHomepagePayload, getPagePayload, listCountries } = require("./content-loader");
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
 
-const port = Number(process.env.PORT || 3001);
-const host = process.env.HOST || "127.0.0.1";
+const port = Number(process.env.PORT || 10000);
+const host = "0.0.0.0";
 const adminRoot = path.resolve(__dirname, "..", "..", "admin");
 const adminLogin = process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "andrewyemtsev";
 const adminPassword = process.env.ADMIN_PASSWORD || "StadaAdmin67";
@@ -501,7 +501,7 @@ const server = http.createServer(handleRequest);
 
 if (require.main === module) {
   server.listen(port, host, () => {
-    console.log(`STADA country content backend listening at http://${host}:${port}`);
+    console.log(`STADA country content backend listening on port ${port}`);
   });
 }
 
