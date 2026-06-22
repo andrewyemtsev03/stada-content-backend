@@ -191,17 +191,9 @@ function makeStableCloudinaryPublicId({ country, page, imageId }) {
   return [countryPart, pagePart, slot].filter(Boolean).join("/");
 }
 
-function withCacheBuster(url, value) {
-  if (!url) return "";
-
-  try {
-    const parsed = new URL(url);
-    parsed.searchParams.set("cb", String(value || Date.now()));
-    return parsed.href;
-  } catch (error) {
-    const separator = String(url).includes("?") ? "&" : "?";
-    return `${url}${separator}cb=${encodeURIComponent(String(value || Date.now()))}`;
-  }
+function makeStableCloudinaryDeliveryUrl(publicId, format) {
+  if (!publicId || !format) return "";
+  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${publicId}.${format}`;
 }
 
 function makeCloudinarySignature(params) {
@@ -255,7 +247,9 @@ async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, pa
 
   return {
     publicId: payload.public_id,
-    secureUrl: stablePublicId ? withCacheBuster(payload.secure_url, timestamp) : payload.secure_url,
+    secureUrl: stablePublicId
+      ? makeStableCloudinaryDeliveryUrl(payload.public_id, payload.format) || payload.secure_url
+      : payload.secure_url,
     width: payload.width,
     height: payload.height,
     format: payload.format,
