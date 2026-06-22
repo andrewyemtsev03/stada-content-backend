@@ -29,6 +29,7 @@ function normalizeBucket(bucket) {
   return {
     text: bucket?.text && typeof bucket.text === "object" ? bucket.text : {},
     domText: bucket?.domText && typeof bucket.domText === "object" ? bucket.domText : {},
+    domImages: bucket?.domImages && typeof bucket.domImages === "object" ? bucket.domImages : {},
     updatedAt: bucket?.updatedAt || null,
   };
 }
@@ -44,7 +45,8 @@ function hasValues(value) {
 
 function pruneEmptyContainers(overrides, countryId, language, pagePath) {
   if (!hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.text)
-    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domText)) {
+    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domText)
+    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domImages)) {
     delete overrides.pages[countryId][language][pagePath];
   }
 
@@ -64,13 +66,36 @@ function writeContentOverrides(overrides) {
   fs.renameSync(tempPath, overridesPath);
 }
 
-function savePageOverrides({ countryId, language, pagePath, text = {}, domText = {} }) {
+function omitKeys(source, keys) {
+  const omitted = new Set(keys || []);
+  return Object.fromEntries(
+    Object.entries(source || {}).filter(([key]) => !omitted.has(key))
+  );
+}
+
+function savePageOverrides({
+  countryId,
+  language,
+  pagePath,
+  text = {},
+  domText = {},
+  domImages = {},
+  submittedTextKeys = null,
+  submittedDomTextIds = null,
+  submittedDomImageIds = null,
+}) {
   const overrides = readContentOverrides();
+  const existing = normalizeBucket(overrides.pages?.[countryId]?.[language]?.[pagePath]);
+  const nextText = submittedTextKeys ? { ...omitKeys(existing.text, submittedTextKeys), ...text } : text;
+  const nextDomText = submittedDomTextIds ? { ...omitKeys(existing.domText, submittedDomTextIds), ...domText } : domText;
+  const nextDomImages = submittedDomImageIds ? { ...omitKeys(existing.domImages, submittedDomImageIds), ...domImages } : domImages;
+
   overrides.pages[countryId] ||= {};
   overrides.pages[countryId][language] ||= {};
   overrides.pages[countryId][language][pagePath] = {
-    text,
-    domText,
+    text: nextText,
+    domText: nextDomText,
+    domImages: nextDomImages,
     updatedAt: new Date().toISOString(),
   };
   pruneEmptyContainers(overrides, countryId, language, pagePath);

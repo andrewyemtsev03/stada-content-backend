@@ -513,6 +513,7 @@ function extractImages(html, sectionId, assetsBaseUrl) {
     const src = attrs["data-backend-src"] || attrs.src;
     if (!src) continue;
     images.push({
+      id: attrs["data-backend-image-id"] || "",
       section: sectionId,
       src,
       url: makeAssetUrl(src, assetsBaseUrl),
@@ -624,10 +625,11 @@ function buildSectionPayload(section, translations, productFallbackTools, langua
   };
 }
 
-function applyContentOverrides(payload, countryId, language, pagePath) {
+function applyContentOverrides(payload, countryId, language, pagePath, assetsBaseUrl) {
   const overrides = getPageOverrides(countryId, language, pagePath);
   const textOverrides = overrides.text || {};
   const domTextOverrides = overrides.domText || {};
+  const domImageOverrides = overrides.domImages || {};
 
   for (const [key, value] of Object.entries(textOverrides)) {
     if (typeof value === "string") {
@@ -658,6 +660,25 @@ function applyContentOverrides(payload, countryId, language, pagePath) {
     };
   });
 
+  payload.content.dom.images = (payload.content.dom.images || []).map(image => {
+    const override = domImageOverrides[image.id];
+    if (!override || typeof override !== "object" || Array.isArray(override)) {
+      return image;
+    }
+
+    const src = typeof override.src === "string" ? override.src : image.src;
+    return {
+      ...image,
+      src,
+      url: makeAssetUrl(src, assetsBaseUrl),
+      alt: typeof override.alt === "string" ? override.alt : image.alt,
+      loading: typeof override.loading === "string" ? override.loading : image.loading,
+      srcset: typeof override.srcset === "string" ? override.srcset : image.srcset,
+      sizes: typeof override.sizes === "string" ? override.sizes : image.sizes,
+      source: "override",
+    };
+  });
+
   const overriddenTitle = payload.content.dom.text.find(item => {
     return item.tag === "title" && Object.prototype.hasOwnProperty.call(domTextOverrides, item.id);
   });
@@ -669,6 +690,7 @@ function applyContentOverrides(payload, countryId, language, pagePath) {
     updatedAt: overrides.updatedAt,
     textKeys: Object.keys(textOverrides),
     domTextIds: Object.keys(domTextOverrides),
+    domImageIds: Object.keys(domImageOverrides),
   };
 }
 
@@ -729,7 +751,7 @@ function getPagePayload(options = {}) {
   };
 
   if (options.applyOverrides !== false) {
-    applyContentOverrides(payload, countryConfig.id, language, pagePath);
+    applyContentOverrides(payload, countryConfig.id, language, pagePath, homepageConfig.assetsBaseUrl);
   }
 
   return payload;

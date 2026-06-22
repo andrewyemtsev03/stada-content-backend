@@ -14,6 +14,13 @@ const adminPassword = process.env.ADMIN_PASSWORD || "StadaAdmin67";
 const adminSessionTtlMs = Number(process.env.ADMIN_SESSION_TTL_MS || 8 * 60 * 60 * 1000);
 const adminSessions = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
+const adminEditablePagePath = "index.html";
+const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
+const maxJsonBodyBytes = Number(process.env.MAX_JSON_BODY_BYTES || 8 * 1024 * 1024);
+const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || "";
+const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY || "";
+const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET || "";
+const cloudinaryUploadFolder = process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero";
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -86,7 +93,7 @@ function readJsonBody(request) {
     request.setEncoding("utf8");
     request.on("data", chunk => {
       body += chunk;
-      if (body.length > 1024 * 1024) {
+      if (body.length > maxJsonBodyBytes) {
         reject(Object.assign(new Error("Request body is too large."), { statusCode: 413 }));
         request.destroy();
       }
@@ -145,6 +152,81 @@ function requireAdmin(request) {
       code: "ADMIN_UNAUTHORIZED",
     });
   }
+}
+
+function assertCloudinaryConfigured() {
+  if (cloudinaryCloudName && cloudinaryApiKey && cloudinaryApiSecret) return;
+  throw Object.assign(new Error("Cloudinary upload is not configured on the backend."), {
+    statusCode: 500,
+    code: "CLOUDINARY_NOT_CONFIGURED",
+  });
+}
+
+function sanitizePublicId(value) {
+  return String(value || "hero-image")
+    .replace(/\.[^.]+$/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "hero-image";
+}
+
+function makeCloudinarySignature(params) {
+  const payload = Object.entries(params)
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+  return crypto.createHash("sha1").update(`${payload}${cloudinaryApiSecret}`).digest("hex");
+}
+
+async function uploadImageToCloudinary({ dataUrl, fileName }) {
+  assertCloudinaryConfigured();
+
+  if (!/^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i.test(String(dataUrl || ""))) {
+    throw Object.assign(new Error("Upload must be a PNG, JPEG, WebP, or SVG image."), {
+      statusCode: 400,
+      code: "INVALID_IMAGE_UPLOAD",
+    });
+  }
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  const publicId = `${sanitizePublicId(fileName)}-${timestamp}`;
+  const signedParams = {
+    folder: cloudinaryUploadFolder,
+    public_id: publicId,
+    timestamp,
+    overwrite: "true",
+  };
+  const signature = makeCloudinarySignature(signedParams);
+  const form = new FormData();
+  form.append("file", dataUrl);
+  form.append("api_key", cloudinaryApiKey);
+  form.append("signature", signature);
+  Object.entries(signedParams).forEach(([key, value]) => form.append(key, String(value)));
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
+    method: "POST",
+    body: form,
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw Object.assign(new Error(payload.error?.message || "Cloudinary upload failed."), {
+      statusCode: response.status,
+      code: "CLOUDINARY_UPLOAD_FAILED",
+    });
+  }
+
+  return {
+    publicId: payload.public_id,
+    secureUrl: payload.secure_url,
+    width: payload.width,
+    height: payload.height,
+    format: payload.format,
+    bytes: payload.bytes,
+  };
 }
 
 function makeEditableLabel(id) {
@@ -213,6 +295,20 @@ function makeSectionLookup(payload) {
   return lookup;
 }
 
+function makeImageSectionLookup(payload) {
+  const lookup = new Map();
+  for (const section of payload.content?.sections || []) {
+    for (const image of section.photos || []) {
+      if (!image?.id || lookup.has(image.id)) continue;
+      lookup.set(image.id, {
+        id: section.id || "content",
+        label: makeSectionDisplayLabel(section.label || section.id || "content"),
+      });
+    }
+  }
+  return lookup;
+}
+
 function fallbackSectionForTextKey(key) {
   if (/_page_title$/i.test(key) || /_meta_/i.test(key)) {
     return { id: "page-metadata", label: "Page metadata" };
@@ -229,7 +325,10 @@ function buildEditableContent(basePayload, currentPayload) {
   const currentText = currentPayload.content?.text || {};
   const baseDomText = basePayload.content?.dom?.text || [];
   const currentDomTextById = new Map((currentPayload.content?.dom?.text || []).map(item => [item.id, item]));
+  const baseDomImages = basePayload.content?.dom?.images || [];
+  const currentDomImagesById = new Map((currentPayload.content?.dom?.images || []).map(item => [item.id, item]));
   const sectionLookup = makeSectionLookup(basePayload);
+  const imageSectionLookup = makeImageSectionLookup(basePayload);
 
   const textItems = Object.keys(baseText)
     .filter(key => !isHiddenEditableTextKey(key) && baseText[key] !== null && baseText[key] !== undefined)
@@ -267,6 +366,25 @@ function buildEditableContent(basePayload, currentPayload) {
     };
   });
 
+  const domImageItems = baseDomImages.map(image => {
+    const currentImage = currentDomImagesById.get(image.id);
+    const original = normalizeEditableImage(image);
+    const value = normalizeEditableImage(currentImage || image);
+    const section = imageSectionLookup.get(image.id) || { id: "backend-images", label: "Backend images" };
+    return {
+      type: "domImage",
+      id: image.id,
+      label: makeEditableLabel(image.id),
+      sectionId: section.id,
+      sectionLabel: section.label,
+      original,
+      value,
+      previewUrl: currentImage?.url || image.url || "",
+      originalPreviewUrl: image.url || "",
+      overridden: !sameEditableImage(value, original),
+    };
+  });
+
   return {
     country: currentPayload.country,
     language: currentPayload.language,
@@ -275,10 +393,10 @@ function buildEditableContent(basePayload, currentPayload) {
     overrides: getPageOverrides(currentPayload.country.id, currentPayload.language, currentPayload.page.path),
     sections: [
       ...new Map(
-        [...textItems, ...domTextItems].map(item => [item.sectionId, { id: item.sectionId, label: item.sectionLabel }])
+        [...textItems, ...domTextItems, ...domImageItems].map(item => [item.sectionId, { id: item.sectionId, label: item.sectionLabel }])
       ).values(),
     ],
-    items: [...textItems, ...domTextItems],
+    items: [...textItems, ...domTextItems, ...domImageItems],
   };
 }
 
@@ -289,14 +407,39 @@ function normalizeSubmittedMap(value) {
   );
 }
 
+function normalizeEditableImage(image) {
+  const normalized = {};
+  editableImageFields.forEach(field => {
+    normalized[field] = String(image?.[field] ?? "");
+  });
+  return normalized;
+}
+
+function normalizeSubmittedImageMap(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value).map(([id, image]) => [id, normalizeEditableImage(image)])
+  );
+}
+
+function sameEditableImage(left, right) {
+  return editableImageFields.every(field => String(left?.[field] ?? "") === String(right?.[field] ?? ""));
+}
+
 function buildChangedOverrides(basePayload, body) {
   const baseText = basePayload.content?.text || {};
   const sectionLookup = makeSectionLookup(basePayload);
   const baseDomText = Object.fromEntries((basePayload.content?.dom?.text || []).map(item => [item.id, item.value || ""]));
+  const baseDomImages = Object.fromEntries((basePayload.content?.dom?.images || []).map(item => [item.id, normalizeEditableImage(item)]));
   const submittedText = normalizeSubmittedMap(body.text);
   const submittedDomText = normalizeSubmittedMap(body.domText);
+  const submittedDomImages = normalizeSubmittedImageMap(body.domImages);
+  const submittedTextKeys = Object.keys(submittedText);
+  const submittedDomTextIds = Object.keys(submittedDomText);
+  const submittedDomImageIds = Object.keys(submittedDomImages);
   const text = {};
   const domText = {};
+  const domImages = {};
 
   for (const [key, value] of Object.entries(submittedText)) {
     if (isHiddenEditableTextKey(key) || !Object.prototype.hasOwnProperty.call(baseText, key)) continue;
@@ -313,7 +456,21 @@ function buildChangedOverrides(basePayload, body) {
     }
   }
 
-  return { text, domText };
+  for (const [id, value] of Object.entries(submittedDomImages)) {
+    if (!Object.prototype.hasOwnProperty.call(baseDomImages, id)) continue;
+    if (!sameEditableImage(value, baseDomImages[id])) {
+      domImages[id] = value;
+    }
+  }
+
+  return {
+    text,
+    domText,
+    domImages,
+    submittedTextKeys,
+    submittedDomTextIds,
+    submittedDomImageIds,
+  };
 }
 
 function routeCountryFromHomepagePath(pathname) {
@@ -372,7 +529,7 @@ async function handleRequest(request, response) {
       requireAdmin(request);
       const country = requestUrl.searchParams.get("country");
       const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language");
-      const page = requestUrl.searchParams.get("page") || "index.html";
+      const page = adminEditablePagePath;
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
       const currentPayload = getPagePayload({ country, lang: basePayload.language, page: basePayload.page.path });
 
@@ -383,10 +540,25 @@ async function handleRequest(request, response) {
       return;
     }
 
+    if (request.method === "POST" && pathname === "/api/admin/upload-image") {
+      requireAdmin(request);
+      const body = await readJsonBody(request);
+      const image = await uploadImageToCloudinary({
+        dataUrl: body.dataUrl,
+        fileName: body.fileName,
+      });
+
+      sendJson(response, 200, {
+        status: "uploaded",
+        image,
+      });
+      return;
+    }
+
     if (request.method === "POST" && pathname === "/api/admin/content") {
       requireAdmin(request);
       const body = await readJsonBody(request);
-      const page = body.page || body.path || "index.html";
+      const page = adminEditablePagePath;
       const basePayload = getPagePayload({
         country: body.country || body.countryId,
         lang: body.lang || body.language,
@@ -473,8 +645,8 @@ async function handleRequest(request, response) {
           "POST /api/page { country, lang, page }",
           "GET /admin",
           "POST /api/admin/login { login, password }",
-          "GET /api/admin/content?country=kazakhstan&lang=ru&page=index.html",
-          "POST /api/admin/content { country, lang, page, text, domText }",
+          "GET /api/admin/content?country=kazakhstan&lang=ru",
+          "POST /api/admin/content { country, lang, text, domText, domImages }",
         ],
       });
       return;

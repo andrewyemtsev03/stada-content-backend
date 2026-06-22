@@ -13,7 +13,7 @@ npm start
 
 By default the API listens on `http://127.0.0.1:3001`. Override with `PORT=4000 npm start`.
 
-Open the admin panel at `http://127.0.0.1:3001/admin` after the backend is running. The panel edits homepage text for the selected country and language, then stores overrides in `backend/data/content-overrides.json`.
+Open the admin panel at `http://127.0.0.1:3001/admin` after the backend is running. The panel edits dynamic homepage text and images for the selected country and language, then stores overrides in `backend/data/content-overrides.json`.
 
 Default admin credentials:
 
@@ -23,6 +23,20 @@ password: StadaAdmin67
 ```
 
 For deployment, override them with `ADMIN_LOGIN` and `ADMIN_PASSWORD`.
+
+## Cloudinary Uploads
+
+The admin image upload flow sends files to the backend, and the backend uploads them to Cloudinary. Configure these environment variables on Render:
+
+```text
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_UPLOAD_FOLDER=stada/hero
+MAX_JSON_BODY_BYTES=8388608
+```
+
+Keep `CLOUDINARY_API_SECRET` backend-only. Do not expose it in frontend JavaScript.
 
 ## Content Source
 
@@ -51,7 +65,8 @@ POST /api/homepage
 POST /api/page
 GET /admin
 POST /api/admin/login
-GET /api/admin/content?country=kazakhstan&lang=ru&page=index.html
+GET /api/admin/content?country=kazakhstan&lang=ru
+POST /api/admin/upload-image
 POST /api/admin/content
 ```
 
