@@ -38,7 +38,7 @@ MAX_JSON_BODY_BYTES=8388608
 
 Keep `CLOUDINARY_API_SECRET` backend-only. Do not expose it in frontend JavaScript.
 
-Admin hero image uploads use a stable Cloudinary public ID based on country, page, and backend image ID, for example `stada/hero/kazakhstan/index/index_image_003`. Re-uploading that hero slot overwrites the same Cloudinary asset instead of creating a timestamped asset name. The backend still saves Cloudinary's returned `secure_url`, which may include a new `/v.../` version so browsers and the CDN fetch the fresh image immediately.
+Admin hero image uploads use a stable Cloudinary public ID based on country, page, and backend image ID, for example `stada/hero/kazakhstan/index/index_image_003`. Re-uploading that hero slot overwrites the same Cloudinary asset instead of creating a timestamped asset name. The backend asks Cloudinary to invalidate the old CDN copy and saves a cache-busted delivery URL, so browsers fetch the fresh image immediately even when the underlying public ID stays the same.
 
 ## Content Source
 
