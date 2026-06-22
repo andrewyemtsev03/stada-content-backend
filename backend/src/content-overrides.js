@@ -36,7 +36,26 @@ function normalizeBucket(bucket) {
 
 function getPageOverrides(countryId, language, pagePath) {
   const overrides = readContentOverrides();
-  return normalizeBucket(overrides.pages?.[countryId]?.[language]?.[pagePath]);
+  const countryPages = overrides.pages?.[countryId] || {};
+  const languageBucket = normalizeBucket(countryPages?.[language]?.[pagePath]);
+  const globalBucket = normalizeBucket(countryPages?._all?.[pagePath]);
+  const fallbackBucket = normalizeBucket(
+    Object.entries(countryPages)
+      .filter(([candidateLanguage]) => candidateLanguage !== "_all" && candidateLanguage !== language)
+      .map(([, pages]) => pages?.[pagePath])
+      .find(bucket => bucket?.domImages && Object.keys(bucket.domImages).length > 0)
+  );
+
+  return {
+    text: languageBucket.text,
+    domText: languageBucket.domText,
+    domImages: {
+      ...fallbackBucket.domImages,
+      ...globalBucket.domImages,
+      ...languageBucket.domImages,
+    },
+    updatedAt: languageBucket.updatedAt || globalBucket.updatedAt || fallbackBucket.updatedAt || null,
+  };
 }
 
 function hasValues(value) {
@@ -57,6 +76,10 @@ function pruneEmptyContainers(overrides, countryId, language, pagePath) {
   if (!hasValues(overrides.pages?.[countryId])) {
     delete overrides.pages[countryId];
   }
+}
+
+function prunePageContainer(overrides, countryId, language, pagePath) {
+  pruneEmptyContainers(overrides, countryId, language, pagePath);
 }
 
 function writeContentOverrides(overrides) {
@@ -86,19 +109,35 @@ function savePageOverrides({
 }) {
   const overrides = readContentOverrides();
   const existing = normalizeBucket(overrides.pages?.[countryId]?.[language]?.[pagePath]);
+  const existingGlobal = normalizeBucket(overrides.pages?.[countryId]?._all?.[pagePath]);
   const nextText = submittedTextKeys ? { ...omitKeys(existing.text, submittedTextKeys), ...text } : text;
   const nextDomText = submittedDomTextIds ? { ...omitKeys(existing.domText, submittedDomTextIds), ...domText } : domText;
-  const nextDomImages = submittedDomImageIds ? { ...omitKeys(existing.domImages, submittedDomImageIds), ...domImages } : domImages;
+  const nextDomImages = submittedDomImageIds
+    ? { ...omitKeys(existingGlobal.domImages, submittedDomImageIds), ...domImages }
+    : domImages;
+  const nextLanguageDomImages = submittedDomImageIds ? omitKeys(existing.domImages, submittedDomImageIds) : domImages;
 
   overrides.pages[countryId] ||= {};
   overrides.pages[countryId][language] ||= {};
   overrides.pages[countryId][language][pagePath] = {
     text: nextText,
     domText: nextDomText,
-    domImages: nextDomImages,
+    domImages: nextLanguageDomImages,
     updatedAt: new Date().toISOString(),
   };
-  pruneEmptyContainers(overrides, countryId, language, pagePath);
+
+  if (submittedDomImageIds) {
+    overrides.pages[countryId]._all ||= {};
+    overrides.pages[countryId]._all[pagePath] = {
+      text: {},
+      domText: {},
+      domImages: nextDomImages,
+      updatedAt: new Date().toISOString(),
+    };
+    prunePageContainer(overrides, countryId, "_all", pagePath);
+  }
+
+  prunePageContainer(overrides, countryId, language, pagePath);
   overrides.updatedAt = new Date().toISOString();
   writeContentOverrides(overrides);
   return getPageOverrides(countryId, language, pagePath);

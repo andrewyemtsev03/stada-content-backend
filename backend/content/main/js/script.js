@@ -3607,17 +3607,19 @@ function applyImagesFromBackendPayload(payload) {
   (payload?.content?.dom?.images || []).forEach(image => {
     if (!image?.id) return;
     document.querySelectorAll(`img[data-backend-image-id="${escapeCssIdentifier(image.id)}"]`).forEach(img => {
-      if (image.src) img.src = image.src;
+      img.src = image.url || image.src || img.src;
       if (image.srcset) img.srcset = image.srcset;
       if (image.sizes) img.sizes = image.sizes;
       img.alt = image.alt || '';
       if (image.loading) img.loading = image.loading;
+      img.dataset.backendImageApplied = 'true';
     });
   });
 
   const photos = payload?.content?.photos || [];
   const photosBySrc = new Map(photos.map(photo => [photo.src, photo]));
   document.querySelectorAll('img[data-backend-src]').forEach(img => {
+    if (img.dataset.backendImageApplied === 'true') return;
     const originalSrc = img.getAttribute('data-backend-src');
     const photo = photosBySrc.get(originalSrc);
     if (!photo) return;

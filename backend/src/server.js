@@ -172,6 +172,25 @@ function sanitizePublicId(value) {
     .slice(0, 80) || "hero-image";
 }
 
+function sanitizeCloudinaryPathPart(value, fallback) {
+  return String(value || fallback || "")
+    .replace(/\.[^.]+$/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function makeStableCloudinaryPublicId({ country, page, imageId }) {
+  const slot = sanitizeCloudinaryPathPart(imageId);
+  if (!slot) return "";
+
+  const countryPart = sanitizeCloudinaryPathPart(country, "site");
+  const pagePart = sanitizeCloudinaryPathPart(page || adminEditablePagePath, "index");
+  return [countryPart, pagePart, slot].filter(Boolean).join("/");
+}
+
 function makeCloudinarySignature(params) {
   const payload = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null && value !== "")
@@ -181,7 +200,7 @@ function makeCloudinarySignature(params) {
   return crypto.createHash("sha1").update(`${payload}${cloudinaryApiSecret}`).digest("hex");
 }
 
-async function uploadImageToCloudinary({ dataUrl, fileName }) {
+async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page }) {
   assertCloudinaryConfigured();
 
   if (!/^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i.test(String(dataUrl || ""))) {
@@ -192,7 +211,8 @@ async function uploadImageToCloudinary({ dataUrl, fileName }) {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const publicId = `${sanitizePublicId(fileName)}-${timestamp}`;
+  const stablePublicId = makeStableCloudinaryPublicId({ country, page, imageId });
+  const publicId = stablePublicId || `${sanitizePublicId(fileName)}-${timestamp}`;
   const signedParams = {
     folder: cloudinaryUploadFolder,
     public_id: publicId,
@@ -244,7 +264,7 @@ function isHiddenEditableTextKey(key) {
   return hiddenTextKeys.has(key)
     || /^nav_/i.test(key)
     || /^footer_nav_/i.test(key)
-    || /^hero_caption_/i.test(key)
+    || (/^hero_caption_/i.test(key) && key !== "hero_caption_logo")
     || /(^|_)button($|_)/i.test(key)
     || key === "cta_more"
     || key === "products_browse_catalog";
@@ -546,6 +566,9 @@ async function handleRequest(request, response) {
       const image = await uploadImageToCloudinary({
         dataUrl: body.dataUrl,
         fileName: body.fileName,
+        imageId: body.imageId,
+        country: body.country || body.countryId,
+        page: body.page,
       });
 
       sendJson(response, 200, {
