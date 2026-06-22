@@ -17,10 +17,10 @@ const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
 const maxJsonBodyBytes = Number(process.env.MAX_JSON_BODY_BYTES || 8 * 1024 * 1024);
-const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || "";
-const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY || "";
-const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET || "";
-const cloudinaryUploadFolder = process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero";
+const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
+const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
+const cloudinaryApiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
+const cloudinaryUploadFolder = String(process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero").trim();
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
