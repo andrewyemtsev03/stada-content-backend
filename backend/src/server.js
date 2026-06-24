@@ -6,6 +6,7 @@ const { URL } = require("node:url");
 const { getHomepagePayload, getPagePayload, listCountries } = require("./content-loader");
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
+const { importProductsFromSite } = require("./products/import-from-site");
 const { getProduct, listProducts } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
@@ -633,6 +634,16 @@ async function handleRequest(request, response) {
       return;
     }
 
+    if (request.method === "POST" && pathname === "/api/admin/products/import-from-site") {
+      requireAdmin(request);
+      const result = await importProductsFromSite();
+      sendJson(response, 200, {
+        status: "imported",
+        ...result,
+      });
+      return;
+    }
+
     if (request.method === "GET" && pathname.startsWith("/api/admin/products/")) {
       requireAdmin(request);
       const product = await getProduct(routeProductSlugFromAdminPath(pathname));
@@ -762,6 +773,7 @@ async function handleRequest(request, response) {
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",
           "GET /api/admin/products",
+          "POST /api/admin/products/import-from-site",
           "GET /api/admin/products/:slug",
         ],
       });
