@@ -3334,7 +3334,10 @@ function applyTextFromBackendPayload(payload) {
   (payload?.content?.dom?.text || []).forEach(item => {
     if (!item?.id) return;
     document.querySelectorAll(`[data-backend-text-id="${escapeCssIdentifier(item.id)}"]`).forEach(el => {
-      el.textContent = item.value || '';
+      const value = item.value || '';
+      el.textContent = value;
+      el.dataset.backendTextValue = value;
+      delete el.dataset.animated;
     });
   });
 }
@@ -5048,7 +5051,7 @@ function initScrollEffects() {
 function initCounters() {
   const counters = document.querySelectorAll('.career-fact .number');
   if (!counters.length) return;
-  const animateCounter = (el, endVal, formatValue) => {
+  const animateCounter = (el, endVal, formatValue, finalText) => {
     const duration = 2000;
     const startTime = performance.now();
     const startVal = 0;
@@ -5058,6 +5061,8 @@ function initCounters() {
       el.textContent = el.dataset.prefix + formatValue(value) + el.dataset.suffix;
       if (progress < 1) {
         requestAnimationFrame(animate);
+      } else {
+        el.textContent = finalText;
       }
     };
     requestAnimationFrame(animate);
@@ -5073,7 +5078,12 @@ function initCounters() {
         const el = entry.target;
         if (!el.dataset.animated) {
           // Store prefix and suffix so we can reassemble the original format
-          const text = el.textContent;
+          const text = el.dataset.backendTextValue || el.textContent;
+          if (!/[0-9]/.test(text)) {
+            el.textContent = text;
+            el.dataset.animated = 'true';
+            return;
+          }
           const prefixMatch = text.match(/^[^0-9]+/);
           const suffixMatch = text.match(/[^0-9]+$/);
           el.dataset.prefix = prefixMatch ? prefixMatch[0] : '';
@@ -5083,7 +5093,7 @@ function initCounters() {
           const formatValue = shouldGroup
             ? value => value.toLocaleString('ru-RU').replace(/\s/g, '\u00a0')
             : value => String(value);
-          animateCounter(el, endVal, formatValue);
+          animateCounter(el, endVal, formatValue, text);
           el.dataset.animated = 'true';
         }
       }
