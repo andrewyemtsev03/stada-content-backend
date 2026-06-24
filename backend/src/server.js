@@ -196,6 +196,12 @@ function makeStableCloudinaryDeliveryUrl(publicId, format) {
   return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${publicId}.${format}`;
 }
 
+function normalizePreferredImageFormat(value) {
+  const format = String(value || "").trim().toLowerCase();
+  if (format === "jpeg") return "jpg";
+  return ["png", "jpg", "webp"].includes(format) ? format : "";
+}
+
 function makeCloudinarySignature(params) {
   const payload = Object.entries(params)
     .filter(([, value]) => value !== undefined && value !== null && value !== "")
@@ -205,7 +211,7 @@ function makeCloudinarySignature(params) {
   return crypto.createHash("sha1").update(`${payload}${cloudinaryApiSecret}`).digest("hex");
 }
 
-async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page }) {
+async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page, preferredFormat }) {
   assertCloudinaryConfigured();
 
   if (!/^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i.test(String(dataUrl || ""))) {
@@ -248,7 +254,7 @@ async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, pa
   return {
     publicId: payload.public_id,
     secureUrl: stablePublicId
-      ? makeStableCloudinaryDeliveryUrl(payload.public_id, payload.format) || payload.secure_url
+      ? makeStableCloudinaryDeliveryUrl(payload.public_id, normalizePreferredImageFormat(preferredFormat) || payload.format) || payload.secure_url
       : payload.secure_url,
     width: payload.width,
     height: payload.height,
@@ -612,6 +618,7 @@ async function handleRequest(request, response) {
         imageId: body.imageId,
         country: body.country || body.countryId,
         page: body.page,
+        preferredFormat: body.preferredFormat,
       });
 
       sendJson(response, 200, {
