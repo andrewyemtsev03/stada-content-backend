@@ -3357,21 +3357,23 @@ function isStableCloudinaryImageUrl(src) {
   return /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?!v\d+\/)/i.test(String(src || ''));
 }
 
-function withRuntimeImageRefresh(src) {
+function withRuntimeImageRefresh(src, cacheKey = '') {
   if (!isStableCloudinaryImageUrl(src)) return src;
-  if (!window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) return src;
+  if (!cacheKey && !window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) return src;
 
   try {
     const url = new URL(src);
-    url.searchParams.set('fresh', String(Date.now()));
+    url.searchParams.set(cacheKey ? 'v' : 'fresh', cacheKey || String(Date.now()));
     return url.href;
   } catch (error) {
     const separator = String(src).includes('?') ? '&' : '?';
-    return `${src}${separator}fresh=${Date.now()}`;
+    return `${src}${separator}${cacheKey ? 'v' : 'fresh'}=${encodeURIComponent(cacheKey || String(Date.now()))}`;
   }
 }
 
 function applyImagesFromBackendPayload(payload) {
+  const overrideImageCacheKey = payload?.content?.overrides?.updatedAt || '';
+
   (payload?.content?.dom?.images || []).forEach(image => {
     if (!image?.id) return;
     document.querySelectorAll(`img[data-backend-image-id="${escapeCssIdentifier(image.id)}"]`).forEach(img => {
@@ -3380,7 +3382,7 @@ function applyImagesFromBackendPayload(payload) {
       const nextSrc = image.source === 'override'
         ? image.url || image.src || img.src
         : image.src || img.src;
-      img.src = withRuntimeImageRefresh(nextSrc);
+      img.src = withRuntimeImageRefresh(nextSrc, image.source === 'override' ? overrideImageCacheKey : '');
       if (image.srcset) img.srcset = image.srcset;
       if (image.sizes) img.sizes = image.sizes;
       img.alt = image.alt || '';
