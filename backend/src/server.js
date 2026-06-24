@@ -5,6 +5,8 @@ const path = require("node:path");
 const { URL } = require("node:url");
 const { getHomepagePayload, getPagePayload, listCountries } = require("./content-loader");
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
+const { checkDatabaseConnection } = require("./db/client");
+const { getProduct, listProducts } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
@@ -552,6 +554,11 @@ function routeCountryFromPagePath(pathname) {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+function routeProductSlugFromAdminPath(pathname) {
+  const match = pathname.match(/^\/api\/admin\/products\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 async function handleRequest(request, response) {
   const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
   const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
@@ -564,6 +571,15 @@ async function handleRequest(request, response) {
   try {
     if (request.method === "GET" && pathname === "/health") {
       sendJson(response, 200, { status: "ok" });
+      return;
+    }
+
+    if (request.method === "GET" && pathname === "/health/db") {
+      const database = await checkDatabaseConnection();
+      sendJson(response, 200, {
+        status: "ok",
+        database,
+      });
       return;
     }
 
@@ -606,6 +622,30 @@ async function handleRequest(request, response) {
         countries: listCountries(),
         editable: buildEditableContent(basePayload, currentPayload),
       });
+      return;
+    }
+
+    if (request.method === "GET" && pathname === "/api/admin/products") {
+      requireAdmin(request);
+      sendJson(response, 200, {
+        products: await listProducts(),
+      });
+      return;
+    }
+
+    if (request.method === "GET" && pathname.startsWith("/api/admin/products/")) {
+      requireAdmin(request);
+      const product = await getProduct(routeProductSlugFromAdminPath(pathname));
+      if (!product) {
+        sendJson(response, 404, {
+          error: {
+            code: "PRODUCT_NOT_FOUND",
+            message: "Product was not found.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, { product });
       return;
     }
 
@@ -709,6 +749,7 @@ async function handleRequest(request, response) {
         service: "stada-country-content-backend",
         endpoints: [
           "GET /health",
+          "GET /health/db",
           "GET /api/countries",
           "GET /api/homepage?country=kazakhstan&lang=ru",
           "GET /api/homepage/kazakhstan?lang=kz",
@@ -720,6 +761,8 @@ async function handleRequest(request, response) {
           "POST /api/admin/login { login, password }",
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",
+          "GET /api/admin/products",
+          "GET /api/admin/products/:slug",
         ],
       });
       return;
