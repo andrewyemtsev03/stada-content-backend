@@ -1,0 +1,375 @@
+{
+    "version":  1,
+    "pages":  {
+                  "index.html":  {
+                                     "title":  {
+                                                   "ru":  "STADA - О компании",
+                                                   "kz":  "STADA - Компания туралы"
+                                               },
+                                     "sections":  [
+                                                      {
+                                                          "id":  "hero",
+                                                          "label":  "Hero",
+                                                          "translatedTextKeys":  [
+                                                                                     "hero_title1",
+                                                                                     "hero_sub1",
+                                                                                     "hero_title2",
+                                                                                     "hero_sub2",
+                                                                                     "hero_title3",
+                                                                                     "hero_sub3"
+                                                                                 ],
+                                                          "imageIds":  [
+                                                                           "index_image_002",
+                                                                           "index_image_003",
+                                                                           "index_image_004"
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "id":  "about",
+                                                          "label":  "About STADA",
+                                                          "translatedTextKeys":  [
+                                                                                     "site_name",
+                                                                                     "about_par1",
+                                                                                     "about_par2",
+                                                                                     "about_list1",
+                                                                                     "about_list2",
+                                                                                     "about_list3",
+                                                                                     "hero_caption_logo",
+                                                                                     "stats_sales",
+                                                                                     "stats_employees",
+                                                                                     "stats_countries"
+                                                                                 ],
+                                                          "imageIds":  [
+                                                                           "index_image_005"
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "id":  "news",
+                                                          "label":  "News and Media",
+                                                          "translatedTextKeys":  [
+                                                                                     "hero_text1",
+                                                                                     "news_1_text",
+                                                                                     "hero_text2",
+                                                                                     "news_2_text",
+                                                                                     "hero_text3",
+                                                                                     "news_3_text",
+                                                                                     "news_4_title",
+                                                                                     "news_4_text",
+                                                                                     "news_5_title",
+                                                                                     "news_5_text",
+                                                                                     "news_6_title",
+                                                                                     "news_6_text",
+                                                                                     "news_7_title",
+                                                                                     "news_7_text",
+                                                                                     "news_8_title",
+                                                                                     "news_8_text"
+                                                                                 ],
+                                                          "imageIds":  [
+                                                                           "index_image_006",
+                                                                           "index_image_007",
+                                                                           "index_image_008",
+                                                                           "index_image_009",
+                                                                           "index_image_010",
+                                                                           "index_image_011",
+                                                                           "index_image_012",
+                                                                           "index_image_013"
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "id":  "career",
+                                                          "label":  "Career",
+                                                          "translatedTextKeys":  [
+                                                                                     "career_par1",
+                                                                                     "career_fact1",
+                                                                                     "career_fact2",
+                                                                                     "career_fact3",
+                                                                                     "career_fact4",
+                                                                                     "career_fact5"
+                                                                                 ],
+                                                          "imageIds":  [
+                                                                           "index_image_014",
+                                                                           "index_image_015"
+                                                                       ]
+                                                      },
+                                                      {
+                                                          "id":  "products",
+                                                          "label":  "Products",
+                                                          "translatedTextKeys":  [
+                                                                                     "hero_products_heading",
+                                                                                     "hero_products_description"
+                                                                                 ],
+                                                          "imageIds":  [
+
+                                                                       ]
+                                                      }
+                                                  ],
+                                     "text":  {
+                                                  "ru":  {
+                                                             "hero_title1":  "Забота о здоровье",
+                                                             "hero_sub1":  "Качественные препараты, которым доверяют каждый день.",
+                                                             "hero_title2":  "Качество без компромиссов",
+                                                             "hero_sub2":  "Опыт STADA помогает поддерживать здоровье миллионов людей.",
+                                                             "hero_title3":  "Ближе к пациентам",
+                                                             "hero_sub3":  "Развиваем доступные решения для семей в Казахстане.",
+                                                             "site_name":  "STADA Kazakhstan",
+                                                             "about_par1":  "STADA — ведущий производитель высококачественных фармацевтических препаратов. С более чем 130‑летней историей, уходящей корнями в аптечную практику, мы являемся надежным и заслуживающим доверия партнером.",
+                                                             "about_par2":  "Компания сосредоточена на трех направлениях: потребительские здравоохранительные продукты, дженерики и специальные препараты. Сегодня STADA присутствует более чем в 100 странах мира и обеспечивает более 11 600 рабочих мест.",
+                                                             "about_list1":  "Доступность: наши дженерики помогают сделать здравоохранение доступным для всех.",
+                                                             "about_list2":  "Инновации: мы инвестируем в исследования и разработки для улучшения качества жизни.",
+                                                             "about_list3":  "Надежность: мы стремимся быть вашим партнером, которому вы можете доверять.",
+                                                             "hero_caption_logo":  "130 лет опыта STADA в заботе о здоровье людей",
+                                                             "stats_sales":  "4 059 млн € — объём продаж группы в 2024 году",
+                                                             "stats_employees":  "\u003e 11 600 сотрудников по всему миру",
+                                                             "stats_countries":  "\u003e 100 стран присутствия",
+                                                             "hero_text1":  "CapVest приобретает контрольный пакет акций STADA у Brain Capital и Cinven",
+                                                             "news_1_text":  "Сделка открывает новый этап развития группы и усиливает долгосрочную стратегию STADA на международных рынках.",
+                                                             "hero_text2":  "Путь роста STADA продолжается в 2024 году — значительное увеличение продаж и прибыли — рост опережает рынок.",
+                                                             "news_2_text":  "Компания продолжает показывать устойчивый рост продаж и прибыли, опережая динамику фармацевтического рынка.",
+                                                             "hero_text3":  "В Казахстане велико доверие к врачам, но профилактика остается слабым местом",
+                                                             "news_3_text":  "Исследования подчеркивают важность профилактики, доступной информации и доверительного диалога с медицинскими специалистами.",
+                                                             "news_4_title":  "STADA признана Top Employer Europe 2025",
+                                                             "news_4_text":  "Признание отражает культуру роста, заботы о сотрудниках и возможности развития для команд STADA.",
+                                                             "news_5_title":  "Портфель STADA объединяет сильные потребительские бренды и дженерики",
+                                                             "news_5_text":  "Продуктовая линейка помогает поддерживать здоровье пациентов в разных терапевтических направлениях.",
+                                                             "news_6_title":  "Enterogermina поддерживает здоровье микрофлоры",
+                                                             "news_6_text":  "Пробиотическое направление остается важной частью решений STADA для повседневного здоровья.",
+                                                             "news_7_title":  "Coldrex остается узнаваемым брендом в сезон простуды",
+                                                             "news_7_text":  "Средства для облегчения симптомов простуды помогают пациентам сохранять привычный ритм жизни.",
+                                                             "news_8_title":  "Vitrum Immunaktiv в фокусе ежедневной поддержки",
+                                                             "news_8_text":  "Витаминно-минеральные комплексы дополняют портфель продуктов для заботы о самочувствии.",
+                                                             "career_par1":  "Работать в STADA — это уникальное путешествие. Мы предлагаем разнообразные и увлекательные роли: от стартовых должностей для выпускников до экспертных позиций. Наши вакансии охватывают широкий спектр навыков и не ограничиваются фармацевтической отраслью — вы также найдёте возможности в области цепочки поставок, маркетинга, финансов, управления проектами и многого другого.",
+                                                             "career_fact1":  "руководителей — женщины",
+                                                             "career_fact2":  "сотрудников гордятся нашей целью «Забота о здоровье людей как надёжный партнёр»",
+                                                             "career_fact3":  "сотрудников по всему миру",
+                                                             "career_fact4":  "национальности в нашей команде",
+                                                             "career_fact5":  "фармацевтических компаний по рейтингу Sustainalytics ESG 2023",
+                                                             "hero_products_heading":  "Качественные лекарства для лучшей жизни",
+                                                             "hero_products_description":  "Мы предлагаем широкий ассортимент высококачественных дженериков и продуктов для здоровья потребителей в различных терапевтических областях."
+                                                         },
+                                                  "kz":  {
+                                                             "hero_title1":  "Денсаулыққа қамқорлық",
+                                                             "hero_sub1":  "Күн сайын сенім артатын сапалы дәрі-дәрмектер.",
+                                                             "hero_title2":  "Сапаға адалдық",
+                                                             "hero_sub2":  "STADA тәжірибесі миллиондаған адамның денсаулығын қолдайды.",
+                                                             "hero_title3":  "Пациенттерге жақын",
+                                                             "hero_sub3":  "Қазақстан отбасылары үшін қолжетімді шешімдерді дамытамыз.",
+                                                             "site_name":  "STADA Kazakhstan",
+                                                             "about_par1":  "STADA – жоғары сапалы фармацевтикалық өнімдердің жетекші өндірушісі. 130 жылдық тарихы бар біздің компания дәріхана тәжірибесінен бастау алып, сенімді серіктес ретінде танылған.",
+                                                             "about_par2":  "Компанияның қызметі үш бағытқа шоғырланған: тұтынушылық денсаулық өнімдері, дженериктер және арнайы препараттар. Бүгінде STADA 100-ден астам елде қызмет етіп, 11 600-ден астам жұмыс орнын қамтамасыз етеді.",
+                                                             "about_list1":  "Қолжетімділік: біздің дженериктер денсаулық сақтауды баршаға қолжетімді етеді.",
+                                                             "about_list2":  "Инновациялар: біз өмір сапасын жақсарту үшін ғылыми зерттеулер мен әзірлемелерге инвестиция саламыз.",
+                                                             "about_list3":  "Сенімділік: біз сіз сенетін серіктес болуға тырысамыз.",
+                                                             "hero_caption_logo":  "STADA-ның адамдар денсаулығына қамқорлық жасаудағы 130 жылдық тәжірибесі",
+                                                             "stats_sales":  "4 059 млн € — 2024 жылғы топтың сатылым көлемі",
+                                                             "stats_employees":  "\u003e 11 600 қызметкер",
+                                                             "stats_countries":  "\u003e 100 елдегі қатысу",
+                                                             "hero_text1":  "CapVest Brain Capital және Cinven компанияларынан STADA-ның бақылау пакетін сатып алуда",
+                                                             "news_1_text":  "Мәміле топтың дамуына жаңа серпін беріп, STADA-ның халықаралық нарықтардағы ұзақ мерзімді стратегиясын күшейтеді.",
+                                                             "hero_text2":  "STADA-ның өсу жолы 2024 жылы жалғасады — сатылым мен пайда айтарлықтай өсуде — өсу нарықтан алда.",
+                                                             "news_2_text":  "Компания фармацевтикалық нарық қарқынынан озып, сатылым мен пайданың тұрақты өсуін көрсетуді жалғастыруда.",
+                                                             "hero_text3":  "Қазақстанда дәрігерлерге сенім зор, бірақ алдын алу әлсіз тұс болып қалуда",
+                                                             "news_3_text":  "Зерттеулер алдын алудың, қолжетімді ақпараттың және медицина мамандарымен сенімді диалогтың маңызын көрсетеді.",
+                                                             "news_4_title":  "STADA Top Employer Europe 2025 ретінде танылды",
+                                                             "news_4_text":  "Бұл мойындау STADA командалары үшін өсу мәдениетін, қызметкерлерге қамқорлықты және даму мүмкіндіктерін көрсетеді.",
+                                                             "news_5_title":  "STADA портфелі күшті тұтынушылық брендтер мен дженериктерді біріктіреді",
+                                                             "news_5_text":  "Өнім желісі әртүрлі терапевтикалық бағыттарда пациенттердің денсаулығын қолдауға көмектеседі.",
+                                                             "news_6_title":  "Enterogermina микрофлора денсаулығын қолдайды",
+                                                             "news_6_text":  "Пробиотиктер бағыты STADA-ның күнделікті денсаулыққа арналған шешімдерінің маңызды бөлігі болып қала береді.",
+                                                             "news_7_title":  "Coldrex суық тию маусымындағы танымал бренд болып қала береді",
+                                                             "news_7_text":  "Суық тию белгілерін жеңілдетуге арналған өнімдер пациенттерге әдеттегі өмір ырғағын сақтауға көмектеседі.",
+                                                             "news_8_title":  "Vitrum Immunaktiv күнделікті қолдауға арналған",
+                                                             "news_8_text":  "Витаминді-минералды кешендер өзін жақсы сезінуге бағытталған өнімдер портфелін толықтырады.",
+                                                             "career_par1":  "STADA-да жұмыс істеу – бұл бірегей саяхат. Біз түлектерге арналған бастапқы лауазымдардан бастап сарапшылық позицияларға дейін әртүрлі және қызықты рөлдерді ұсынамыз. Біздің бос орындар дағдылардың кең ауқымын қамтиды және тек фармацевтика саласымен шектелмейді – сіз жеткізілім тізбегі, маркетинг, қаржы, жобаларды басқару және тағы басқа салаларда мүмкіндіктер таба аласыз.",
+                                                             "career_fact1":  "басшылар – әйелдер",
+                                                             "career_fact2":  "қызметкерлер біздің «Адамдардың денсаулығына сенімді серіктес ретінде қамқорлық жасау» мақсатымызды мақтан тұтады",
+                                                             "career_fact3":  "қызметкер әлем бойынша",
+                                                             "career_fact4":  "командамызда 93 ұлт өкілі",
+                                                             "career_fact5":  "Sustainalytics ESG 2023 рейтингі бойынша фармацевтикалық компаниялардың жоғарғы 6%-ы",
+                                                             "hero_products_heading":  "Үздік өмір үшін сапалы дәрілер",
+                                                             "hero_products_description":  "Біз әртүрлі терапевтік салаларда жоғары сапалы дженериктер мен тұтынушылар денсаулығы өнімдерінің кең ассортиментін ұсынамыз."
+                                                         }
+                                              },
+                                     "domText":  [
+                                                     {
+                                                         "id":  "index_text_013",
+                                                         "tag":  "span",
+                                                         "value":  "2025"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_014",
+                                                         "tag":  "span",
+                                                         "value":  "2024"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_015",
+                                                         "tag":  "span",
+                                                         "value":  "KZ"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_016",
+                                                         "tag":  "span",
+                                                         "value":  "2025"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_017",
+                                                         "tag":  "span",
+                                                         "value":  "STADA"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_018",
+                                                         "tag":  "span",
+                                                         "value":  "Digestive"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_019",
+                                                         "tag":  "span",
+                                                         "value":  "Cold season"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_020",
+                                                         "tag":  "span",
+                                                         "value":  "Wellbeing"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_021",
+                                                         "tag":  "span",
+                                                         "value":  "\u003e50%"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_022",
+                                                         "tag":  "span",
+                                                         "value":  "94%"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_023",
+                                                         "tag":  "span",
+                                                         "value":  "\u003e11 600"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_024",
+                                                         "tag":  "span",
+                                                         "value":  "93"
+                                                     },
+                                                     {
+                                                         "id":  "index_text_025",
+                                                         "tag":  "span",
+                                                         "value":  "Top 6%"
+                                                     }
+                                                 ],
+                                     "images":  [
+                                                    {
+                                                        "id":  "index_image_002",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_002.webp",
+                                                        "alt":  "STADA Kazakhstan team group photo",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_003",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_003.webp",
+                                                        "alt":  "STADA production specialists reviewing a tablet",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_004",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_004.png",
+                                                        "alt":  "STADA team group photo",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_005",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_005.webp",
+                                                        "alt":  "STADA corporate headquarters in Bad Vilbel",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_006",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_006.webp",
+                                                        "alt":  "STADA headquarters in Bad Vilbel",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_007",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_007.jpg",
+                                                        "alt":  "STADA headquarters complete view",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_008",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_008.jpg",
+                                                        "alt":  "STADA production specialist at equipment",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_009",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_009.jpg",
+                                                        "alt":  "STADA laboratory team at work",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_010",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_010.jpg",
+                                                        "alt":  "STADA production process equipment",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_011",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_011.jpg",
+                                                        "alt":  "STADA laboratory glassware",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_012",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_012.jpg",
+                                                        "alt":  "STADA laboratory equipment detail",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_013",
+                                                        "src":  "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_013.jpg",
+                                                        "alt":  "Historic STADA pharmacy glass bottles",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_014",
+                                                        "src":  "assets/products/awards/top-employer-kazakhstan-2025.png",
+                                                        "alt":  "Top Employer Kazakhstan 2025",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_015",
+                                                        "src":  "assets/products/awards/top-employer-europe-2025.png",
+                                                        "alt":  "Top Employer Europe 2025",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    }
+                                                ]
+                                 }
+              }
+}

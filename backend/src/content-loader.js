@@ -21,6 +21,22 @@ function loadConfig() {
   return config;
 }
 
+function loadContentSource(config) {
+  const sourcePath = resolveBackendPath(config.contentSourcePath || "data/content-source.json");
+  if (!fs.existsSync(sourcePath)) {
+    return {
+      version: 1,
+      pages: {},
+    };
+  }
+
+  const source = readJson(sourcePath);
+  return {
+    version: source.version || 1,
+    pages: source.pages && typeof source.pages === "object" ? source.pages : {},
+  };
+}
+
 function normalizeSlug(value) {
   return String(value || "")
     .trim()
@@ -92,11 +108,7 @@ function normalizePagePath(pageInput) {
   return path.posix.extname(withoutHash) ? withoutHash : `${withoutHash}.html`;
 }
 
-function resolveHtmlPath(homepageConfig, pageInput) {
-  const homepagePath = resolveBackendPath(homepageConfig.htmlPath);
-  const siteRoot = path.dirname(homepagePath);
-  const pagePath = normalizePagePath(pageInput);
-
+function validateNormalizedPagePath(pagePath) {
   if (pagePath.split("/").includes("..")) {
     throw Object.assign(new Error("Page path cannot include parent directory segments."), {
       statusCode: 400,
@@ -110,6 +122,13 @@ function resolveHtmlPath(homepageConfig, pageInput) {
       code: "INVALID_PAGE_PATH",
     });
   }
+}
+
+function resolveHtmlPath(homepageConfig, pageInput) {
+  const homepagePath = resolveBackendPath(homepageConfig.htmlPath);
+  const siteRoot = path.dirname(homepagePath);
+  const pagePath = normalizePagePath(pageInput);
+  validateNormalizedPagePath(pagePath);
 
   const resolvedPath = path.resolve(siteRoot, pagePath);
   const relativePath = path.relative(siteRoot, resolvedPath);
@@ -625,6 +644,126 @@ function buildSectionPayload(section, translations, productFallbackTools, langua
   };
 }
 
+function chooseContentSourceLanguage(countryConfig, pageText, languageInput) {
+  const supportedLanguages = countryConfig.supportedLanguages?.length
+    ? countryConfig.supportedLanguages
+    : Object.keys(pageText || {});
+  const requestedLanguage = String(languageInput || countryConfig.defaultLanguage || "").trim().toLowerCase();
+
+  if (requestedLanguage && supportedLanguages.includes(requestedLanguage)) return requestedLanguage;
+  if (countryConfig.defaultLanguage && supportedLanguages.includes(countryConfig.defaultLanguage)) {
+    return countryConfig.defaultLanguage;
+  }
+  return supportedLanguages[0] || "ru";
+}
+
+function resolveContentSourceText(pageSource, language, fallbackLanguage, key) {
+  const languageOrder = unique([language, fallbackLanguage, "ru", "kz", "en"]);
+  for (const candidateLanguage of languageOrder) {
+    const value = pageSource.text?.[candidateLanguage]?.[key];
+    if (value !== null && value !== undefined && value !== "") {
+      return {
+        key,
+        value,
+        language: candidateLanguage,
+        source: "contentSource",
+      };
+    }
+  }
+
+  return {
+    key,
+    value: null,
+    language: null,
+    source: "contentSource",
+  };
+}
+
+function normalizeContentSourceImage(image, sectionId, assetsBaseUrl) {
+  const src = String(image?.src || "");
+  return {
+    id: String(image?.id || ""),
+    section: sectionId || "",
+    src,
+    url: makeAssetUrl(src, assetsBaseUrl),
+    alt: String(image?.alt || ""),
+    loading: String(image?.loading || ""),
+    srcset: String(image?.srcset || ""),
+    sizes: String(image?.sizes || ""),
+  };
+}
+
+function buildContentSourcePayload({
+  countryConfig,
+  pagePath,
+  pageSource,
+  languageInput,
+  assetsBaseUrl,
+}) {
+  const language = chooseContentSourceLanguage(countryConfig, pageSource.text, languageInput);
+  const fallbackLanguage = countryConfig.defaultLanguage || language;
+  const imagesById = new Map(
+    (pageSource.images || []).map(image => [image.id, image])
+  );
+  const sections = (pageSource.sections || []).map(section => {
+    const translatedTexts = (section.translatedTextKeys || [])
+      .map(key => resolveContentSourceText(pageSource, language, fallbackLanguage, key));
+    const photos = (section.imageIds || [])
+      .map(id => imagesById.get(id))
+      .filter(Boolean)
+      .map(image => normalizeContentSourceImage(image, section.id, assetsBaseUrl));
+
+    return {
+      id: section.id,
+      label: section.label || section.id,
+      translatedTexts,
+      staticTexts: [],
+      photos,
+    };
+  });
+  const allKeys = unique(sections.flatMap(section => section.translatedTexts.map(item => item.key)));
+  const text = Object.fromEntries(
+    allKeys.map(key => {
+      const translated = resolveContentSourceText(pageSource, language, fallbackLanguage, key);
+      return [key, translated.value];
+    })
+  );
+
+  return {
+    country: {
+      id: countryConfig.id,
+      name: countryConfig.name,
+      siteName: countryConfig.siteName,
+      domain: countryConfig.domain,
+      siteUrl: countryConfig.siteUrl,
+      defaultLanguage: countryConfig.defaultLanguage,
+      supportedLanguages: countryConfig.supportedLanguages || [],
+      worldwide: null,
+    },
+    language,
+    requestedLanguage: languageInput || null,
+    page: {
+      path: pagePath,
+    },
+    content: {
+      pageTitle: pageSource.title?.[language] || pageSource.title?.[fallbackLanguage] || pageSource.title?.ru || "",
+      text,
+      missingTranslationKeys: allKeys.filter(key => text[key] === null),
+      staticTexts: [],
+      photos: uniqueImages(sections.flatMap(section => section.photos)),
+      dom: {
+        text: (pageSource.domText || []).map(item => ({
+          id: String(item.id || ""),
+          tag: String(item.tag || "span").toLowerCase(),
+          value: String(item.value || ""),
+        })),
+        images: (pageSource.images || []).map(image => normalizeContentSourceImage(image, "", assetsBaseUrl)),
+      },
+      sections,
+    },
+  };
+}
+
 function applyContentOverrides(payload, countryId, language, pagePath, assetsBaseUrl) {
   const overrides = getPageOverrides(countryId, language, pagePath);
   const textOverrides = overrides.text || {};
@@ -698,7 +837,34 @@ function getPagePayload(options = {}) {
   const config = loadConfig();
   const countryConfig = findCountryConfig(config, options.country);
   const homepageConfig = countryConfig.homepage || {};
-  const { htmlPath, pagePath } = resolveHtmlPath(homepageConfig, options.page || options.pagePath || options.path);
+  const requestedPagePath = normalizePagePath(options.page || options.pagePath || options.path);
+  validateNormalizedPagePath(requestedPagePath);
+  const contentSource = loadContentSource(config);
+  const pageSource = contentSource.pages[requestedPagePath];
+
+  if (pageSource) {
+    const payload = buildContentSourcePayload({
+      countryConfig,
+      pagePath: requestedPagePath,
+      pageSource,
+      languageInput: options.lang || options.language,
+      assetsBaseUrl: homepageConfig.assetsBaseUrl,
+    });
+
+    if (options.applyOverrides !== false) {
+      applyContentOverrides(
+        payload,
+        countryConfig.id,
+        payload.language,
+        requestedPagePath,
+        homepageConfig.assetsBaseUrl
+      );
+    }
+
+    return payload;
+  }
+
+  const { htmlPath, pagePath } = resolveHtmlPath(homepageConfig, requestedPagePath);
   const translationScriptPath = resolveBackendPath(homepageConfig.translationScriptPath);
   const countriesDataPath = resolveBackendPath(homepageConfig.countriesDataPath);
 

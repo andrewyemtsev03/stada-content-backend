@@ -2,7 +2,7 @@
 
 Small Node backend that returns country-aware page content for the STADA website.
 
-The first configured sites are Kazakhstan and Kyrgyzstan. Future country sites can be added in `data/site-config.json` by pointing a country entry at that site's `index.html`, translation script, and asset base URL.
+The first configured sites are Kazakhstan and Kyrgyzstan. Future country sites can be added in `data/site-config.json` by adding country metadata and, for editable pages, entries in `data/content-source.json`.
 
 ## Run
 
@@ -42,16 +42,9 @@ Admin homepage image uploads use a stable Cloudinary public ID based on country,
 
 ## Content Source
 
-The backend reads page HTML and translation keys from `backend/content/main`, so it can be deployed by itself without filesystem access to the root `main` frontend folder.
+The backend-owned content source lives in `backend/data/content-source.json`. It defines the default editable homepage text, image slots, and admin sections. Admin changes are stored separately in `backend/data/content-overrides.json`.
 
-When frontend pages or `main/js/script.js` change, refresh the backend snapshot locally before deploying:
-
-```bash
-cd backend
-npm run sync-content
-```
-
-Commit the updated files in `backend/content/main` with the backend.
+The public frontend still calls `/api/page` and `/api/homepage`, but the homepage response is now built from backend data instead of a copied frontend folder. `backend/content/main` remains only as a temporary compatibility fallback for non-migrated pages.
 
 ## Endpoints
 
@@ -98,11 +91,11 @@ The page response includes:
 - `content.text`: all translated `data-i18n-key` values used by the page.
 - `content.dom.text`: unkeyed text nodes marked with `data-backend-text-id`.
 - `content.dom.images`: image nodes marked with `data-backend-image-id`.
-- `content.staticTexts`: visible static text discovered in the HTML.
+- `content.staticTexts`: visible static text discovered in fallback HTML pages.
 - `content.photos`: all image paths from the page, with resolved URLs.
 - `content.sections`: the same text and photos grouped by page section.
 
-`/api/page` accepts any `.html` page under the configured site root, including product pages. Parent-directory paths and non-HTML files are rejected. The frontend hydrates both keyed translations and backend-id DOM text/image items from this endpoint.
+`/api/page` first checks `data/content-source.json`, then falls back to configured HTML snapshots for pages that have not been migrated yet. Parent-directory paths and non-HTML files are rejected. The frontend hydrates both keyed translations and backend-id DOM text/image items from this endpoint.
 
 Configured language pairs:
 
@@ -111,7 +104,7 @@ Configured language pairs:
 
 ## Add Another Country Site
 
-Add another entry under `countries` in `data/site-config.json`:
+Add another entry under `countries` in `data/site-config.json`, then add editable page defaults to `data/content-source.json`:
 
 ```json
 {
@@ -124,9 +117,6 @@ Add another entry under `countries` in `data/site-config.json`:
   "defaultLanguage": "ru",
   "supportedLanguages": ["ru", "uz"],
   "homepage": {
-    "htmlPath": "../sites/uzbekistan/index.html",
-    "translationScriptPath": "../sites/uzbekistan/js/script.js",
-    "countriesDataPath": "../sites/uzbekistan/js/worldwide/countries-data.js",
     "assetsBaseUrl": "https://stada.uz/"
   }
 }

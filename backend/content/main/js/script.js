@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Main interactivity script for the STADA “О компании” page.
  *
  * Handles language switching (Russian ↔ Kazakh), mobile menu
@@ -24,6 +24,7 @@ const translations = {
     nav_products: 'Продукты',
     nav_career: 'Карьера',
     hero_kicker: 'STADA Kazakhstan',
+    site_name: 'STADA Kazakhstan',
     hero_title1: 'Забота о здоровье',
     hero_sub1: 'Качественные препараты, которым доверяют каждый день.',
     hero_title2: 'Качество без компромиссов',
@@ -35,6 +36,7 @@ const translations = {
     hero_metric_employees: 'сотрудников по всему миру',
     hero_media_caption: 'Фармацевтическое качество, которому доверяют каждый день',
     hero_caption_office: 'STADA в Казахстане: ближе к пациентам и партнерам',
+        hero_caption_scientists: 'Качество и безопасность на каждом этапе производства',
         hero_caption_awards: 'ESG-награды и признание устойчивого развития STADA',
     hero_caption_logo: '130 лет опыта STADA в заботе о здоровье людей',
     about_heading: 'О компании STADA',
@@ -309,6 +311,7 @@ const translations = {
     hero_products_label: 'НАШИ ПРОДУКТЫ',
     hero_products_heading: 'Качественные лекарства для лучшей жизни',
     hero_products_description: 'Мы предлагаем широкий ассортимент высококачественных дженериков и продуктов для здоровья потребителей в различных терапевтических областях.',
+    button_products: 'Продукты',
     products_browse_catalog: 'Смотреть каталог',
     products_metric_portfolio: 'продуктов в каталоге',
     products_metric_areas: 'терапевтических направлений',
@@ -1012,6 +1015,7 @@ const translations = {
     nav_products: 'Өнімдер',
     nav_career: 'Мансап',
     hero_kicker: 'STADA Kazakhstan',
+    site_name: 'STADA Kazakhstan',
     hero_title1: 'Денсаулыққа қамқорлық',
     hero_sub1: 'Күн сайын сенім артатын сапалы дәрі-дәрмектер.',
     hero_title2: 'Сапаға адалдық',
@@ -1023,6 +1027,7 @@ const translations = {
     hero_metric_employees: 'қызметкер әлем бойынша',
     hero_media_caption: 'Күн сайын сенім артатын фармацевтикалық сапа',
     hero_caption_office: 'STADA Қазақстанда: пациенттер мен серіктестерге жақын',
+        hero_caption_scientists: 'Өндірістің әр кезеңіндегі сапа мен қауіпсіздік',
         hero_caption_awards: 'STADA тұрақты дамуы үшін ESG марапаттары мен мойындауы',
     hero_caption_logo: 'STADA-ның адамдар денсаулығына қамқорлық жасаудағы 130 жылдық тәжірибесі',
     about_heading: 'STADA компаниясы туралы',
@@ -1298,6 +1303,7 @@ const translations = {
     hero_products_label: 'БІЗДІҢ ӨНІМДЕР',
     hero_products_heading: 'Үздік өмір үшін сапалы дәрілер',
     hero_products_description: 'Біз әртүрлі терапевтік салаларда жоғары сапалы дженериктер мен тұтынушылар денсаулығы өнімдерінің кең ассортиментін ұсынамыз.',
+    button_products: 'Өнімдер',
     products_browse_catalog: 'Каталогты көру',
     products_metric_portfolio: 'каталогтағы өнім',
     products_metric_areas: 'терапевтік бағыт',
@@ -2191,126 +2197,6 @@ Object.assign(translations.kz, {
   culture_career_cta: 'STADA-дағы мансап'
 });
 
-translations.ru.site_name = 'STADA Kazakhstan';
-translations.kz.site_name = 'STADA Kazakhstan';
-translations.ru.history_source_note = 'Хронология основана на материалах глобального сайта STADA и адаптирована для локальной страницы STADA.';
-translations.kz.history_source_note = 'Хронология STADA жаһандық сайтының материалдарына негізделіп, жергілікті STADA бетіне бейімделген.';
-translations.kg = translations.kg || {};
-Object.assign(translations.kg, {
-  site_name: 'STADA Kyrgyzstan',
-  history_source_note: 'Хронология STADA глобалдык сайтынын материалдарына негизделип, жергиликтүү STADA барагына ылайыкташтырылган.',
-  nav_about: 'Компания жөнүндө',
-  nav_culture: 'Маданият',
-  nav_history: 'Компаниянын тарыхы',
-  nav_news: 'Жаңылыктар жана медиа',
-  nav_products: 'Өнүмдөр',
-  nav_career: 'Карьера',
-  nav_worldwide: 'Биздин филиалдар',
-  hero_kicker: 'STADA Kyrgyzstan',
-  hero_title1: 'Ден соолукка кам көрүү',
-  hero_sub1: 'Күн сайын ишеним жараткан сапаттуу препараттар.',
-  hero_title2: 'Сапат компромисссиз',
-  hero_sub2: 'STADA тажрыйбасы миллиондогон адамдардын ден соолугун колдоого жардам берет.',
-  hero_title3: 'Бейтаптарга жакыныраак',
-  hero_sub3: 'Кыргызстандагы үй-бүлөлөр үчүн жеткиликтүү чечимдерди өнүктүрөбүз.',
-  hero_caption_office: 'STADA Кыргызстанда: бейтаптарга жана өнөктөштөргө жакын',
-  hero_caption_logo: 'STADAнын адамдардын ден соолугуна кам көрүүдөгү 130 жылдык тажрыйбасы',
-  cta_more: 'Кененирээк',
-  about_heading: 'STADA компаниясы жөнүндө',
-  about_par1: 'STADA — жогорку сапаттагы фармацевтикалык препараттарды өндүргөн алдыңкы компания. 130 жылдан ашуун тарыхы жана дарыканалык тажрыйбага таянган тамыры менен биз ишенимдүү өнөктөш болуп келебиз.',
-  about_par2: 'Компания үч багытка көңүл бурат: керектөөчүлөрдүн ден соолугуна арналган өнүмдөр, дженериктер жана атайын препараттар. Бүгүн STADA дүйнөнүн 100дөн ашык өлкөсүндө иштейт жана 11 600дөн ашык жумуш орундарын камсыздайт.',
-  about_list1: 'Жеткиликтүүлүк: биздин дженериктер саламаттык сактоону көбүрөөк адамдар үчүн жеткиликтүү кылууга жардам берет.',
-  about_list2: 'Инновациялар: жашоо сапатын жакшыртуу үчүн изилдөөгө жана өнүктүрүүгө инвестициялайбыз.',
-  about_list3: 'Ишенимдүүлүк: сиз ишене ала турган өнөктөш болууга умтулабыз.',
-  stats_sales: '4 059 млн евро — 2024-жылдагы топтун сатуу көлөмү',
-  stats_employees: '> 11 600 кызматкер дүйнө жүзү боюнча',
-  stats_countries: '> 100 өлкөдө катышуу',
-  news_section_lead: 'STADAнын башкы жаңылыктары, медиа материалдары жана өнүм жаңыртуулары бир динамикалык бөлүмдө.',
-  hero_text1: 'CapVest Brain Capital жана Cinven компанияларынан STADAнын контролдук пакетин сатып алууда',
-  news_1_text: 'Бул келишим топтун өнүгүүсүнүн жаңы этабын ачып, STADAнын эл аралык рыноктордогу узак мөөнөттүү стратегиясын күчөтөт.',
-  hero_text2: 'STADAнын өсүү жолу 2024-жылы уланууда — сатуу жана киреше рыноктон ылдам өсүүдө',
-  news_2_text: 'Компания фармацевтикалык рыноктун динамикасынан озуп, сатуу жана киреше боюнча туруктуу өсүү көрсөтүүдө.',
-  hero_text3: 'Кыргызстанда дарыгерлерге ишеним жогору, ал эми алдын алуу багыты дагы да көңүл бурууну талап кылат',
-  news_3_text: 'Изилдөөлөр алдын алуунун, жеткиликтүү маалыматтын жана медицина адистери менен ишенимдүү диалогдун маанилүүлүгүн көрсөтөт.',
-  news_4_title: 'STADA Top Employer Europe 2025 деп таанылды',
-  news_4_text: 'Бул таануу STADA командалары үчүн өсүү маданиятын, кызматкерлерге кам көрүүнү жана өнүгүү мүмкүнчүлүктөрүн чагылдырат.',
-  news_5_title: 'STADA портфели күчтүү керектөө бренддерин жана дженериктерди бириктирет',
-  news_5_text: 'Өнүмдөр линейкасы ар кандай терапиялык багыттарда бейтаптардын ден соолугун колдоого жардам берет.',
-  news_6_title: 'Enterogermina микрофлоранын ден соолугун колдойт',
-  news_6_text: 'Пробиотикалык багыт STADAнын күнүмдүк ден соолук үчүн чечимдеринин маанилүү бөлүгү бойдон калууда.',
-  news_7_title: 'Coldrex суук тийүү мезгилинде таанымал бренд бойдон калууда',
-  news_7_text: 'Суук тийүүнүн белгилерин жеңилдетүүгө арналган каражаттар бейтаптарга кадимки жашоо ритмин сактоого жардам берет.',
-  news_8_title: 'Vitrum Immunaktiv күнүмдүк колдоонун фокусунда',
-  news_8_text: 'Витамин-минералдык комплекстер өзүн жакшы сезүүгө кам көргөн өнүмдөр портфелин толуктайт.',
-  career_heading: 'STADAдагы карьера',
-  career_par1: 'STADAда иштөө — бул өзгөчө жол. Биз бүтүрүүчүлөр үчүн баштапкы ролдордон тартып эксперттик позицияларга чейин ар түрдүү мүмкүнчүлүктөрдү сунуштайбыз. Вакансиялар фармацевтика менен гана чектелбейт: жеткирүү тизмеги, маркетинг, финансы, долбоорлорду башкаруу жана башка багыттар бар.',
-  career_fact1: 'жетекчилердин жарымынан көбү — аялдар',
-  career_fact2: 'кызматкерлер биздин “адамдардын ден соолугуна ишенимдүү өнөктөш катары кам көрүү” максатыбыз менен сыймыктанат',
-  career_fact3: 'кызматкер дүйнө жүзү боюнча',
-  career_fact4: 'улут биздин командада',
-  career_fact5: 'Sustainalytics ESG 2023 рейтингинде фармацевтикалык компаниялардын топ 6% ичинде',
-  career_button: 'Вакансияларды көрүү',
-  hero_products_label: 'БИЗДИН ӨНҮМДӨР',
-  hero_products_heading: 'Жакшы жашоо үчүн сапаттуу дары-дармектер',
-  hero_products_description: 'Биз ар кандай терапиялык багыттарда жогорку сапаттагы дженериктерди жана керектөөчүлөрдүн ден соолугу үчүн өнүмдөрдү сунуштайбыз.',
-  products_metric_portfolio: 'каталогдогу өнүм',
-  products_metric_areas: 'терапиялык багыт',
-  products_catalog_label: 'STADA каталогу',
-  products_browse_catalog: 'Каталогду көрүү',
-  products_category_cold: 'Суук тийүү жана дем алуу',
-  products_category_digestive: 'Тамак сиңирүү',
-  products_category_respiratory: 'Дем алуу жолдору',
-  products_category_immunity: 'Иммунитет',
-  products_category_cardio: 'Кардио',
-  products_filter_all: 'Бардык өнүмдөр',
-  product_coldrex_name: 'Колдрекс',
-  product_enterogermina_name: 'Энтерожермина',
-  product_sinulan_duo_name: 'Синулан Дуо',
-  product_vitrum_immunaktiv_name: 'Витрум Иммунактив',
-  footer_brand_text: 'Биз STADAнын эл аралык тажрыйбасын Кыргызстандагы бейтаптарга, адистерге жана өнөктөштөргө жакын жергиликтүү мамиле менен бириктиребиз.',
-  footer_trust_years: '130+ жыл тажрыйба',
-  footer_trust_countries: '100+ өлкө',
-  footer_company_title: 'Компания',
-  footer_global_link: 'STADA Global',
-  footer_products_title: 'Өнүмдөр',
-  footer_access_title: 'Жеткиликтүүлүк',
-  where_to_buy_heading: 'Кайдан сатып алса болот',
-  footer_warning_title: 'Маанилүү',
-  footer_warning_text: 'Сайттагы маалымат адистин консультациясын алмаштырбайт. Дары каражаттарын колдонор алдында нускаманы окуңуз.',
-  footer_rights: 'Бардык укуктар корголгон.',
-  footer_back_top: 'Жогору',
-});
-
-Object.assign(translations.ru, {
-  button_products: 'Продукты',
-  footer_nav_about: 'О компании',
-  footer_nav_culture: 'Культура',
-  footer_nav_history: 'История компании',
-  footer_nav_worldwide: 'STADA в мире',
-  footer_nav_news: 'Новости и Медиа',
-  footer_nav_career: 'Карьера',
-});
-
-Object.assign(translations.kz, {
-  button_products: 'Өнімдер',
-  footer_nav_about: 'Компания туралы',
-  footer_nav_culture: 'Мәдениет',
-  footer_nav_history: 'Компания тарихы',
-  footer_nav_worldwide: 'STADA әлемде',
-  footer_nav_news: 'Жаңалықтар және медиа',
-  footer_nav_career: 'Мансап',
-});
-
-Object.assign(translations.kg, {
-  button_products: 'Өнүмдөр',
-  footer_nav_about: 'Компания жөнүндө',
-  footer_nav_culture: 'Маданият',
-  footer_nav_history: 'Компаниянын тарыхы',
-  footer_nav_worldwide: 'STADA дүйнөдө',
-  footer_nav_news: 'Жаңылыктар жана медиа',
-  footer_nav_career: 'Карьера',
-});
-
 let currentLang = 'ru';
 let currentCountry = 'kz';
 
@@ -3093,160 +2979,6 @@ const productCopyOverrides = {
 Object.assign(productFallbacks.ru, productCopyOverrides.ru);
 Object.assign(productFallbacks.kz, productCopyOverrides.kz);
 
-Object.assign(productFallbacks.ru, {
-  products_category_oral: 'Полость рта',
-  product_kamistad: {
-    name: 'Камистад-Гель N',
-    title: 'Камистад-Гель N',
-    desc: 'Гель для применения в полости рта при раздражении десен и слизистой согласно инструкции.',
-    kicker: 'Уход за полостью рта',
-    badge1: 'Лидокаин + ромашка',
-    badge2: 'Гель',
-    badge3: '12+',
-    facts: ['10 г', 'До 3 раз в день', 'С 12 лет'],
-    buy: 'Камистад-Гель N можно найти у аптечных партнеров STADA.',
-    copy: {
-      overview_label: 'О продукте',
-      overview_heading: 'Гель для десен и слизистой полости рта',
-      overview_intro: 'Камистад-Гель N представлен в формате геля для местного применения согласно инструкции.',
-      card_pack_title: '10 г',
-      card_pack_text: 'Компактная туба подходит для домашней аптечки и поездок.',
-      card_age_title: 'С 12 лет',
-      card_age_text: 'Возрастные ограничения и способ применения необходимо сверять с инструкцией.',
-      card_dose_title: 'До 3 раз в день',
-      card_dose_text: 'Режим применения определяется инструкцией и рекомендацией специалиста.',
-      card_storage_title: 'Ответственный прием',
-      card_storage_text: 'Перед применением ознакомьтесь с инструкцией и учитывайте индивидуальные ограничения.',
-      benefit1: 'Формат геля удобен для местного нанесения.',
-      benefit2: 'Карточка продукта отдельно показывает формат, возраст и режим применения.',
-      benefit3: 'Состав и способ применения остаются в рамках инструкции.',
-      benefit4: 'Блок покупки ведет к аптечным партнерам.',
-      formula_label: 'Формула',
-      formula_heading: 'Лидокаин, ромашка и гелевая форма',
-      formula_intro: 'Формульный блок выделяет основные практические параметры продукта.',
-      formula_active_title: 'Лидокаин',
-      formula_active_text: 'Активный компонент указан в инструкции к препарату.',
-      formula_chamomile_title: 'Ромашка',
-      formula_chamomile_text: 'Растительный компонент дополняет формулу продукта.',
-      formula_format_title: 'Гель',
-      formula_format_text: 'Гелевая форма предназначена для местного применения.',
-      usage_label: 'Когда применяют',
-      usage_heading: 'Для полости рта согласно инструкции',
-      usage_gums_title: 'Десны',
-      usage_gums_text: 'Применение возможно при дискомфорте десен согласно инструкции.',
-      usage_mucosa_title: 'Слизистая',
-      usage_mucosa_text: 'Гель предназначен для местного применения в полости рта.',
-      usage_week_title: 'Курс',
-      usage_week_text: 'Продолжительность применения необходимо сверять с инструкцией.',
-      note_title: 'Важно',
-      note_text: 'Информация на странице не заменяет консультацию специалиста.'
-    }
-  }
-});
-
-Object.assign(productFallbacks.kz, {
-  products_category_oral: 'Ауыз қуысы',
-  product_kamistad: {
-    name: 'Камистад-Гель N',
-    title: 'Камистад-Гель N',
-    desc: 'Нұсқаулыққа сәйкес қызыл иек пен ауыз қуысы шырышты қабығы жайсыздығында қолданылатын гель.',
-    kicker: 'Ауыз қуысына күтім',
-    badge1: 'Лидокаин + түймедақ',
-    badge2: 'Гель',
-    badge3: '12+',
-    facts: ['10 г', 'Күніне 3 ретке дейін', '12 жастан бастап'],
-    buy: 'Камистад-Гель N өнімін STADA дәріхана серіктестерінен табуға болады.',
-    copy: {
-      overview_label: 'Өнім туралы',
-      overview_heading: 'Қызыл иек пен ауыз қуысы шырышты қабығына арналған гель',
-      overview_intro: 'Камистад-Гель N нұсқаулыққа сәйкес жергілікті қолдануға арналған гель форматында ұсынылған.',
-      card_pack_title: '10 г',
-      card_pack_text: 'Ықшам туба үйдегі дәрі қобдишасына және сапарға ыңғайлы.',
-      card_age_title: '12 жастан бастап',
-      card_age_text: 'Жас шектеулері мен қолдану тәсілін нұсқаулықпен салыстыру қажет.',
-      card_dose_title: 'Күніне 3 ретке дейін',
-      card_dose_text: 'Қолдану режимі нұсқаулық пен маман ұсынымына сәйкес анықталады.',
-      card_storage_title: 'Жауапты қолдану',
-      card_storage_text: 'Қолданар алдында нұсқаулықпен танысып, жеке шектеулерді ескеріңіз.',
-      benefit1: 'Гель форматы жергілікті жағуға ыңғайлы.',
-      benefit2: 'Өнім карточкасы форматты, жасты және қолдану режимін бөлек көрсетеді.',
-      benefit3: 'Құрамы мен қолдану тәсілі нұсқаулық шегінде берілген.',
-      benefit4: 'Сатып алу блогы дәріхана серіктестеріне апарады.',
-      formula_label: 'Формула',
-      formula_heading: 'Лидокаин, түймедақ және гель формасы',
-      formula_intro: 'Формула блогы өнімнің негізгі практикалық параметрлерін бөліп көрсетеді.',
-      formula_active_title: 'Лидокаин',
-      formula_active_text: 'Белсенді компонент препарат нұсқаулығында көрсетілген.',
-      formula_chamomile_title: 'Түймедақ',
-      formula_chamomile_text: 'Өсімдік компоненті өнім формуласын толықтырады.',
-      formula_format_title: 'Гель',
-      formula_format_text: 'Гель формасы жергілікті қолдануға арналған.',
-      usage_label: 'Қашан қолданылады',
-      usage_heading: 'Нұсқаулыққа сәйкес ауыз қуысына',
-      usage_gums_title: 'Қызыл иек',
-      usage_gums_text: 'Қызыл иек жайсыздығында нұсқаулыққа сәйкес қолданылуы мүмкін.',
-      usage_mucosa_title: 'Шырышты қабық',
-      usage_mucosa_text: 'Гель ауыз қуысында жергілікті қолдануға арналған.',
-      usage_week_title: 'Курс',
-      usage_week_text: 'Қолдану ұзақтығын нұсқаулықпен салыстыру қажет.',
-      note_title: 'Маңызды',
-      note_text: 'Беттегі ақпарат маман кеңесін алмастырмайды.'
-    }
-  }
-});
-
-productFallbacks.kg = productFallbacks.kg || {};
-Object.assign(productFallbacks.kg, {
-  products_category_oral: 'Ооз көңдөйү',
-  product_kamistad: {
-    name: 'Камистад-Гель N',
-    title: 'Камистад-Гель N',
-    desc: 'Нускамага ылайык тиш этинде жана ооз көңдөйүнүн былжыр челинде ыңгайсыздык болгондо колдонулуучу гель.',
-    kicker: 'Ооз көңдөйүнө кам көрүү',
-    badge1: 'Лидокаин + ромашка',
-    badge2: 'Гель',
-    badge3: '12+',
-    facts: ['10 г', 'Күнүнө 3 жолуга чейин', '12 жаштан баштап'],
-    buy: 'Камистад-Гель N өнүмүн STADAнын дарыкана өнөктөштөрүнөн табууга болот.',
-    copy: {
-      overview_label: 'Өнүм жөнүндө',
-      overview_heading: 'Тиш эти жана ооз көңдөйүнүн былжыр чели үчүн гель',
-      overview_intro: 'Камистад-Гель N нускамага ылайык жергиликтүү колдонууга арналган гель форматында сунушталат.',
-      card_pack_title: '10 г',
-      card_pack_text: 'Ыңгайлуу туба үй дары кутучасына жана жолго ылайыктуу.',
-      card_age_title: '12 жаштан баштап',
-      card_age_text: 'Жаш чектөөлөрүн жана колдонуу ыкмасын нускама менен салыштыруу зарыл.',
-      card_dose_title: 'Күнүнө 3 жолуга чейин',
-      card_dose_text: 'Колдонуу режими нускама жана адистин сунушу боюнча аныкталат.',
-      card_storage_title: 'Жоопкерчиликтүү колдонуу',
-      card_storage_text: 'Колдонор алдында нускаманы окуп, жеке чектөөлөрдү эске алыңыз.',
-      benefit1: 'Гель форматы жергиликтүү сүйкөөгө ыңгайлуу.',
-      benefit2: 'Өнүм карточкасы форматты, жашты жана колдонуу режимин өзүнчө көрсөтөт.',
-      benefit3: 'Курамы жана колдонуу ыкмасы нускаманын чегинде берилет.',
-      benefit4: 'Сатып алуу блогу дарыкана өнөктөштөрүнө алып барат.',
-      formula_label: 'Формула',
-      formula_heading: 'Лидокаин, ромашка жана гель формасы',
-      formula_intro: 'Формула блогу өнүмдүн негизги практикалык параметрлерин бөлүп көрсөтөт.',
-      formula_active_title: 'Лидокаин',
-      formula_active_text: 'Активдүү компонент препараттын нускамасында көрсөтүлгөн.',
-      formula_chamomile_title: 'Ромашка',
-      formula_chamomile_text: 'Өсүмдүк компоненти өнүмдүн формуласын толуктайт.',
-      formula_format_title: 'Гель',
-      formula_format_text: 'Гель формасы жергиликтүү колдонууга арналган.',
-      usage_label: 'Качан колдонулат',
-      usage_heading: 'Нускамага ылайык ооз көңдөйү үчүн',
-      usage_gums_title: 'Тиш эти',
-      usage_gums_text: 'Тиш этинин ыңгайсыздыгында нускамага ылайык колдонулушу мүмкүн.',
-      usage_mucosa_title: 'Былжыр чел',
-      usage_mucosa_text: 'Гель ооз көңдөйүндө жергиликтүү колдонууга арналган.',
-      usage_week_title: 'Курс',
-      usage_week_text: 'Колдонуу узактыгын нускама менен салыштыруу зарыл.',
-      note_title: 'Маанилүү',
-      note_text: 'Баракчадагы маалымат адистин консультациясын алмаштырбайт.'
-    }
-  }
-});
-
 function getProductFallback(lang, key) {
   const dictionary = productFallbacks[lang] || productFallbacks.ru;
   if (dictionary[key]) return dictionary[key];
@@ -3371,7 +3103,9 @@ function getProductFallback(lang, key) {
 }
 
 const STADA_BACKEND_BASE_URL = window.STADA_BACKEND_BASE_URL || 'https://stada-content-backend.onrender.com';
-const STADA_DEFAULT_COUNTRY = normalizeCountryCode(window.STADA_BACKEND_COUNTRY || window.STADA_COUNTRY || 'kz');
+const STADA_DOMAIN_COUNTRY = getCountryCodeFromHostname(window.location.hostname);
+const STADA_CONFIG_COUNTRY = getConfiguredCountryCode();
+const STADA_DEFAULT_COUNTRY = STADA_DOMAIN_COUNTRY || STADA_CONFIG_COUNTRY || 'kz';
 const backendPageCache = {};
 let backendPagePayload = null;
 
@@ -3381,6 +3115,25 @@ function normalizeCountryCode(countryInput) {
     return [country.code, country.backendCountry, country.name].some(value => value.toLowerCase() === requested);
   });
   return matched?.code || 'kz';
+}
+
+function getConfiguredCountryCode() {
+  const configuredCountry = window.STADA_BACKEND_COUNTRY || window.STADA_COUNTRY || '';
+  return configuredCountry ? normalizeCountryCode(configuredCountry) : '';
+}
+
+function getCountryCodeFromHostname(hostname) {
+  const normalizedHostname = String(hostname || '')
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, '')
+    .split(':')[0];
+
+  const matchedCountry = STADA_COUNTRY_OPTIONS.find(country => {
+    return normalizedHostname === country.code || normalizedHostname.endsWith(`.${country.code}`);
+  });
+
+  return matchedCountry?.code || '';
 }
 
 function getCountryConfig(countryCode = currentCountry) {
@@ -3402,17 +3155,6 @@ function resolveLanguageForCountry(lang, countryCode = currentCountry) {
   return country.defaultLanguage || country.supportedLanguages[0] || 'ru';
 }
 
-function mapLanguageForCountry(lang, nextCountryCode, previousCountryCode = currentCountry) {
-  const nextCountry = getCountryConfig(nextCountryCode);
-  const previousCountry = getCountryConfig(previousCountryCode);
-  if (nextCountry.supportedLanguages.includes(lang)) return lang;
-  if (lang && lang !== 'ru' && previousCountry.supportedLanguages.includes(lang)) {
-    const localLanguage = nextCountry.supportedLanguages.find(language => language !== 'ru');
-    if (localLanguage) return localLanguage;
-  }
-  return resolveLanguageForCountry(lang, nextCountry.code);
-}
-
 function persistLocaleState() {
   try {
     localStorage.setItem('stada-country', currentCountry);
@@ -3422,53 +3164,29 @@ function persistLocaleState() {
   }
 }
 
+function initializeLocaleState() {
+  currentCountry = STADA_DEFAULT_COUNTRY;
+  try {
+    const savedCountry = localStorage.getItem('stada-country');
+    if (savedCountry && !STADA_DOMAIN_COUNTRY) {
+      currentCountry = normalizeCountryCode(savedCountry);
+    }
+    const savedLang = localStorage.getItem('stada-lang');
+    if (savedLang) {
+      currentLang = resolveLanguageForCountry(savedLang, currentCountry);
+    } else {
+      currentLang = resolveLanguageForCountry(currentLang, currentCountry);
+    }
+  } catch (e) {
+    currentLang = resolveLanguageForCountry(currentLang, currentCountry);
+  }
+}
+
 function setToggleActiveIndex(toggle, index) {
   if (!toggle) return;
   toggle.dataset.activeIndex = String(index);
   toggle.style.setProperty('--toggle-active-x', index === 0 ? '0%' : 'calc(100% + 4px)');
   toggle.style.setProperty('--lang-active-x', index === 0 ? '0%' : 'calc(100% + 4px)');
-}
-
-function getLanguageAriaLabel(lang) {
-  const label = getLanguageLabel(lang);
-  return `Switch language to ${label}`;
-}
-
-function ensureCountryToggle() {
-  document.querySelectorAll('.menu-language').forEach(menuItem => {
-    if (menuItem.querySelector('.country-toggle')) return;
-    const toggle = document.createElement('div');
-    toggle.className = 'country-toggle';
-    toggle.setAttribute('role', 'group');
-    toggle.setAttribute('aria-label', 'Country selector');
-
-    STADA_COUNTRY_OPTIONS.forEach(country => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'country-option-button';
-      button.dataset.country = country.code;
-      button.textContent = country.label;
-      button.setAttribute('aria-label', `Switch country to ${country.name}`);
-      button.addEventListener('click', () => updateCountry(country.code));
-      toggle.appendChild(button);
-    });
-
-    const languageToggle = menuItem.querySelector('.lang-toggle');
-    menuItem.insertBefore(toggle, languageToggle || null);
-  });
-}
-
-function setCountryToggleState(countryCode) {
-  document.querySelectorAll('.country-toggle').forEach(toggle => {
-    const buttons = Array.from(toggle.querySelectorAll('.country-option-button'));
-    const activeIndex = Math.max(0, buttons.findIndex(button => button.dataset.country === countryCode));
-    setToggleActiveIndex(toggle, activeIndex);
-    buttons.forEach(button => {
-      const isActive = button.dataset.country === countryCode;
-      button.classList.toggle('active', isActive);
-      button.setAttribute('aria-pressed', String(isActive));
-    });
-  });
 }
 
 function renderLanguageOptions(countryCode = currentCountry) {
@@ -3485,13 +3203,13 @@ function renderLanguageOptions(countryCode = currentCountry) {
       button.dataset.lang = lang;
       button.id = `lang-${lang}`;
       button.textContent = getLanguageLabel(lang);
-      button.setAttribute('aria-label', getLanguageAriaLabel(lang));
+      button.setAttribute('aria-label', `Switch language to ${getLanguageLabel(lang)}`);
     });
   });
 }
 
 function isBackendDrivenPage() {
-  return !!document.querySelector('[data-i18n-key]');
+  return !!document.querySelector('[data-i18n-key], [data-backend-text-id], [data-backend-image-id]');
 }
 
 function getCurrentBackendPagePath() {
@@ -3504,6 +3222,11 @@ function getCurrentBackendPagePath() {
   if (!pagePath || pagePath.endsWith('/')) pagePath = `${pagePath}index.html`;
   if (pagePath === 'main') pagePath = 'index.html';
   return pagePath || 'index.html';
+}
+
+function getSiteAssetPath(relativePath) {
+  const depth = Math.max(0, getCurrentBackendPagePath().split('/').length - 1);
+  return `${'../'.repeat(depth)}${String(relativePath || '').replace(/^\/+/, '')}`;
 }
 
 function buildBackendPageUrl(lang) {
@@ -3534,40 +3257,47 @@ function getBackendPageText(key) {
 }
 
 function escapeCssIdentifier(value) {
-  if (window.CSS?.escape) return CSS.escape(value);
+  if (window.CSS?.escape) return window.CSS.escape(value);
   return String(value).replace(/["\\]/g, '\\$&');
 }
 
 function getTranslatedText(lang, key) {
-  if (isBackendDrivenPage()) {
-    return getBackendPageText(key) || translations[lang]?.[key] || translations.ru?.[key] || getProductFallback(lang, key) || getProductFallback('ru', key);
-  }
-  return translations[lang]?.[key] || translations.ru?.[key] || getProductFallback(lang, key) || getProductFallback('ru', key);
+  return getBackendPageText(key)
+    || translations[lang]?.[key]
+    || translations.ru?.[key]
+    || getProductFallback(lang, key)
+    || getProductFallback('ru', key);
+}
+
+function getStaticTranslatedText(lang, key) {
+  return translations[lang]?.[key]
+    || translations.ru?.[key]
+    || getProductFallback(lang, key)
+    || getProductFallback('ru', key)
+    || '';
+}
+
+function applyStaticI18n(lang) {
+  document.querySelectorAll('[data-static-i18n-key]').forEach(el => {
+    const key = el.getAttribute('data-static-i18n-key');
+    const translation = getStaticTranslatedText(lang, key);
+    if (translation) el.textContent = translation;
+  });
 }
 
 function setLanguageToggleState(lang) {
   renderLanguageOptions(currentCountry);
-  setCountryToggleState(currentCountry);
-  const langOptions = document.querySelectorAll('.lang-toggle .lang-option');
-  if (langOptions.length) {
-    document.querySelectorAll('.lang-toggle').forEach(langToggle => {
-      const buttons = Array.from(langToggle.querySelectorAll('.lang-option:not([hidden])'));
-      const activeIndex = Math.max(0, buttons.findIndex(button => button.dataset.lang === lang));
-      langToggle.dataset.activeLang = lang;
-      setToggleActiveIndex(langToggle, activeIndex);
-      buttons.forEach(btn => {
-        const isActive = btn.dataset.lang === lang;
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', String(isActive));
-      });
+  document.querySelectorAll('.lang-toggle').forEach(langToggle => {
+    const buttons = Array.from(langToggle.querySelectorAll('.lang-option:not([hidden])'));
+    const activeIndex = Math.max(0, buttons.findIndex(button => button.dataset.lang === lang));
+    langToggle.dataset.activeLang = lang;
+    setToggleActiveIndex(langToggle, activeIndex);
+    buttons.forEach(btn => {
+      const isActive = btn.dataset.lang === lang;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
     });
-  } else {
-    const langBtn = document.getElementById('langBtn');
-    if (langBtn) {
-      const labels = getSupportedLanguages().map(getLanguageLabel);
-      langBtn.textContent = lang === getSupportedLanguages()[0] ? labels.join(' / ') : labels.reverse().join(' / ');
-    }
-  }
+  });
 }
 
 function applyTextFromBackendPayload(payload) {
@@ -3576,11 +3306,17 @@ function applyTextFromBackendPayload(payload) {
     hero_kicker: payload?.country?.siteName,
     site_name: payload?.country?.siteName,
   };
+
   document.querySelectorAll('[data-i18n-key]').forEach(el => {
     const key = el.getAttribute('data-i18n-key');
     const value = dynamicText[key] || text[key] || '';
-    el.textContent = value;
-    el.hidden = !value && !!el.closest('.benefits-list');
+    if (value) {
+      el.textContent = value;
+      el.hidden = false;
+    } else if (el.closest('.benefits-list')) {
+      el.textContent = '';
+      el.hidden = true;
+    }
   });
 
   document.querySelectorAll('[data-i18n-placeholder-key]').forEach(el => {
@@ -3603,11 +3339,45 @@ function applyTextFromBackendPayload(payload) {
   });
 }
 
+function normalizeImageLookupKey(value) {
+  return String(value || '')
+    .split('#')[0]
+    .split('?')[0]
+    .replace(/\\/g, '/')
+    .replace(/^https?:\/\/[^/]+\/?/i, '')
+    .replace(/^(\.\/)+/, '')
+    .replace(/^\/+/, '')
+    .replace(/^\.\.\//, '');
+}
+
+function isStableCloudinaryImageUrl(src) {
+  return /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?!v\d+\/)/i.test(String(src || ''));
+}
+
+function withRuntimeImageRefresh(src) {
+  if (!isStableCloudinaryImageUrl(src)) return src;
+  if (!window.location.hostname.match(/^(localhost|127\.0\.0\.1)$/)) return src;
+
+  try {
+    const url = new URL(src);
+    url.searchParams.set('fresh', String(Date.now()));
+    return url.href;
+  } catch (error) {
+    const separator = String(src).includes('?') ? '&' : '?';
+    return `${src}${separator}fresh=${Date.now()}`;
+  }
+}
+
 function applyImagesFromBackendPayload(payload) {
   (payload?.content?.dom?.images || []).forEach(image => {
     if (!image?.id) return;
     document.querySelectorAll(`img[data-backend-image-id="${escapeCssIdentifier(image.id)}"]`).forEach(img => {
-      img.src = image.url || image.src || img.src;
+      if (img.dataset.optimizedStaticSrc === 'true' && image.source !== 'override') return;
+
+      const nextSrc = image.source === 'override'
+        ? image.url || image.src || img.src
+        : image.src || img.src;
+      img.src = withRuntimeImageRefresh(nextSrc);
       if (image.srcset) img.srcset = image.srcset;
       if (image.sizes) img.sizes = image.sizes;
       img.alt = image.alt || '';
@@ -3616,42 +3386,42 @@ function applyImagesFromBackendPayload(payload) {
     });
   });
 
-  const photos = payload?.content?.photos || [];
-  const photosBySrc = new Map(photos.map(photo => [photo.src, photo]));
-  document.querySelectorAll('img[data-backend-src]').forEach(img => {
+  const photosBySrc = new Map();
+  (payload?.content?.photos || []).forEach(photo => {
+    const keys = [photo.src, photo.url].map(normalizeImageLookupKey).filter(Boolean);
+    keys.forEach(key => photosBySrc.set(key, photo));
+  });
+
+  document.querySelectorAll('img').forEach(img => {
     if (img.dataset.backendImageApplied === 'true') return;
-    const originalSrc = img.getAttribute('data-backend-src');
-    const photo = photosBySrc.get(originalSrc);
+    const originalSrc = img.getAttribute('data-backend-src') || img.getAttribute('src') || '';
+    const photo = photosBySrc.get(normalizeImageLookupKey(originalSrc));
     if (!photo) return;
-    img.src = photo.src || photo.url;
+    img.src = photo.src || photo.url || img.src;
     if (photo.alt) img.alt = photo.alt;
+    if (photo.loading) img.loading = photo.loading;
   });
 }
 
 function showBackendRequiredMessage(error) {
   backendPagePayload = null;
   delete backendPageCache[`${currentCountry}:${currentLang}:${getCurrentBackendPagePath()}`];
+  hideStadaPageLoader();
   document.body.classList.add('backend-content-pending');
-  document.querySelectorAll('[data-i18n-key]').forEach(el => {
-    el.textContent = '';
-  });
-  document.querySelectorAll('img[data-backend-src]').forEach(img => {
-    img.removeAttribute('src');
-  });
 
   let screen = document.querySelector('[data-backend-error-screen]');
   if (!screen) {
     screen = document.createElement('div');
     screen.setAttribute('data-backend-error-screen', '');
-    screen.style.cssText = 'position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:#f7f8fb;color:#141414;font:400 16px/1.5 Noto Sans,Arial,sans-serif;';
+    screen.style.cssText = 'position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:#f7f8fb;color:#141414;font:400 16px/1.5 Noto Sans,Arial,sans-serif;';
     document.body.appendChild(screen);
   }
 
   screen.innerHTML = `
     <section role="alert" aria-live="assertive" style="width:min(100%,560px);padding:44px 38px;border-radius:18px;background:#fff;box-shadow:0 24px 70px rgba(20,20,20,.14);text-align:center;">
-      <img src="assets/logos/stada_logo.png" alt="STADA logo" style="display:block;width:118px;height:auto;margin:0 auto 26px;">
+      <img src="${getSiteAssetPath('assets/logos/stada_logo.png')}" alt="STADA logo" style="display:block;width:118px;height:auto;margin:0 auto 26px;">
       <p style="margin:0 0 10px;color:#c4002f;font-weight:700;text-transform:uppercase;font-size:13px;letter-spacing:.08em;">Service unavailable</p>
-      <h1 style="margin:0 0 14px;font-size:clamp(28px,4vw,42px);line-height:1.12;color:#1d1d1f;">Sorry, something went wrong.</h1>
+      <h1 style="margin:0 0 14px;font-size:clamp(28px,4vw,42px);line-height:1.12;color:#1d1d1f;">Sorry, our services are unavailable.</h1>
       <p style="margin:0 auto 28px;max-width:420px;color:#4b4b55;font-size:17px;">We're working on fixing it. Please try refreshing the page in a moment.</p>
       <button type="button" data-backend-retry style="appearance:none;border:0;border-radius:999px;background:#005db9;color:#fff;padding:13px 24px;font:700 15px/1 Noto Sans,Arial,sans-serif;cursor:pointer;">Refresh page</button>
     </section>
@@ -3662,7 +3432,6 @@ function showBackendRequiredMessage(error) {
 }
 
 function clearBackendRequiredMessage() {
-  document.querySelector('[data-backend-required-message]')?.remove();
   document.querySelector('[data-backend-error-screen]')?.remove();
 }
 
@@ -3670,18 +3439,19 @@ async function updateBackendDrivenPage(lang) {
   lang = resolveLanguageForCountry(lang);
   currentLang = lang;
   persistLocaleState();
-
   document.documentElement.lang = lang;
   setLanguageToggleState(lang);
+  applyStaticI18n(lang);
 
   const payload = await fetchBackendPage(lang);
   backendPagePayload = payload;
   clearBackendRequiredMessage();
+  applyStaticI18n(lang);
   applyTextFromBackendPayload(payload);
   applyImagesFromBackendPayload(payload);
   document.body.classList.remove('backend-content-pending');
-  if (payload.content?.pageTitle) document.title = payload.content.pageTitle;
 
+  updateDocumentTitle(lang);
   const backToTop = document.getElementById('backToTop');
   if (backToTop) {
     backToTop.setAttribute('aria-label', getBackendPageText('footer_back_top') || 'Back to top');
@@ -3693,15 +3463,13 @@ async function updateBackendDrivenPage(lang) {
   });
 }
 
-// Helper to update all elements with data-i18n-key
 function updateStaticLanguage(lang) {
   lang = resolveLanguageForCountry(lang);
   currentLang = lang;
-  // Persist the selected language so that navigation between pages retains the user’s choice
   persistLocaleState();
   document.documentElement.lang = lang;
-  const elements = document.querySelectorAll('[data-i18n-key]');
-  elements.forEach(el => {
+
+  document.querySelectorAll('[data-i18n-key]').forEach(el => {
     const key = el.getAttribute('data-i18n-key');
     const translation = getTranslatedText(lang, key);
     if (translation) {
@@ -3724,14 +3492,10 @@ function updateStaticLanguage(lang) {
     const translation = getTranslatedText(lang, key);
     if (translation) el.setAttribute('aria-label', translation);
   });
-  // Highlight the active language option in the custom toggle.  Each
-  // language button is annotated with a `data-lang` attribute; we
-  // assign the `active` class based on the current language.  If
-  // legacy markup with a single `#langBtn` exists (e.g. before
-  // applying the redesign) we leave it untouched.
-  setLanguageToggleState(lang);
 
-  // Update back-to-top button label if it exists
+  setLanguageToggleState(lang);
+  applyStaticI18n(lang);
+
   const backToTop = document.getElementById('backToTop');
   if (backToTop) {
     backToTop.setAttribute('aria-label', lang === 'kz' ? 'Жоғарыға қайту' : 'Вернуться наверх');
@@ -3739,24 +3503,18 @@ function updateStaticLanguage(lang) {
 
   updateDocumentTitle(lang);
   document.dispatchEvent(new CustomEvent('stada:languagechange', { detail: { lang, country: currentCountry } }));
-
-  // Reveal hero overlays after text has been populated.  Without this
-  // call the overlays remain hidden (opacity 0) to prevent a flash of
-  // unstyled content while CSS and translations are loading.  We add
-  // the class on every language update so that toggling languages
-  // re‑triggers the fade in effect if desired.
-  const heroOverlays = document.querySelectorAll('.hero-overlay');
-  heroOverlays.forEach(overlay => {
+  document.querySelectorAll('.hero-overlay').forEach(overlay => {
     overlay.classList.add('visible');
   });
 }
 
+// Helper to update all elements with data-i18n-key
 function updateLanguage(lang) {
   lang = resolveLanguageForCountry(lang);
   if (isBackendDrivenPage()) {
     updateBackendDrivenPage(lang).catch(error => {
-      showBackendRequiredMessage(error);
       updateStaticLanguage(lang);
+      showBackendRequiredMessage(error);
     });
     return;
   }
@@ -3765,11 +3523,10 @@ function updateLanguage(lang) {
 
 function updateCountry(countryCode) {
   const nextCountry = normalizeCountryCode(countryCode);
-  const previousCountry = currentCountry;
+  if (nextCountry === currentCountry) return;
   currentCountry = nextCountry;
-  const nextLanguage = mapLanguageForCountry(currentLang, nextCountry, previousCountry);
   backendPagePayload = null;
-  updateLanguage(nextLanguage);
+  updateLanguage(resolveLanguageForCountry(currentLang, nextCountry));
 }
 
 // Toggle languages on button click
@@ -3812,7 +3569,7 @@ function updateDocumentTitle(lang) {
     }
   }
 
-  const homeTitle = getTranslatedText(lang, 'nav_about');
+  const homeTitle = getStaticTranslatedText(lang, 'nav_about') || getTranslatedText(lang, 'nav_about');
   if (homeTitle) document.title = `STADA - ${homeTitle}`;
 }
 
@@ -3876,6 +3633,7 @@ function initHeroCarousel() {
   const hero = carousel.closest('.stada-home-hero');
   const slides = Array.from(carousel.querySelectorAll('.hero-carousel-slide'));
   const dots = Array.from(carousel.querySelectorAll('.hero-carousel-dot'));
+  const caption = document.querySelector('[data-hero-caption]');
   const heroTitle = hero?.querySelector('.stada-home-hero__copy h1');
   const heroLead = hero?.querySelector('.stada-home-hero__lead');
   const prevButton = carousel.querySelector('[data-hero-prev]');
@@ -3925,6 +3683,12 @@ function initHeroCarousel() {
         dot.removeAttribute('aria-current');
       }
     });
+
+    const captionKey = slides[activeIndex].dataset.captionKey;
+    if (caption && captionKey) {
+      caption.setAttribute('data-i18n-key', captionKey);
+      caption.textContent = getTranslatedText(currentLang, captionKey) || '';
+    }
 
     const titleKey = slides[activeIndex].dataset.titleKey;
     if (heroTitle && titleKey) {
@@ -5111,112 +4875,6 @@ function initGecsikonLevitation() {
   start();
 }
 
-function initTerginanLevitation() {
-  const page = document.querySelector('.product-terginan-page');
-  if (!page) return;
-
-  const hero = page.querySelector('.product-hero--terginan');
-  const packshot = page.querySelector('.terginan-hero-packshot');
-  const heroImage = page.querySelector('.product-hero-image');
-  const formula = page.querySelector('.terginan-formula-system');
-  const formulaCards = Array.from(page.querySelectorAll('.terginan-formula-point'));
-  if (!hero || !packshot || !heroImage) return;
-
-  const resetHero = () => {
-    packshot.style.setProperty('--terginan-hero-float-y', '0px');
-    heroImage.style.setProperty('--terginan-hero-shadow-opacity', '0.74');
-    heroImage.style.setProperty('--terginan-hero-shadow-transform', 'scale3d(1, 1, 1)');
-  };
-
-  const resetFormula = () => {
-    formulaCards.forEach(card => {
-      card.style.setProperty('--terginan-formula-card-y', '0px');
-    });
-  };
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
-    resetHero();
-    resetFormula();
-    return;
-  }
-
-  let animationFrame = 0;
-  let heroVisible = true;
-  let formulaVisible = !!formula;
-
-  const renderFrame = time => {
-    if (document.hidden || (!heroVisible && !formulaVisible)) {
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-      return;
-    }
-
-    if (heroVisible) {
-      const phase = Math.sin(time / 1380);
-      const liftProgress = (phase + 1) / 2;
-      const lift = liftProgress * -6;
-      const shadowScaleX = 1 - liftProgress * 0.05;
-      const shadowScaleY = 1 - liftProgress * 0.08;
-      const shadowOpacity = 0.74 - liftProgress * 0.1;
-
-      packshot.style.setProperty('--terginan-hero-float-y', `${lift.toFixed(2)}px`);
-      heroImage.style.setProperty('--terginan-hero-shadow-opacity', shadowOpacity.toFixed(3));
-      heroImage.style.setProperty('--terginan-hero-shadow-transform', `scale3d(${shadowScaleX.toFixed(3)}, ${shadowScaleY.toFixed(3)}, 1)`);
-    } else {
-      resetHero();
-    }
-
-    if (formulaVisible) {
-      formulaCards.forEach((card, index) => {
-        const cardPhase = Math.sin(time / 1260 + index * 0.84);
-        card.style.setProperty('--terginan-formula-card-y', `${(cardPhase * 5).toFixed(2)}px`);
-      });
-    } else {
-      resetFormula();
-    }
-
-    animationFrame = window.requestAnimationFrame(renderFrame);
-  };
-
-  const start = () => {
-    if (!animationFrame && !document.hidden && (heroVisible || formulaVisible)) {
-      animationFrame = window.requestAnimationFrame(renderFrame);
-    }
-  };
-
-  const stopIfIdle = () => {
-    if (animationFrame && (document.hidden || (!heroVisible && !formulaVisible))) {
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-    }
-  };
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.target === hero) heroVisible = entry.isIntersecting;
-        if (entry.target === formula) formulaVisible = entry.isIntersecting;
-      });
-      stopIfIdle();
-      start();
-    }, { threshold: 0.08 });
-
-    observer.observe(hero);
-    if (formula) observer.observe(formula);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopIfIdle();
-    else start();
-  });
-
-  start();
-}
-
 function initKlopidogrelTevaLevitation() {
   const page = document.querySelector('.product-klopidogrel-teva-page');
   if (!page) return;
@@ -5326,224 +4984,6 @@ function initKlopidogrelTevaLevitation() {
   start();
 }
 
-function initLizobaktLevitation() {
-  const page = document.querySelector('.product-lizobakt-page');
-  if (!page) return;
-
-  const hero = page.querySelector('.product-hero--lizobakt');
-  const packshot = page.querySelector('.lizobakt-hero-packshot');
-  const heroImage = page.querySelector('.product-hero-image');
-  const formula = page.querySelector('.lizobakt-formula-system');
-  const formulaCards = Array.from(page.querySelectorAll('.lizobakt-formula-point'));
-  if (!hero || !packshot || !heroImage) return;
-
-  const resetHero = () => {
-    packshot.style.setProperty('--lizobakt-hero-float-y', '0px');
-    heroImage.style.setProperty('--lizobakt-hero-shadow-opacity', '0.74');
-    heroImage.style.setProperty('--lizobakt-hero-shadow-transform', 'scale3d(1, 1, 1)');
-  };
-
-  const resetFormula = () => {
-    formulaCards.forEach(card => {
-      card.style.setProperty('--lizobakt-formula-card-y', '0px');
-    });
-  };
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
-    resetHero();
-    resetFormula();
-    return;
-  }
-
-  let animationFrame = 0;
-  let heroVisible = true;
-  let formulaVisible = !!formula;
-
-  const renderFrame = time => {
-    if (document.hidden || (!heroVisible && !formulaVisible)) {
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-      return;
-    }
-
-    if (heroVisible) {
-      const phase = Math.sin(time / 1380);
-      const liftProgress = (phase + 1) / 2;
-      const lift = liftProgress * -6;
-      const shadowScaleX = 1 - liftProgress * 0.05;
-      const shadowScaleY = 1 - liftProgress * 0.08;
-      const shadowOpacity = 0.74 - liftProgress * 0.1;
-
-      packshot.style.setProperty('--lizobakt-hero-float-y', `${lift.toFixed(2)}px`);
-      heroImage.style.setProperty('--lizobakt-hero-shadow-opacity', shadowOpacity.toFixed(3));
-      heroImage.style.setProperty('--lizobakt-hero-shadow-transform', `scale3d(${shadowScaleX.toFixed(3)}, ${shadowScaleY.toFixed(3)}, 1)`);
-    } else {
-      resetHero();
-    }
-
-    if (formulaVisible) {
-      formulaCards.forEach((card, index) => {
-        const cardPhase = Math.sin(time / 1260 + index * 0.84);
-        card.style.setProperty('--lizobakt-formula-card-y', `${(cardPhase * 5).toFixed(2)}px`);
-      });
-    } else {
-      resetFormula();
-    }
-
-    animationFrame = window.requestAnimationFrame(renderFrame);
-  };
-
-  const start = () => {
-    if (!animationFrame && !document.hidden && (heroVisible || formulaVisible)) {
-      animationFrame = window.requestAnimationFrame(renderFrame);
-    }
-  };
-
-  const stopIfIdle = () => {
-    if (animationFrame && (document.hidden || (!heroVisible && !formulaVisible))) {
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-    }
-  };
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.target === hero) heroVisible = entry.isIntersecting;
-        if (entry.target === formula) formulaVisible = entry.isIntersecting;
-      });
-      stopIfIdle();
-      start();
-    }, { threshold: 0.08 });
-
-    observer.observe(hero);
-    if (formula) observer.observe(formula);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      stopIfIdle();
-    } else {
-      start();
-    }
-  });
-
-  start();
-}
-
-function initFaringoseptLevitation() {
-  const page = document.querySelector('.product-faringosept-page');
-  if (!page) return;
-
-  const hero = page.querySelector('.product-hero--faringosept');
-  const packshot = page.querySelector('.faringosept-hero-packshot');
-  const heroImage = page.querySelector('.product-hero-image');
-  const formula = page.querySelector('.faringosept-formula-system');
-  const formulaCards = Array.from(page.querySelectorAll('.faringosept-formula-point'));
-  if (!hero || !packshot || !heroImage) return;
-
-  const resetHero = () => {
-    packshot.style.setProperty('--faringosept-hero-float-y', '0px');
-    heroImage.style.setProperty('--faringosept-hero-shadow-opacity', '0.74');
-    heroImage.style.setProperty('--faringosept-hero-shadow-transform', 'scale3d(1, 1, 1)');
-  };
-
-  const resetFormula = () => {
-    formulaCards.forEach(card => {
-      card.style.setProperty('--faringosept-formula-card-y', '0px');
-    });
-  };
-
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) {
-    resetHero();
-    resetFormula();
-    return;
-  }
-
-  let animationFrame = 0;
-  let heroVisible = true;
-  let formulaVisible = !!formula;
-
-  const renderFrame = time => {
-    if (document.hidden || (!heroVisible && !formulaVisible)) {
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-      return;
-    }
-
-    if (heroVisible) {
-      const phase = Math.sin(time / 1380);
-      const liftProgress = (phase + 1) / 2;
-      const lift = liftProgress * -6;
-      const shadowScaleX = 1 - liftProgress * 0.05;
-      const shadowScaleY = 1 - liftProgress * 0.08;
-      const shadowOpacity = 0.74 - liftProgress * 0.1;
-
-      packshot.style.setProperty('--faringosept-hero-float-y', `${lift.toFixed(2)}px`);
-      heroImage.style.setProperty('--faringosept-hero-shadow-opacity', shadowOpacity.toFixed(3));
-      heroImage.style.setProperty('--faringosept-hero-shadow-transform', `scale3d(${shadowScaleX.toFixed(3)}, ${shadowScaleY.toFixed(3)}, 1)`);
-    } else {
-      resetHero();
-    }
-
-    if (formulaVisible) {
-      formulaCards.forEach((card, index) => {
-        const cardPhase = Math.sin(time / 1260 + index * 0.84);
-        card.style.setProperty('--faringosept-formula-card-y', `${(cardPhase * 5).toFixed(2)}px`);
-      });
-    } else {
-      resetFormula();
-    }
-
-    animationFrame = window.requestAnimationFrame(renderFrame);
-  };
-
-  const start = () => {
-    if (!animationFrame && !document.hidden && (heroVisible || formulaVisible)) {
-      animationFrame = window.requestAnimationFrame(renderFrame);
-    }
-  };
-
-  const stopIfIdle = () => {
-    if (animationFrame && (document.hidden || (!heroVisible && !formulaVisible))) {
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
-      resetHero();
-      resetFormula();
-    }
-  };
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.target === hero) heroVisible = entry.isIntersecting;
-        if (entry.target === formula) formulaVisible = entry.isIntersecting;
-      });
-      stopIfIdle();
-      start();
-    }, { threshold: 0.08 });
-
-    observer.observe(hero);
-    if (formula) observer.observe(formula);
-  }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      stopIfIdle();
-    } else {
-      start();
-    }
-  });
-
-  start();
-}
-
 // Highlight the current navigation link as its section enters the viewport
 function initScrollSpy() {
   const sections = document.querySelectorAll('section[id]');
@@ -5585,7 +5025,7 @@ function initScrollEffects() {
   if (!navBar) return;
   const backToTop = document.createElement('button');
   backToTop.id = 'backToTop';
-  backToTop.setAttribute('aria-label', currentLang === 'kz' ? 'Жоғарыға қайту' : 'Вернуться наверх');
+  backToTop.setAttribute('aria-label', currentLang === 'ru' ? 'Вернуться наверх' : 'Жоғарыға қайту');
   backToTop.innerHTML = '↑';
   backToTop.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5768,22 +5208,7 @@ function initHistoryTimelineMedia() {
 
 // Bind event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  // Determine the initial language.  If the user has previously selected
-  // a language and it is stored in localStorage, respect that choice.
-  currentCountry = STADA_DEFAULT_COUNTRY;
-  try {
-    const savedCountry = localStorage.getItem('stada-country');
-    if (savedCountry) {
-      currentCountry = normalizeCountryCode(savedCountry);
-    }
-    const savedLang = localStorage.getItem('stada-lang');
-    if (savedLang) {
-      currentLang = resolveLanguageForCountry(savedLang, currentCountry);
-    }
-  } catch (e) {
-    // Fallback to default language when localStorage is not available
-  }
-  ensureCountryToggle();
+  initializeLocaleState();
   renderLanguageOptions(currentCountry);
   // Initial language update
   updateLanguage(currentLang);
@@ -5834,10 +5259,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFemilexHeroLevitation();
   initNoshpaForteLevitation();
   initGecsikonLevitation();
-  initTerginanLevitation();
   initKlopidogrelTevaLevitation();
-  initLizobaktLevitation();
-  initFaringoseptLevitation();
   // Bind hamburger menu
   const hamburger = document.querySelector('.hamburger');
   const menu = document.querySelector('.menu');

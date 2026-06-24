@@ -1,5 +1,6 @@
 {
   "defaultCountry": "kazakhstan",
+  "contentSourcePath": "data/content-source.json",
   "countries": {
     "kazakhstan": {
       "id": "kazakhstan",
