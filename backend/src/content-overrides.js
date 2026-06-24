@@ -30,6 +30,7 @@ function normalizeBucket(bucket) {
     text: bucket?.text && typeof bucket.text === "object" ? bucket.text : {},
     domText: bucket?.domText && typeof bucket.domText === "object" ? bucket.domText : {},
     domImages: bucket?.domImages && typeof bucket.domImages === "object" ? bucket.domImages : {},
+    settings: bucket?.settings && typeof bucket.settings === "object" ? bucket.settings : {},
     updatedAt: bucket?.updatedAt || null,
   };
 }
@@ -54,6 +55,11 @@ function getPageOverrides(countryId, language, pagePath) {
       ...globalBucket.domImages,
       ...languageBucket.domImages,
     },
+    settings: {
+      ...fallbackBucket.settings,
+      ...globalBucket.settings,
+      ...languageBucket.settings,
+    },
     updatedAt: languageBucket.updatedAt || globalBucket.updatedAt || fallbackBucket.updatedAt || null,
   };
 }
@@ -65,7 +71,8 @@ function hasValues(value) {
 function pruneEmptyContainers(overrides, countryId, language, pagePath) {
   if (!hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.text)
     && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domText)
-    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domImages)) {
+    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.domImages)
+    && !hasValues(overrides.pages?.[countryId]?.[language]?.[pagePath]?.settings)) {
     delete overrides.pages[countryId][language][pagePath];
   }
 
@@ -103,9 +110,11 @@ function savePageOverrides({
   text = {},
   domText = {},
   domImages = {},
+  settings = {},
   submittedTextKeys = null,
   submittedDomTextIds = null,
   submittedDomImageIds = null,
+  submittedSettingKeys = null,
 }) {
   const overrides = readContentOverrides();
   const existing = normalizeBucket(overrides.pages?.[countryId]?.[language]?.[pagePath]);
@@ -114,8 +123,12 @@ function savePageOverrides({
   const nextDomText = submittedDomTextIds ? { ...omitKeys(existing.domText, submittedDomTextIds), ...domText } : domText;
   const nextDomImages = submittedDomImageIds
     ? { ...omitKeys(existingGlobal.domImages, submittedDomImageIds), ...domImages }
-    : domImages;
+    : existingGlobal.domImages;
   const nextLanguageDomImages = submittedDomImageIds ? omitKeys(existing.domImages, submittedDomImageIds) : domImages;
+  const nextSettings = submittedSettingKeys
+    ? { ...omitKeys(existingGlobal.settings, submittedSettingKeys), ...settings }
+    : existingGlobal.settings;
+  const nextLanguageSettings = submittedSettingKeys ? omitKeys(existing.settings, submittedSettingKeys) : settings;
 
   overrides.pages[countryId] ||= {};
   overrides.pages[countryId][language] ||= {};
@@ -123,15 +136,17 @@ function savePageOverrides({
     text: nextText,
     domText: nextDomText,
     domImages: nextLanguageDomImages,
+    settings: nextLanguageSettings,
     updatedAt: new Date().toISOString(),
   };
 
-  if (submittedDomImageIds) {
+  if (submittedDomImageIds || submittedSettingKeys) {
     overrides.pages[countryId]._all ||= {};
     overrides.pages[countryId]._all[pagePath] = {
       text: {},
       domText: {},
       domImages: nextDomImages,
+      settings: nextSettings,
       updatedAt: new Date().toISOString(),
     };
     prunePageContainer(overrides, countryId, "_all", pagePath);

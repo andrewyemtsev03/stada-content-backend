@@ -419,6 +419,9 @@ function buildEditableContent(basePayload, currentPayload) {
     requestedLanguage: currentPayload.requestedLanguage,
     page: currentPayload.page,
     overrides: getPageOverrides(currentPayload.country.id, currentPayload.language, currentPayload.page.path),
+    settings: currentPayload.content?.settings || {},
+    originalSettings: basePayload.content?.settings || {},
+    productCatalog: currentPayload.content?.productCatalog || [],
     sections: [
       ...new Map(
         [...textItems, ...domTextItems, ...domImageItems].map(item => [item.sectionId, { id: item.sectionId, label: item.sectionLabel }])
@@ -450,6 +453,21 @@ function normalizeSubmittedImageMap(value) {
   );
 }
 
+function normalizeProductIdList(value, productCatalog) {
+  const availableProductIds = new Set((productCatalog || []).map(product => product.id));
+  const ids = Array.isArray(value) ? value : String(value || "").split(",");
+  return [...new Set(
+    ids
+      .map(id => String(id || "").trim())
+      .filter(id => availableProductIds.has(id))
+  )].slice(0, 4);
+}
+
+function sameStringArray(left, right) {
+  if (left.length !== right.length) return false;
+  return left.every((value, index) => value === right[index]);
+}
+
 function sameEditableImage(left, right) {
   return editableImageFields.every(field => String(left?.[field] ?? "") === String(right?.[field] ?? ""));
 }
@@ -462,12 +480,17 @@ function buildChangedOverrides(basePayload, body) {
   const submittedText = normalizeSubmittedMap(body.text);
   const submittedDomText = normalizeSubmittedMap(body.domText);
   const submittedDomImages = normalizeSubmittedImageMap(body.domImages);
+  const submittedSettings = body.settings && typeof body.settings === "object" && !Array.isArray(body.settings)
+    ? body.settings
+    : {};
   const submittedTextKeys = Object.keys(submittedText);
   const submittedDomTextIds = Object.keys(submittedDomText);
   const submittedDomImageIds = Object.keys(submittedDomImages);
+  const submittedSettingKeys = [];
   const text = {};
   const domText = {};
   const domImages = {};
+  const settings = {};
 
   for (const [key, value] of Object.entries(submittedText)) {
     if (isHiddenEditableTextKey(key) || !Object.prototype.hasOwnProperty.call(baseText, key)) continue;
@@ -491,13 +514,25 @@ function buildChangedOverrides(basePayload, body) {
     }
   }
 
+  if (Object.prototype.hasOwnProperty.call(submittedSettings, "homeProducts")) {
+    const productCatalog = basePayload.content?.productCatalog || [];
+    const value = normalizeProductIdList(submittedSettings.homeProducts, productCatalog);
+    const baseValue = normalizeProductIdList(basePayload.content?.settings?.homeProducts || [], productCatalog);
+    submittedSettingKeys.push("homeProducts");
+    if (!sameStringArray(value, baseValue)) {
+      settings.homeProducts = value;
+    }
+  }
+
   return {
     text,
     domText,
     domImages,
+    settings,
     submittedTextKeys,
     submittedDomTextIds,
     submittedDomImageIds,
+    submittedSettingKeys: submittedSettingKeys.length ? submittedSettingKeys : null,
   };
 }
 

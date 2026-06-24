@@ -5,6 +5,7 @@ const { getPageOverrides } = require("./content-overrides");
 
 const backendRoot = path.resolve(__dirname, "..");
 const configPath = path.join(backendRoot, "data", "site-config.json");
+const defaultHomeProductIds = ["coldrex", "enterogermina", "sinulan-duo", "vitrum-immunaktiv"];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -693,6 +694,170 @@ function normalizeContentSourceImage(image, sectionId, assetsBaseUrl) {
   };
 }
 
+function normalizeHomepageRelativePath(value) {
+  return String(value || "")
+    .replace(/\\/g, "/")
+    .replace(/^(\.\/)+/, "")
+    .replace(/^(\.\.\/)+/, "");
+}
+
+function normalizeProductIdFromHref(href) {
+  return normalizeHomepageRelativePath(href)
+    .replace(/^products\//, "")
+    .replace(/\.html(?:[?#].*)?$/i, "")
+    .replace(/\/index$/i, "")
+    .trim();
+}
+
+function stripHtml(value) {
+  return normalizeText(String(value || "").replace(/<[^>]*>/g, " "));
+}
+
+function getClassList(attributes) {
+  return String(attributes.class || "").split(/\s+/).filter(Boolean);
+}
+
+function findElementByClass(html, tagName, className) {
+  const pattern = new RegExp(`<${tagName}\\b([^>]*)>([\\s\\S]*?)<\\/${tagName}>`, "gi");
+  let match;
+  while ((match = pattern.exec(html)) !== null) {
+    const attributes = parseAttributes(match[1]);
+    if (getClassList(attributes).includes(className)) {
+      return {
+        attributes,
+        html: match[0],
+        innerHtml: match[2],
+        text: stripHtml(match[2]),
+      };
+    }
+  }
+  return null;
+}
+
+function findImage(html) {
+  const match = html.match(/<img\b([^>]*)>/i);
+  return match ? parseAttributes(match[1]) : {};
+}
+
+function resolveCatalogText({ key, text }, translations, productFallbackTools, language, fallbackLanguage) {
+  if (key) {
+    const translated = resolveTranslation(translations, productFallbackTools, language, fallbackLanguage, key);
+    if (translated.value) return translated.value;
+  }
+  return text || "";
+}
+
+function extractCardAccent(style) {
+  const match = String(style || "").match(/--card-accent\s*:\s*([^;]+)/i);
+  return match ? match[1].trim() : "";
+}
+
+function categoryTokenToClass(category) {
+  const firstCategory = String(category || "").split(/\s+/).filter(Boolean)[0] || "products";
+  return firstCategory.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
+}
+
+function loadProductCatalog({ homepageConfig, translations, productFallbackTools, language, fallbackLanguage, assetsBaseUrl }) {
+  const homepagePath = resolveBackendPath(homepageConfig.htmlPath);
+  const catalogPath = path.join(path.dirname(homepagePath), "products", "index.html");
+  if (!fs.existsSync(catalogPath)) return [];
+
+  const html = fs.readFileSync(catalogPath, "utf8");
+  const cards = [];
+  const cardPattern = /<a\b([^>]*)\bdata-product-card\b([^>]*)>([\s\S]*?)<\/a>/gi;
+  let match;
+
+  while ((match = cardPattern.exec(html)) !== null) {
+    const attributes = parseAttributes(`${match[1]} ${match[2]}`);
+    const id = normalizeProductIdFromHref(attributes.href);
+    if (!id || id === "index") continue;
+
+    const body = match[3];
+    const image = findImage(body);
+    const category = findElementByClass(body, "span", "catalog-card__category");
+    const name = body.match(/<h3\b([^>]*)>([\s\S]*?)<\/h3>/i);
+    const nameAttributes = name ? parseAttributes(name[1]) : {};
+    const imageSrc = normalizeHomepageRelativePath(image["data-backend-src"] || image.src || "");
+    const href = `products/${normalizeProductIdFromHref(attributes.href)}.html`;
+    const categoryKey = category?.attributes?.["data-i18n-key"] || "";
+    const nameKey = nameAttributes["data-i18n-key"] || "";
+
+    cards.push({
+      id,
+      href,
+      className: getClassList(attributes).filter(value => value !== "catalog-card").join(" "),
+      category: String(attributes["data-category"] || ""),
+      categoryClass: categoryTokenToClass(attributes["data-category"]),
+      accent: extractCardAccent(attributes.style),
+      image: {
+        id: String(image["data-backend-image-id"] || ""),
+        src: imageSrc,
+        url: makeAssetUrl(imageSrc, assetsBaseUrl),
+        alt: String(image.alt || ""),
+      },
+      nameKey,
+      name: resolveCatalogText(
+        { key: nameKey, text: name ? stripHtml(name[2]) : "" },
+        translations,
+        productFallbackTools,
+        language,
+        fallbackLanguage
+      ),
+      categoryKey,
+      therapeuticArea: resolveCatalogText(
+        { key: categoryKey, text: category?.text || "" },
+        translations,
+        productFallbackTools,
+        language,
+        fallbackLanguage
+      ),
+    });
+  }
+
+  return cards;
+}
+
+function normalizeProductIds(value) {
+  const ids = Array.isArray(value) ? value : String(value || "").split(",");
+  return unique(ids.map(item => String(item || "").trim()).filter(Boolean));
+}
+
+function syncHomeProducts(payload) {
+  const catalog = payload.content?.productCatalog || [];
+  const catalogById = new Map(catalog.map(product => [product.id, product]));
+  const requestedIds = normalizeProductIds(payload.content?.settings?.homeProducts);
+  const selectedIds = [
+    ...requestedIds.filter(id => catalogById.has(id)),
+    ...defaultHomeProductIds.filter(id => catalogById.has(id) && !requestedIds.includes(id)),
+  ].slice(0, 4);
+
+  payload.content.settings ||= {};
+  payload.content.settings.homeProducts = selectedIds;
+  payload.content.homeProducts = selectedIds.map(id => catalogById.get(id)).filter(Boolean);
+}
+
+function attachProductCatalog(payload, countryConfig, homepageConfig) {
+  const translationScriptPath = resolveBackendPath(homepageConfig.translationScriptPath);
+  if (!fs.existsSync(translationScriptPath)) {
+    payload.content.productCatalog = [];
+    syncHomeProducts(payload);
+    return;
+  }
+
+  const translations = loadTranslations(translationScriptPath);
+  const productFallbackTools = loadProductFallbackTools(translationScriptPath);
+  const fallbackLanguage = countryConfig.defaultLanguage || payload.language;
+  payload.content.productCatalog = loadProductCatalog({
+    homepageConfig,
+    translations,
+    productFallbackTools,
+    language: payload.language,
+    fallbackLanguage,
+    assetsBaseUrl: homepageConfig.assetsBaseUrl,
+  });
+  syncHomeProducts(payload);
+}
+
 function buildContentSourcePayload({
   countryConfig,
   pagePath,
@@ -759,6 +924,10 @@ function buildContentSourcePayload({
         })),
         images: (pageSource.images || []).map(image => normalizeContentSourceImage(image, "", assetsBaseUrl)),
       },
+      settings: {
+        ...(pageSource.settings && typeof pageSource.settings === "object" ? pageSource.settings : {}),
+        homeProducts: normalizeProductIds(pageSource.settings?.homeProducts || defaultHomeProductIds),
+      },
       sections,
     },
   };
@@ -769,6 +938,7 @@ function applyContentOverrides(payload, countryId, language, pagePath, assetsBas
   const textOverrides = overrides.text || {};
   const domTextOverrides = overrides.domText || {};
   const domImageOverrides = overrides.domImages || {};
+  const settingsOverrides = overrides.settings || {};
 
   for (const [key, value] of Object.entries(textOverrides)) {
     if (typeof value === "string") {
@@ -825,11 +995,18 @@ function applyContentOverrides(payload, countryId, language, pagePath, assetsBas
     payload.content.pageTitle = overriddenTitle.value;
   }
 
+  payload.content.settings = {
+    ...(payload.content.settings || {}),
+    ...settingsOverrides,
+  };
+  syncHomeProducts(payload);
+
   payload.content.overrides = {
     updatedAt: overrides.updatedAt,
     textKeys: Object.keys(textOverrides),
     domTextIds: Object.keys(domTextOverrides),
     domImageIds: Object.keys(domImageOverrides),
+    settingKeys: Object.keys(settingsOverrides),
   };
 }
 
@@ -850,6 +1027,7 @@ function getPagePayload(options = {}) {
       languageInput: options.lang || options.language,
       assetsBaseUrl: homepageConfig.assetsBaseUrl,
     });
+    attachProductCatalog(payload, countryConfig, homepageConfig);
 
     if (options.applyOverrides !== false) {
       applyContentOverrides(

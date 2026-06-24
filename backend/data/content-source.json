@@ -99,7 +99,7 @@
                                                                                      "hero_products_description"
                                                                                  ],
                                                           "imageIds":  [
-
+                                                                           "index_image_016"
                                                                        ]
                                                       }
                                                   ],
@@ -365,6 +365,14 @@
                                                         "id":  "index_image_015",
                                                         "src":  "assets/products/awards/top-employer-europe-2025.png",
                                                         "alt":  "Top Employer Europe 2025",
+                                                        "loading":  "",
+                                                        "srcset":  "",
+                                                        "sizes":  ""
+                                                    },
+                                                    {
+                                                        "id":  "index_image_016",
+                                                        "src":  "assets/products/podium.png",
+                                                        "alt":  "STADA products display",
                                                         "loading":  "",
                                                         "srcset":  "",
                                                         "sizes":  ""

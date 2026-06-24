@@ -3406,6 +3406,37 @@ function applyImagesFromBackendPayload(payload) {
   });
 }
 
+function renderHomeProductPreview(payload) {
+  const grid = document.querySelector('[data-home-products-grid]');
+  const products = payload?.content?.homeProducts || [];
+  if (!grid || !products.length) return;
+
+  grid.innerHTML = '';
+  products.slice(0, 4).forEach(product => {
+    const card = document.createElement('a');
+    const categoryClass = product.categoryClass ? ` product-preview-card--${product.categoryClass}` : '';
+    card.className = `product-preview-card${categoryClass}`;
+    card.href = product.href || `products/${product.id}.html`;
+    if (product.accent) card.style.setProperty('--product-accent', product.accent);
+
+    const category = document.createElement('span');
+    category.className = 'product-preview-card__category';
+    category.textContent = product.therapeuticArea || product.category || '';
+
+    const image = document.createElement('img');
+    image.src = product.image?.src || product.image?.url || '';
+    image.alt = product.image?.alt || product.name || product.id || '';
+    image.loading = 'lazy';
+
+    const name = document.createElement('span');
+    name.className = 'product-preview-card__name';
+    name.textContent = product.name || product.id || '';
+
+    card.append(category, image, name);
+    grid.appendChild(card);
+  });
+}
+
 function showBackendRequiredMessage(error) {
   backendPagePayload = null;
   delete backendPageCache[`${currentCountry}:${currentLang}:${getCurrentBackendPagePath()}`];
@@ -3452,6 +3483,7 @@ async function updateBackendDrivenPage(lang) {
   applyStaticI18n(lang);
   applyTextFromBackendPayload(payload);
   applyImagesFromBackendPayload(payload);
+  renderHomeProductPreview(payload);
   document.body.classList.remove('backend-content-pending');
 
   updateDocumentTitle(lang);
