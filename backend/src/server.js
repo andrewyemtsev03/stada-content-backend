@@ -560,7 +560,37 @@ function normalizeProductImages(value) {
     const cloudinaryPublicId = String(image.cloudinaryPublicId || "").trim() || null;
     normalized[slot] = { src, cloudinaryPublicId, alt };
   }
-  return normalized;
+  return syncProductImageSlots(normalized);
+}
+
+function isCloudinaryImageSource(src) {
+  return /^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//i.test(String(src || ""));
+}
+
+function getCanonicalProductImageFromSlots(images = {}) {
+  const candidates = [
+    images.card,
+    images.detailHero,
+    images.hero,
+    ...Object.values(images),
+  ].filter(image => image?.src);
+  return candidates.find(image => isCloudinaryImageSource(image.src)) || candidates[0] || {};
+}
+
+function syncProductImageSlots(images = {}) {
+  const canonicalImage = getCanonicalProductImageFromSlots(images);
+  if (!canonicalImage.src) return images;
+
+  const slotNames = new Set([...Object.keys(images), "card", "detailHero", "hero"]);
+  const synced = {};
+  for (const slot of slotNames) {
+    synced[slot] = {
+      src: canonicalImage.src || "",
+      cloudinaryPublicId: canonicalImage.cloudinaryPublicId || null,
+      alt: canonicalImage.alt || images[slot]?.alt || "",
+    };
+  }
+  return synced;
 }
 
 function normalizeProductPayload(body, routeId = "") {
@@ -598,7 +628,7 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
     || product.translations?.ru
     || product.translations?.kz
     || {};
-  const cardImage = product.images?.card || {};
+  const cardImage = getCanonicalProductImageFromSlots(product.images || {});
   const category = product.therapeuticAreaId || "";
   const therapeuticArea = areaLabels.get(category) || category;
 
@@ -843,7 +873,7 @@ function applyDatabaseProductDetailToPayload(payload, products) {
     }
   }
 
-  setPayloadDomImageValue(payload, `products_${domBase}_image_002`, product.images?.detailHero || product.images?.hero);
+  setPayloadDomImageValue(payload, `products_${domBase}_image_002`, getCanonicalProductImageFromSlots(product.images || {}));
 }
 
 function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
@@ -1021,6 +1051,7 @@ function applyStaticProductDetailFallbacks(products, country) {
       }
     }
 
+    nextProduct.images = syncProductImageSlots(nextProduct.images);
     return nextProduct;
   });
 }
@@ -1060,6 +1091,7 @@ function applyStaticProductFallbacks(products, country, options = {}) {
       };
     }
 
+    nextProduct.images = syncProductImageSlots(nextProduct.images);
     return nextProduct;
   });
   return options.includeDetailFallbacks
