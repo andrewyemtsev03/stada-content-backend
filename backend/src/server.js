@@ -7,7 +7,7 @@ const { getHomepagePayload, getPagePayload, listCountries } = require("./content
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
 const { importProductsFromSite } = require("./products/import-from-site");
-const { deleteProduct, getProduct, listProducts, upsertProduct } = require("./products/repository");
+const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertProduct } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
@@ -744,6 +744,7 @@ async function handleRequest(request, response) {
       requireAdmin(request);
       sendJson(response, 200, {
         products: await listProducts(),
+        therapeuticAreas: await listTherapeuticAreas(),
       });
       return;
     }

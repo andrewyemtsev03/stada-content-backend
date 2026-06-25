@@ -70,6 +70,38 @@ async function listProducts() {
   return mapProductRows(result.rows);
 }
 
+async function listTherapeuticAreas() {
+  const result = await query(`
+    select
+      ta.id,
+      ta.sort_order,
+      tat.language,
+      tat.name
+    from therapeutic_areas ta
+    left join therapeutic_area_translations tat on tat.area_id = ta.id
+    order by ta.sort_order, ta.id, tat.language
+  `);
+  const areasById = new Map();
+
+  for (const row of result.rows) {
+    if (!areasById.has(row.id)) {
+      areasById.set(row.id, {
+        id: row.id,
+        sortOrder: row.sort_order,
+        translations: {},
+      });
+    }
+
+    if (row.language) {
+      areasById.get(row.id).translations[row.language] = {
+        name: row.name,
+      };
+    }
+  }
+
+  return [...areasById.values()];
+}
+
 async function getProduct(slugOrId) {
   const result = await query(`
     select
@@ -252,6 +284,7 @@ async function upsertTherapeuticArea(area) {
 module.exports = {
   deleteProduct,
   getProduct,
+  listTherapeuticAreas,
   listProducts,
   upsertProduct,
   upsertTherapeuticArea,
