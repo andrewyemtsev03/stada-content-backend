@@ -647,6 +647,28 @@ function syncPayloadHomeProducts(payload) {
     .filter(Boolean);
 }
 
+function setPayloadDomText(payload, ids, value) {
+  const domText = payload.content?.dom?.text;
+  if (!Array.isArray(domText)) return;
+  const textValue = String(value ?? "");
+  const idSet = new Set(ids);
+
+  payload.content.dom.text = domText.map(item => {
+    if (!idSet.has(item.id)) return item;
+    return {
+      ...item,
+      value: textValue,
+      source: "database",
+    };
+  });
+}
+
+function syncPayloadProductMetrics(payload) {
+  const productCount = (payload.content?.productCatalog || []).length;
+  if (!productCount) return;
+  setPayloadDomText(payload, ["index_text_026", "products_index_text_002"], productCount);
+}
+
 function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
   if (!payload?.content) return payload;
 
@@ -667,6 +689,7 @@ function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
     ...databaseProducts.filter(product => !staticIds.has(product.id)),
   ];
   syncPayloadHomeProducts(payload);
+  syncPayloadProductMetrics(payload);
   return payload;
 }
 
