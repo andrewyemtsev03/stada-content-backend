@@ -1025,7 +1025,7 @@ function applyStaticProductDetailFallbacks(products, country) {
   });
 }
 
-function applyStaticProductFallbacks(products, country) {
+function applyStaticProductFallbacks(products, country, options = {}) {
   const fallbacks = staticCatalogFallbacksByLanguage(country);
   const catalogProducts = (products || []).map(product => {
     const nextProduct = {
@@ -1062,7 +1062,9 @@ function applyStaticProductFallbacks(products, country) {
 
     return nextProduct;
   });
-  return applyStaticProductDetailFallbacks(catalogProducts, country);
+  return options.includeDetailFallbacks
+    ? applyStaticProductDetailFallbacks(catalogProducts, country)
+    : catalogProducts;
 }
 
 async function attachDatabaseProductsToPayload(payload) {
@@ -1322,7 +1324,7 @@ async function handleRequest(request, response) {
       }
       const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId");
       sendJson(response, 200, {
-        product: applyStaticProductFallbacks([product], country)[0],
+        product: applyStaticProductFallbacks([product], country, { includeDetailFallbacks: true })[0],
       });
       return;
     }
