@@ -3451,6 +3451,17 @@ function normalizeProductCardId(value) {
     .trim();
 }
 
+function resolveProductCardHref(href) {
+  const value = String(href || '').trim();
+  if (!value || /^(?:https?:)?\/\//i.test(value) || value.startsWith('#')) return value;
+
+  const normalized = value.replace(/\\/g, '/').replace(/^(\.\/)+/, '');
+  if (getCurrentBackendPagePath().startsWith('products/') && normalized.startsWith('products/')) {
+    return normalized.replace(/^products\//, '');
+  }
+  return normalized;
+}
+
 function applyProductCatalogCards(payload) {
   const products = payload?.content?.productCatalog || [];
   if (!products.length) return;
@@ -3461,7 +3472,7 @@ function applyProductCatalogCards(payload) {
     const product = productsById.get(cardId);
     if (!product) return;
 
-    if (product.href) card.setAttribute('href', product.href);
+    if (product.href) card.setAttribute('href', resolveProductCardHref(product.href));
     if (product.category) card.dataset.category = product.category;
     if (product.accent) card.style.setProperty('--card-accent', product.accent);
 
