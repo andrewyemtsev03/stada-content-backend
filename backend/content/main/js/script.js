@@ -3439,6 +3439,57 @@ function renderHomeProductPreview(payload) {
   });
 }
 
+function normalizeProductCardId(value) {
+  return String(value || '')
+    .split(/[?#]/)[0]
+    .replace(/\\/g, '/')
+    .replace(/^(\.\/)+/, '')
+    .replace(/^(\.\.\/)+/, '')
+    .replace(/^products\//, '')
+    .replace(/\.html$/i, '')
+    .replace(/\/index$/i, '')
+    .trim();
+}
+
+function applyProductCatalogCards(payload) {
+  const products = payload?.content?.productCatalog || [];
+  if (!products.length) return;
+
+  const productsById = new Map(products.map(product => [product.id, product]));
+  document.querySelectorAll('[data-product-card]').forEach(card => {
+    const cardId = normalizeProductCardId(card.getAttribute('href'));
+    const product = productsById.get(cardId);
+    if (!product) return;
+
+    if (product.href) card.setAttribute('href', product.href);
+    if (product.category) card.dataset.category = product.category;
+    if (product.accent) card.style.setProperty('--card-accent', product.accent);
+
+    const image = card.querySelector('.catalog-card__media img, img');
+    const imageSrc = product.image?.url || product.image?.src || '';
+    if (image && imageSrc) {
+      image.src = withRuntimeImageRefresh(imageSrc);
+      image.alt = product.image?.alt || product.name || product.id || '';
+      image.dataset.backendImageApplied = 'true';
+    }
+
+    const category = card.querySelector('.catalog-card__category');
+    if (category && product.therapeuticArea) {
+      category.textContent = product.therapeuticArea;
+    }
+
+    const title = card.querySelector('.catalog-card__body h3, h3');
+    if (title && product.name) {
+      title.textContent = product.name;
+    }
+
+    const description = card.querySelector('.catalog-card__body p, p');
+    if (description && product.shortDescription) {
+      description.textContent = product.shortDescription;
+    }
+  });
+}
+
 function showBackendRequiredMessage(error) {
   backendPagePayload = null;
   delete backendPageCache[`${currentCountry}:${currentLang}:${getCurrentBackendPagePath()}`];
@@ -3485,6 +3536,7 @@ async function updateBackendDrivenPage(lang) {
   applyStaticI18n(lang);
   applyTextFromBackendPayload(payload);
   applyImagesFromBackendPayload(payload);
+  applyProductCatalogCards(payload);
   renderHomeProductPreview(payload);
   document.body.classList.remove('backend-content-pending');
 

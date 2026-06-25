@@ -24,6 +24,7 @@ const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const cloudinaryApiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
 const cloudinaryUploadFolder = String(process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero").trim();
+const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -194,6 +195,14 @@ function makeStableCloudinaryPublicId({ country, page, imageId }) {
   return [countryPart, pagePart, slot].filter(Boolean).join("/");
 }
 
+function makeStableProductCloudinaryPublicId({ productId, slot, imageId }) {
+  const productPart = sanitizeCloudinaryPathPart(productId);
+  if (!productPart) return "";
+
+  const slotPart = sanitizeCloudinaryPathPart(slot || imageId, "card");
+  return [productPart, slotPart].filter(Boolean).join("/");
+}
+
 function makeStableCloudinaryDeliveryUrl(publicId, format) {
   if (!publicId || !format) return "";
   return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${publicId}.${format}`;
@@ -214,7 +223,7 @@ function makeCloudinarySignature(params) {
   return crypto.createHash("sha1").update(`${payload}${cloudinaryApiSecret}`).digest("hex");
 }
 
-async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page, preferredFormat }) {
+async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page, preferredFormat, context, productId, slot }) {
   assertCloudinaryConfigured();
 
   if (!/^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i.test(String(dataUrl || ""))) {
@@ -225,10 +234,14 @@ async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, pa
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
-  const stablePublicId = makeStableCloudinaryPublicId({ country, page, imageId });
+  const isProductImage = String(context || "").trim().toLowerCase() === "product";
+  const stablePublicId = isProductImage
+    ? makeStableProductCloudinaryPublicId({ productId, slot, imageId })
+    : makeStableCloudinaryPublicId({ country, page, imageId });
   const publicId = stablePublicId || `${sanitizePublicId(fileName)}-${timestamp}`;
+  const folder = isProductImage ? cloudinaryProductUploadFolder : cloudinaryUploadFolder;
   const signedParams = {
-    folder: cloudinaryUploadFolder,
+    folder,
     public_id: publicId,
     timestamp,
     overwrite: "true",
@@ -551,16 +564,18 @@ function normalizeProductPayload(body, routeId = "") {
   };
 }
 
-function contentProductFromDatabaseProduct(product, language = "ru") {
+function contentProductFromDatabaseProduct(product, language = "ru", areaLabels = new Map()) {
   const translation = product.translations?.[language]
     || product.translations?.ru
     || product.translations?.kz
     || {};
   const cardImage = product.images?.card || {};
   const category = product.therapeuticAreaId || "";
+  const therapeuticArea = areaLabels.get(category) || category;
 
   return {
     id: product.id,
+    slug: product.slug || product.id,
     href: product.pagePath || `products/${product.slug || product.id}.html`,
     category,
     categoryClass: category,
@@ -572,8 +587,178 @@ function contentProductFromDatabaseProduct(product, language = "ru") {
       alt: cardImage.alt || translation.name || product.id,
     },
     name: translation.name || product.id,
-    therapeuticArea: category,
+    shortDescription: translation.shortDescription || "",
+    therapeuticArea,
   };
+}
+
+function buildTherapeuticAreaLabelMap(areas, language = "ru") {
+  return new Map((areas || []).map(area => {
+    const translation = area.translations?.[language]
+      || area.translations?.ru
+      || area.translations?.kz
+      || {};
+    return [area.id, translation.name || area.id];
+  }));
+}
+
+function mergeContentProduct(staticProduct, databaseProduct) {
+  return {
+    ...staticProduct,
+    ...databaseProduct,
+    className: staticProduct.className || databaseProduct.className || "",
+    categoryClass: databaseProduct.categoryClass || staticProduct.categoryClass || "",
+    image: {
+      ...(staticProduct.image || {}),
+      ...(databaseProduct.image || {}),
+      id: databaseProduct.image?.id || staticProduct.image?.id || "",
+      src: databaseProduct.image?.src || staticProduct.image?.src || "",
+      url: databaseProduct.image?.url || databaseProduct.image?.src || staticProduct.image?.url || "",
+      alt: databaseProduct.image?.alt || staticProduct.image?.alt || databaseProduct.name || staticProduct.name || "",
+    },
+    name: databaseProduct.name || staticProduct.name || databaseProduct.id || staticProduct.id,
+    shortDescription: databaseProduct.shortDescription || staticProduct.shortDescription || "",
+    therapeuticArea: databaseProduct.therapeuticArea || staticProduct.therapeuticArea || "",
+  };
+}
+
+function normalizePayloadProductIds(value, productCatalog) {
+  const availableProductIds = new Set((productCatalog || []).map(product => product.id));
+  const ids = Array.isArray(value) ? value : String(value || "").split(",");
+  return [...new Set(
+    ids
+      .map(id => String(id || "").trim())
+      .filter(id => availableProductIds.has(id))
+  )];
+}
+
+function syncPayloadHomeProducts(payload) {
+  const catalog = payload.content?.productCatalog || [];
+  payload.content.settings ||= {};
+  const selectedIds = normalizePayloadProductIds(payload.content.settings.homeProducts, catalog);
+  const fallbackIds = catalog.map(product => product.id).filter(Boolean);
+  payload.content.settings.homeProducts = [
+    ...selectedIds,
+    ...fallbackIds.filter(id => !selectedIds.includes(id)),
+  ].slice(0, 4);
+  const catalogById = new Map(catalog.map(product => [product.id, product]));
+  payload.content.homeProducts = payload.content.settings.homeProducts
+    .map(id => catalogById.get(id))
+    .filter(Boolean);
+}
+
+function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
+  if (!payload?.content) return payload;
+
+  const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, payload.language);
+  const databaseProducts = (products || [])
+    .filter(product => product.status !== "archived")
+    .map(product => contentProductFromDatabaseProduct(product, payload.language, areaLabels));
+  if (!databaseProducts.length) return payload;
+
+  const databaseProductsById = new Map(databaseProducts.map(product => [product.id, product]));
+  const staticCatalog = payload.content.productCatalog || [];
+  const staticIds = new Set(staticCatalog.map(product => product.id));
+  payload.content.productCatalog = [
+    ...staticCatalog.map(product => {
+      const databaseProduct = databaseProductsById.get(product.id);
+      return databaseProduct ? mergeContentProduct(product, databaseProduct) : product;
+    }),
+    ...databaseProducts.filter(product => !staticIds.has(product.id)),
+  ];
+  syncPayloadHomeProducts(payload);
+  return payload;
+}
+
+function isAbsoluteImageSource(src) {
+  return /^(?:https?:)?\/\//i.test(String(src || "")) || /^data:/i.test(String(src || ""));
+}
+
+function staticCatalogFallbacksByLanguage(country) {
+  const languages = ["ru", "kz"];
+  const fallbacks = {};
+
+  for (const language of languages) {
+    try {
+      const payload = getPagePayload({
+        country,
+        lang: language,
+        page: adminEditablePagePath,
+        applyOverrides: false,
+      });
+      fallbacks[language] = new Map(
+        (payload.content?.productCatalog || []).map(product => [product.id, product])
+      );
+    } catch (error) {
+      fallbacks[language] = new Map();
+    }
+  }
+
+  return fallbacks;
+}
+
+function applyStaticProductFallbacks(products, country) {
+  const fallbacks = staticCatalogFallbacksByLanguage(country);
+  return (products || []).map(product => {
+    const nextProduct = {
+      ...product,
+      translations: { ...(product.translations || {}) },
+      images: { ...(product.images || {}) },
+    };
+
+    for (const language of Object.keys(fallbacks)) {
+      const fallback = fallbacks[language].get(product.id);
+      if (!fallback) continue;
+
+      const currentTranslation = nextProduct.translations[language] || {};
+      nextProduct.translations[language] = {
+        ...currentTranslation,
+        name: currentTranslation.name || fallback.name || product.id,
+        shortDescription: currentTranslation.shortDescription || fallback.shortDescription || "",
+      };
+    }
+
+    const ruFallback = fallbacks.ru.get(product.id);
+    const cardImage = nextProduct.images.card || {};
+    if (ruFallback?.image && (!cardImage.src || !isAbsoluteImageSource(cardImage.src))) {
+      nextProduct.images.card = {
+        ...cardImage,
+        src: ruFallback.image.url || ruFallback.image.src || cardImage.src || "",
+        alt: cardImage.alt || ruFallback.image.alt || ruFallback.name || product.id,
+      };
+    }
+
+    return nextProduct;
+  });
+}
+
+async function attachDatabaseProductsToPayload(payload) {
+  try {
+    const [products, therapeuticAreas] = await Promise.all([
+      listProducts(),
+      listTherapeuticAreas(),
+    ]);
+    applyDatabaseProductsToPayload(payload, products, therapeuticAreas);
+  } catch (error) {
+    if (error.code !== "DATABASE_URL_MISSING") throw error;
+  }
+  return payload;
+}
+
+async function attachEditableProductCatalog(editable) {
+  try {
+    const [products, therapeuticAreas] = await Promise.all([
+      listProducts(),
+      listTherapeuticAreas(),
+    ]);
+    const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, editable.language);
+    editable.productCatalog = applyStaticProductFallbacks(products, editable.country?.id)
+      .filter(product => product.status !== "archived")
+      .map(product => contentProductFromDatabaseProduct(product, editable.language, areaLabels));
+  } catch (error) {
+    if (error.code !== "DATABASE_URL_MISSING") throw error;
+  }
+  return editable;
 }
 
 function sameStringArray(left, right) {
@@ -723,15 +908,7 @@ async function handleRequest(request, response) {
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
       const currentPayload = getPagePayload({ country, lang: basePayload.language, page: basePayload.page.path });
       const editable = buildEditableContent(basePayload, currentPayload);
-
-      try {
-        const products = await listProducts();
-        editable.productCatalog = products
-          .filter(product => product.status !== "archived")
-          .map(product => contentProductFromDatabaseProduct(product, editable.language));
-      } catch (error) {
-        if (error.code !== "DATABASE_URL_MISSING") throw error;
-      }
+      await attachEditableProductCatalog(editable);
 
       sendJson(response, 200, {
         countries: listCountries(),
@@ -742,8 +919,9 @@ async function handleRequest(request, response) {
 
     if (request.method === "GET" && pathname === "/api/admin/products") {
       requireAdmin(request);
+      const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId");
       sendJson(response, 200, {
-        products: await listProducts(),
+        products: applyStaticProductFallbacks(await listProducts(), country),
         therapeuticAreas: await listTherapeuticAreas(),
       });
       return;
@@ -809,7 +987,10 @@ async function handleRequest(request, response) {
         });
         return;
       }
-      sendJson(response, 200, { product });
+      const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId");
+      sendJson(response, 200, {
+        product: applyStaticProductFallbacks([product], country)[0],
+      });
       return;
     }
 
@@ -823,6 +1004,9 @@ async function handleRequest(request, response) {
         country: body.country || body.countryId,
         page: body.page,
         preferredFormat: body.preferredFormat,
+        context: body.context,
+        productId: body.productId,
+        slot: body.slot,
       });
 
       sendJson(response, 200, {
@@ -858,7 +1042,7 @@ async function handleRequest(request, response) {
       sendJson(response, 200, {
         status: "saved",
         overrides: savedOverrides,
-        editable: buildEditableContent(basePayload, currentPayload),
+        editable: await attachEditableProductCatalog(buildEditableContent(basePayload, currentPayload)),
       });
       return;
     }
@@ -873,7 +1057,7 @@ async function handleRequest(request, response) {
         country: routeCountryFromHomepagePath(pathname) || requestUrl.searchParams.get("country"),
         lang: requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language"),
       });
-      sendJson(response, 200, payload);
+      sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
 
@@ -883,7 +1067,7 @@ async function handleRequest(request, response) {
         lang: requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language"),
         page: requestUrl.searchParams.get("page") || requestUrl.searchParams.get("path"),
       });
-      sendJson(response, 200, payload);
+      sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
 
@@ -893,7 +1077,7 @@ async function handleRequest(request, response) {
         country: body.country || body.countryId,
         lang: body.lang || body.language,
       });
-      sendJson(response, 200, payload);
+      sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
 
@@ -904,7 +1088,7 @@ async function handleRequest(request, response) {
         lang: body.lang || body.language,
         page: body.page || body.path,
       });
-      sendJson(response, 200, payload);
+      sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
 

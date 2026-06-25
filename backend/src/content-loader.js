@@ -776,11 +776,14 @@ function loadProductCatalog({ homepageConfig, translations, productFallbackTools
     const image = findImage(body);
     const category = findElementByClass(body, "span", "catalog-card__category");
     const name = body.match(/<h3\b([^>]*)>([\s\S]*?)<\/h3>/i);
+    const description = body.match(/<p\b([^>]*)>([\s\S]*?)<\/p>/i);
     const nameAttributes = name ? parseAttributes(name[1]) : {};
+    const descriptionAttributes = description ? parseAttributes(description[1]) : {};
     const imageSrc = normalizeHomepageRelativePath(image["data-backend-src"] || image.src || "");
     const href = `products/${normalizeProductIdFromHref(attributes.href)}.html`;
     const categoryKey = category?.attributes?.["data-i18n-key"] || "";
     const nameKey = nameAttributes["data-i18n-key"] || "";
+    const descriptionKey = descriptionAttributes["data-i18n-key"] || "";
 
     cards.push({
       id,
@@ -798,6 +801,14 @@ function loadProductCatalog({ homepageConfig, translations, productFallbackTools
       nameKey,
       name: resolveCatalogText(
         { key: nameKey, text: name ? stripHtml(name[2]) : "" },
+        translations,
+        productFallbackTools,
+        language,
+        fallbackLanguage
+      ),
+      descriptionKey,
+      shortDescription: resolveCatalogText(
+        { key: descriptionKey, text: description ? stripHtml(description[2]) : "" },
         translations,
         productFallbackTools,
         language,

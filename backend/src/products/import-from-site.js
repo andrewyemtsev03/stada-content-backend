@@ -15,11 +15,16 @@ function productMapById(products) {
   return new Map((products || []).map(product => [product.id, product]));
 }
 
+function cloudinaryPublicIdFromUrl(value) {
+  const match = String(value || "").match(/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?:v\d+\/)?(.+)\.[a-z0-9]+(?:[?#].*)?$/i);
+  return match ? match[1] : null;
+}
+
 function makeTranslation(product) {
   if (!product) return null;
   return {
     name: product.name || product.id,
-    shortDescription: "",
+    shortDescription: product.shortDescription || "",
     benefits: [],
   };
 }
@@ -83,9 +88,9 @@ async function importProductsFromSite() {
       },
       images: {
         card: {
-          src: product.image?.src || product.image?.url || "",
+          src: product.image?.url || product.image?.src || "",
           alt: product.image?.alt || product.name || product.id,
-          cloudinaryPublicId: product.image?.id || null,
+          cloudinaryPublicId: cloudinaryPublicIdFromUrl(product.image?.url || product.image?.src),
         },
       },
     });
