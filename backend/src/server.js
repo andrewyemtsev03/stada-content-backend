@@ -898,13 +898,144 @@ function staticCatalogFallbacksByLanguage(country) {
   return fallbacks;
 }
 
-function applyStaticProductFallbacks(products, country) {
-  const fallbacks = staticCatalogFallbacksByLanguage(country);
+function getPayloadDomTextValue(payload, id) {
+  return (payload.content?.dom?.text || []).find(item => item.id === id)?.value || "";
+}
+
+function getPayloadDomImageValue(payload, id) {
+  return (payload.content?.dom?.images || []).find(item => item.id === id) || null;
+}
+
+function getProductDetailFallbackFromPayload(payload) {
+  const keyPrefix = findProductDetailKeyPrefix(payload);
+  const domBase = productDomBaseFromPagePath(payload.page?.path);
+  const text = payload.content?.text || {};
+
+  if (keyPrefix) {
+    const benefitKeys = Object.keys(text)
+      .filter(key => key.startsWith(`${keyPrefix}_benefit`))
+      .sort((left, right) => Number(left.match(/(\d+)$/)?.[1] || 0) - Number(right.match(/(\d+)$/)?.[1] || 0));
+    return {
+      translation: {
+        name: text[`${keyPrefix}_page_title`] || text[`${keyPrefix}_name`] || "",
+        fullDescription: text[`${keyPrefix}_page_desc`] || "",
+        composition: text[`${keyPrefix}_formula_intro`] || "",
+        usageText: text[`${keyPrefix}_note_text`] || "",
+        benefits: benefitKeys.map(key => text[key]).filter(Boolean),
+      },
+      sections: {
+        hero: { lead: text[`${keyPrefix}_page_desc`] || "" },
+        overview: { intro: text[`${keyPrefix}_overview_intro`] || "" },
+        formula: { intro: text[`${keyPrefix}_formula_intro`] || "" },
+        usage: { heading: text[`${keyPrefix}_usage_heading`] || "" },
+        note: { text: text[`${keyPrefix}_note_text`] || "" },
+        buy: { intro: text[`${keyPrefix}_buy_intro`] || "" },
+      },
+      detailHeroImage: getPayloadDomImageValue(payload, `products_${domBase}_image_002`),
+    };
+  }
+
+  return {
+    translation: {
+      name: getPayloadDomTextValue(payload, `products_${domBase}_text_003`),
+      fullDescription: getPayloadDomTextValue(payload, `products_${domBase}_text_004`),
+      composition: getPayloadDomTextValue(payload, `products_${domBase}_text_036`),
+      usageText: getPayloadDomTextValue(payload, `products_${domBase}_text_055`),
+      benefits: [29, 30, 31, 32, 33]
+        .map(number => getPayloadDomTextValue(payload, `products_${domBase}_text_${String(number).padStart(3, "0")}`))
+        .filter(Boolean),
+    },
+    sections: {
+      hero: { lead: getPayloadDomTextValue(payload, `products_${domBase}_text_004`) },
+      overview: { intro: getPayloadDomTextValue(payload, `products_${domBase}_text_016`) },
+      formula: { intro: getPayloadDomTextValue(payload, `products_${domBase}_text_036`) },
+      usage: { heading: getPayloadDomTextValue(payload, `products_${domBase}_text_047`) },
+      note: { text: getPayloadDomTextValue(payload, `products_${domBase}_text_055`) },
+      buy: { intro: getPayloadDomTextValue(payload, `products_${domBase}_text_056`) },
+    },
+    detailHeroImage: getPayloadDomImageValue(payload, `products_${domBase}_image_002`),
+  };
+}
+
+function mergeMissingProductSectionContent(current = {}, fallback = {}) {
+  return Object.fromEntries(
+    Object.entries({ ...fallback, ...current }).map(([key]) => [
+      key,
+      String(current[key] || "").trim() || String(fallback[key] || "").trim(),
+    ])
+  );
+}
+
+function applyStaticProductDetailFallbacks(products, country) {
+  const languages = ["ru", "kz"];
   return (products || []).map(product => {
     const nextProduct = {
       ...product,
       translations: { ...(product.translations || {}) },
       images: { ...(product.images || {}) },
+      sections: {
+        ru: { ...(product.sections?.ru || {}) },
+        kz: { ...(product.sections?.kz || {}) },
+      },
+    };
+
+    for (const language of languages) {
+      let fallback;
+      try {
+        fallback = getProductDetailFallbackFromPayload(getPagePayload({
+          country,
+          lang: language,
+          page: product.pagePath || `products/${product.slug || product.id}.html`,
+          applyOverrides: false,
+        }));
+      } catch (error) {
+        continue;
+      }
+
+      const currentTranslation = nextProduct.translations[language] || {};
+      nextProduct.translations[language] = {
+        ...currentTranslation,
+        name: currentTranslation.name || fallback.translation.name || product.slug || product.id,
+        fullDescription: currentTranslation.fullDescription || fallback.translation.fullDescription || "",
+        composition: currentTranslation.composition || fallback.translation.composition || "",
+        usageText: currentTranslation.usageText || fallback.translation.usageText || "",
+        benefits: Array.isArray(currentTranslation.benefits) && currentTranslation.benefits.length
+          ? currentTranslation.benefits
+          : fallback.translation.benefits || [],
+      };
+
+      nextProduct.sections[language] ||= {};
+      for (const [sectionType, content] of Object.entries(fallback.sections || {})) {
+        nextProduct.sections[language][sectionType] = mergeMissingProductSectionContent(
+          nextProduct.sections[language][sectionType] || {},
+          content
+        );
+      }
+
+      if (language === "ru" && fallback.detailHeroImage && !nextProduct.images.detailHero?.src) {
+        nextProduct.images.detailHero = {
+          ...(nextProduct.images.detailHero || {}),
+          src: fallback.detailHeroImage.url || fallback.detailHeroImage.src || "",
+          alt: nextProduct.images.detailHero?.alt || fallback.detailHeroImage.alt || currentTranslation.name || product.id,
+        };
+      }
+    }
+
+    return nextProduct;
+  });
+}
+
+function applyStaticProductFallbacks(products, country) {
+  const fallbacks = staticCatalogFallbacksByLanguage(country);
+  const catalogProducts = (products || []).map(product => {
+    const nextProduct = {
+      ...product,
+      translations: { ...(product.translations || {}) },
+      images: { ...(product.images || {}) },
+      sections: {
+        ru: { ...(product.sections?.ru || {}) },
+        kz: { ...(product.sections?.kz || {}) },
+      },
     };
 
     for (const language of Object.keys(fallbacks)) {
@@ -931,6 +1062,7 @@ function applyStaticProductFallbacks(products, country) {
 
     return nextProduct;
   });
+  return applyStaticProductDetailFallbacks(catalogProducts, country);
 }
 
 async function attachDatabaseProductsToPayload(payload) {
