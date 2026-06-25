@@ -504,6 +504,33 @@ function normalizeProductBenefits(value) {
     .filter(Boolean);
 }
 
+function normalizeProductSectionContent(value) {
+  const content = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  return Object.fromEntries(
+    Object.entries(content)
+      .map(([key, item]) => [key, String(item || "").trim()])
+      .filter(([, item]) => item)
+  );
+}
+
+function normalizeProductSections(value) {
+  const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const normalized = {};
+  for (const language of ["ru", "kz"]) {
+    const sections = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
+      ? submitted[language]
+      : {};
+    normalized[language] = {};
+    for (const [sectionType, content] of Object.entries(sections)) {
+      const normalizedContent = normalizeProductSectionContent(content);
+      if (Object.keys(normalizedContent).length) {
+        normalized[language][sectionType] = normalizedContent;
+      }
+    }
+  }
+  return normalized;
+}
+
 function normalizeProductTranslations(value, fallbackName) {
   const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const normalized = {};
@@ -525,14 +552,15 @@ function normalizeProductTranslations(value, fallbackName) {
 
 function normalizeProductImages(value) {
   const images = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  const card = images.card && typeof images.card === "object" && !Array.isArray(images.card) ? images.card : {};
-  return {
-    card: {
-      src: String(card.src || "").trim(),
-      cloudinaryPublicId: String(card.cloudinaryPublicId || "").trim() || null,
-      alt: String(card.alt || "").trim(),
-    },
-  };
+  const normalized = {};
+  for (const [slot, image] of Object.entries(images)) {
+    if (!image || typeof image !== "object" || Array.isArray(image)) continue;
+    const src = String(image.src || "").trim();
+    const alt = String(image.alt || "").trim();
+    const cloudinaryPublicId = String(image.cloudinaryPublicId || "").trim() || null;
+    normalized[slot] = { src, cloudinaryPublicId, alt };
+  }
+  return normalized;
 }
 
 function normalizeProductPayload(body, routeId = "") {
@@ -561,6 +589,7 @@ function normalizeProductPayload(body, routeId = "") {
     isFeatured: Boolean(submitted.isFeatured),
     translations: normalizeProductTranslations(submitted.translations, fallbackName),
     images: normalizeProductImages(submitted.images),
+    sections: normalizeProductSections(submitted.sections),
   };
 }
 
@@ -669,6 +698,154 @@ function syncPayloadProductMetrics(payload) {
   setPayloadDomText(payload, ["index_text_026", "products_index_text_002"], productCount);
 }
 
+function normalizeComparableProductPath(value) {
+  return String(value || "")
+    .split(/[?#]/)[0]
+    .replace(/\\/g, "/")
+    .replace(/^(\.\/)+/, "")
+    .replace(/^\/+/, "")
+    .replace(/^main\//, "")
+    .toLowerCase();
+}
+
+function productSlugFromPagePath(value) {
+  return normalizeComparableProductPath(value)
+    .replace(/^products\//, "")
+    .replace(/\.html$/i, "")
+    .replace(/\/index$/i, "");
+}
+
+function productDomBaseFromPagePath(value) {
+  return productSlugFromPagePath(value).replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function findProductForPayloadPage(payload, products) {
+  const pagePath = normalizeComparableProductPath(payload.page?.path);
+  if (!pagePath.startsWith("products/") || pagePath.endsWith("/index.html") || pagePath === "products/index.html") {
+    return null;
+  }
+
+  const pageSlug = productSlugFromPagePath(pagePath);
+  return (products || []).find(product => {
+    if (product.status === "archived") return false;
+    return normalizeComparableProductPath(product.pagePath || `products/${product.slug || product.id}.html`) === pagePath
+      || normalizeProductSlug(product.slug) === pageSlug
+      || normalizeProductSlug(product.id) === pageSlug;
+  }) || null;
+}
+
+function getProductPayloadTranslation(product, language = "ru") {
+  return product.translations?.[language]
+    || product.translations?.ru
+    || product.translations?.kz
+    || {};
+}
+
+function getProductPayloadSections(product, language = "ru") {
+  return product.sections?.[language]
+    || product.sections?.ru
+    || product.sections?.kz
+    || {};
+}
+
+function findProductDetailKeyPrefix(payload) {
+  const keys = Object.keys(payload.content?.text || {});
+  const match = keys.map(key => key.match(/^(product_.+)_page_title$/)).find(Boolean);
+  return match ? match[1] : "";
+}
+
+function setPayloadTextValue(payload, key, value, { allowEmpty = false } = {}) {
+  if (!key || (!allowEmpty && !String(value || "").trim())) return;
+  const textValue = String(value ?? "");
+  payload.content.text[key] = textValue;
+  for (const section of payload.content.sections || []) {
+    for (const item of section.translatedTexts || []) {
+      if (item.key !== key) continue;
+      item.value = textValue;
+      item.source = "database";
+    }
+  }
+}
+
+function setPayloadDomTextValue(payload, id, value, { allowEmpty = false } = {}) {
+  if (!id || (!allowEmpty && !String(value || "").trim())) return;
+  const domText = payload.content?.dom?.text;
+  if (!Array.isArray(domText)) return;
+  const textValue = String(value ?? "");
+  const item = domText.find(candidate => candidate.id === id);
+  if (!item) return;
+  item.value = textValue;
+  item.source = "database";
+}
+
+function setPayloadDomImageValue(payload, id, image) {
+  const src = String(image?.src || "").trim();
+  if (!id || !src || !Array.isArray(payload.content?.dom?.images)) return;
+  const item = payload.content.dom.images.find(candidate => candidate.id === id);
+  if (!item) return;
+  item.src = src;
+  item.url = src;
+  item.alt = String(image.alt || item.alt || "").trim();
+  item.source = "database";
+}
+
+function applyDatabaseProductDetailToPayload(payload, products) {
+  const product = findProductForPayloadPage(payload, products);
+  if (!product) return;
+
+  const language = payload.language || "ru";
+  const translation = getProductPayloadTranslation(product, language);
+  const sections = getProductPayloadSections(product, language);
+  const keyPrefix = findProductDetailKeyPrefix(payload);
+  const domBase = productDomBaseFromPagePath(payload.page?.path);
+  const name = translation.name || product.slug || product.id;
+  const heroLead = sections.hero?.lead || translation.fullDescription || "";
+  const overviewIntro = sections.overview?.intro || translation.fullDescription || "";
+  const formulaIntro = sections.formula?.intro || translation.composition || "";
+  const usageHeading = sections.usage?.heading || "";
+  const noteText = sections.note?.text || translation.usageText || "";
+  const buyIntro = sections.buy?.intro || "";
+  const benefits = Array.isArray(translation.benefits) ? translation.benefits : [];
+
+  if (keyPrefix) {
+    setPayloadTextValue(payload, `${keyPrefix}_name`, name);
+    setPayloadTextValue(payload, `${keyPrefix}_page_title`, name);
+    setPayloadTextValue(payload, `${keyPrefix}_page_desc`, heroLead);
+    setPayloadTextValue(payload, `${keyPrefix}_overview_intro`, overviewIntro);
+    setPayloadTextValue(payload, `${keyPrefix}_formula_intro`, formulaIntro);
+    setPayloadTextValue(payload, `${keyPrefix}_usage_heading`, usageHeading);
+    setPayloadTextValue(payload, `${keyPrefix}_note_text`, noteText);
+    setPayloadTextValue(payload, `${keyPrefix}_buy_intro`, buyIntro);
+
+    const benefitKeys = Object.keys(payload.content?.text || {})
+      .filter(key => key.startsWith(`${keyPrefix}_benefit`))
+      .sort((left, right) => Number(left.match(/(\d+)$/)?.[1] || 0) - Number(right.match(/(\d+)$/)?.[1] || 0));
+    if (benefits.length) {
+      benefitKeys.forEach((key, index) => {
+        setPayloadTextValue(payload, key, benefits[index] || "", { allowEmpty: true });
+      });
+    }
+  } else if (domBase) {
+    setPayloadDomTextValue(payload, `products_${domBase}_text_001`, `STADA - ${name}`);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_003`, name);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_004`, heroLead);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_016`, overviewIntro);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_036`, formulaIntro);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_047`, usageHeading);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_055`, noteText);
+    setPayloadDomTextValue(payload, `products_${domBase}_text_056`, buyIntro);
+
+    if (benefits.length) {
+      for (let index = 0; index < 8; index += 1) {
+        const id = `products_${domBase}_text_${String(29 + index).padStart(3, "0")}`;
+        setPayloadDomTextValue(payload, id, benefits[index] || "", { allowEmpty: true });
+      }
+    }
+  }
+
+  setPayloadDomImageValue(payload, `products_${domBase}_image_002`, product.images?.detailHero || product.images?.hero);
+}
+
 function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
   if (!payload?.content) return payload;
 
@@ -690,6 +867,7 @@ function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
   ];
   syncPayloadHomeProducts(payload);
   syncPayloadProductMetrics(payload);
+  applyDatabaseProductDetailToPayload(payload, products);
   return payload;
 }
 

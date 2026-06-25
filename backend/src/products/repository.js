@@ -18,6 +18,7 @@ function mapProductRows(rows) {
         updatedAt: row.updated_at,
         translations: {},
         images: {},
+        sections: {},
       });
     }
 
@@ -46,6 +47,44 @@ function mapProductRows(rows) {
   return [...productsById.values()];
 }
 
+function mapSectionRows(rows) {
+  const sectionsByProductId = new Map();
+
+  for (const row of rows) {
+    if (!sectionsByProductId.has(row.product_id)) {
+      sectionsByProductId.set(row.product_id, {});
+    }
+
+    const productSections = sectionsByProductId.get(row.product_id);
+    productSections[row.language] ||= {};
+    productSections[row.language][row.section_type] = row.content || {};
+  }
+
+  return sectionsByProductId;
+}
+
+async function attachProductSections(products) {
+  if (!products.length) return products;
+  const ids = products.map(product => product.id);
+  const result = await query(`
+    select
+      product_id,
+      language,
+      section_type,
+      content
+    from product_sections
+    where product_id = any($1::text[])
+    order by product_id, language, sort_order, section_type
+  `, [ids]);
+  const sectionsByProductId = mapSectionRows(result.rows);
+
+  products.forEach(product => {
+    product.sections = sectionsByProductId.get(product.id) || {};
+  });
+
+  return products;
+}
+
 async function listProducts() {
   const result = await query(`
     select
@@ -67,7 +106,7 @@ async function listProducts() {
     order by p.sort_order, p.slug, pt.language, pi.slot
   `);
 
-  return mapProductRows(result.rows);
+  return attachProductSections(mapProductRows(result.rows));
 }
 
 async function listTherapeuticAreas() {
@@ -124,7 +163,16 @@ async function getProduct(slugOrId) {
     order by pt.language, pi.slot
   `, [slugOrId]);
 
-  return mapProductRows(result.rows)[0] || null;
+  const products = await attachProductSections(mapProductRows(result.rows));
+  return products[0] || null;
+}
+
+function hasSectionContent(content) {
+  if (!content || typeof content !== "object" || Array.isArray(content)) return false;
+  return Object.values(content).some(value => {
+    if (Array.isArray(value)) return value.some(item => String(item || "").trim());
+    return String(value ?? "").trim();
+  });
 }
 
 async function upsertProduct(product) {
@@ -224,6 +272,34 @@ async function upsertProduct(product) {
           image.cloudinaryPublicId || null,
           image.alt || "",
         ]);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(product, "sections")) {
+        await client.query("delete from product_sections where product_id = $1", [id]);
+        for (const [language, sections] of Object.entries(product.sections || {})) {
+          let sortOrder = 0;
+          for (const [sectionType, content] of Object.entries(sections || {})) {
+            if (!hasSectionContent(content)) continue;
+            await client.query(`
+              insert into product_sections (
+                product_id,
+                language,
+                section_type,
+                sort_order,
+                content,
+                updated_at
+              )
+              values ($1, $2, $3, $4, $5::jsonb, now())
+            `, [
+              id,
+              language,
+              sectionType,
+              sortOrder,
+              JSON.stringify(content || {}),
+            ]);
+            sortOrder += 1;
+          }
+        }
       }
 
       await client.query("commit");

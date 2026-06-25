@@ -3336,6 +3336,9 @@ function applyTextFromBackendPayload(payload) {
     document.querySelectorAll(`[data-backend-text-id="${escapeCssIdentifier(item.id)}"]`).forEach(el => {
       const value = item.value || '';
       el.textContent = value;
+      if (el.closest('.benefits-list')) {
+        el.hidden = !value;
+      }
       el.dataset.backendTextValue = value;
       delete el.dataset.animated;
     });
@@ -3436,6 +3439,19 @@ function renderHomeProductPreview(payload) {
 
     card.append(category, image, name);
     grid.appendChild(card);
+  });
+}
+
+function applyProductMetrics(payload) {
+  const productCount = (payload?.content?.productCatalog || []).length;
+  if (!productCount) return;
+
+  ['index_text_026', 'products_index_text_002'].forEach(id => {
+    document.querySelectorAll(`[data-backend-text-id="${escapeCssIdentifier(id)}"]`).forEach(el => {
+      el.textContent = String(productCount);
+      el.dataset.backendTextValue = String(productCount);
+      delete el.dataset.animated;
+    });
   });
 }
 
@@ -3603,6 +3619,7 @@ async function updateBackendDrivenPage(lang) {
   applyImagesFromBackendPayload(payload);
   applyProductCatalogCards(payload);
   renderHomeProductPreview(payload);
+  applyProductMetrics(payload);
   document.body.classList.remove('backend-content-pending');
 
   updateDocumentTitle(lang);
