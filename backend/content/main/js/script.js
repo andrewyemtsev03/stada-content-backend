@@ -3462,6 +3462,46 @@ function resolveProductCardHref(href) {
   return normalized;
 }
 
+function createProductCatalogCard(product) {
+  const card = document.createElement('a');
+  card.className = 'catalog-card';
+  card.dataset.productCard = '';
+  card.dataset.dynamicProductCard = 'true';
+  card.dataset.category = product.category || '';
+  card.href = resolveProductCardHref(product.href || `products/${product.id}.html`);
+  if (product.accent) card.style.setProperty('--card-accent', product.accent);
+
+  const media = document.createElement('div');
+  media.className = 'catalog-card__media';
+
+  const image = document.createElement('img');
+  image.src = withRuntimeImageRefresh(product.image?.url || product.image?.src || '');
+  image.alt = product.image?.alt || product.name || product.id || '';
+  image.loading = 'lazy';
+  media.appendChild(image);
+
+  const body = document.createElement('div');
+  body.className = 'catalog-card__body';
+
+  const category = document.createElement('span');
+  category.className = 'catalog-card__category';
+  category.textContent = product.therapeuticArea || product.category || '';
+
+  const title = document.createElement('h3');
+  title.textContent = product.name || product.id || '';
+
+  const description = document.createElement('p');
+  description.textContent = product.shortDescription || '';
+
+  const cta = document.createElement('span');
+  cta.className = 'catalog-card__cta';
+  cta.textContent = getTranslatedText(currentLang, 'cta_more') || 'Подробнее';
+
+  body.append(category, title, description, cta);
+  card.append(media, body);
+  return card;
+}
+
 function applyProductCatalogCards(payload) {
   const products = payload?.content?.productCatalog || [];
   if (!products.length) return;
@@ -3498,6 +3538,20 @@ function applyProductCatalogCards(payload) {
     if (description && product.shortDescription) {
       description.textContent = product.shortDescription;
     }
+  });
+
+  const grid = document.querySelector('[data-product-grid]');
+  if (!grid) return;
+
+  const existingIds = new Set(
+    Array.from(grid.querySelectorAll('[data-product-card]'))
+      .map(card => normalizeProductCardId(card.getAttribute('href')))
+      .filter(Boolean)
+  );
+  products.forEach(product => {
+    if (!product.id || existingIds.has(product.id)) return;
+    grid.appendChild(createProductCatalogCard(product));
+    existingIds.add(product.id);
   });
 }
 
@@ -4072,8 +4126,7 @@ function initProductsCarousel() {
 
 function initProductCatalogFilters() {
   const filters = Array.from(document.querySelectorAll('[data-product-filter]'));
-  const cards = Array.from(document.querySelectorAll('[data-product-card]'));
-  if (!filters.length || !cards.length) return;
+  if (!filters.length) return;
 
   filters.forEach(filterButton => {
     filterButton.addEventListener('click', () => {
@@ -4085,6 +4138,7 @@ function initProductCatalogFilters() {
         button.setAttribute('aria-pressed', String(isActive));
       });
 
+      const cards = Array.from(document.querySelectorAll('[data-product-card]'));
       cards.forEach(card => {
         const categories = (card.dataset.category || '').split(' ');
         const isVisible = activeFilter === 'all' || categories.includes(activeFilter);
