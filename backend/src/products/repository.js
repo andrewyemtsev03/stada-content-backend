@@ -205,6 +205,16 @@ async function upsertProduct(product) {
   return getProduct(id);
 }
 
+async function deleteProduct(slugOrId) {
+  const result = await query(`
+    delete from products
+    where id = $1 or slug = $1
+    returning id
+  `, [slugOrId]);
+
+  return result.rowCount > 0;
+}
+
 async function upsertTherapeuticArea(area) {
   const id = area.id;
   if (!id) return null;
@@ -240,6 +250,7 @@ async function upsertTherapeuticArea(area) {
 }
 
 module.exports = {
+  deleteProduct,
   getProduct,
   listProducts,
   upsertProduct,

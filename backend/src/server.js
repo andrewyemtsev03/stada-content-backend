@@ -7,7 +7,7 @@ const { getHomepagePayload, getPagePayload, listCountries } = require("./content
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
 const { importProductsFromSite } = require("./products/import-from-site");
-const { getProduct, listProducts } = require("./products/repository");
+const { deleteProduct, getProduct, listProducts, upsertProduct } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
@@ -30,7 +30,7 @@ function sendJson(response, statusCode, payload) {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Authorization, Content-Type",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
   });
   response.end(JSON.stringify(payload, null, 2));
 }
@@ -472,6 +472,110 @@ function normalizeProductIdList(value, productCatalog) {
   )].slice(0, 4);
 }
 
+function normalizeProductSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 120);
+}
+
+function normalizeProductBenefits(value) {
+  if (Array.isArray(value)) {
+    return value.map(item => String(item || "").trim()).filter(Boolean);
+  }
+  return String(value || "")
+    .split(/\r?\n/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeProductTranslations(value, fallbackName) {
+  const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const normalized = {};
+  for (const language of ["ru", "kz"]) {
+    const translation = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
+      ? submitted[language]
+      : {};
+    normalized[language] = {
+      name: String(translation.name || fallbackName || "").trim(),
+      shortDescription: String(translation.shortDescription || "").trim(),
+      fullDescription: String(translation.fullDescription || "").trim(),
+      composition: String(translation.composition || "").trim(),
+      usageText: String(translation.usageText || "").trim(),
+      benefits: normalizeProductBenefits(translation.benefits),
+    };
+  }
+  return normalized;
+}
+
+function normalizeProductImages(value) {
+  const images = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const card = images.card && typeof images.card === "object" && !Array.isArray(images.card) ? images.card : {};
+  return {
+    card: {
+      src: String(card.src || "").trim(),
+      cloudinaryPublicId: String(card.cloudinaryPublicId || "").trim() || null,
+      alt: String(card.alt || "").trim(),
+    },
+  };
+}
+
+function normalizeProductPayload(body, routeId = "") {
+  const submitted = body && typeof body === "object" && !Array.isArray(body) ? body : {};
+  const slug = normalizeProductSlug(submitted.slug || submitted.id || routeId);
+  const id = normalizeProductSlug(routeId || submitted.id || slug);
+  const statuses = new Set(["draft", "published", "archived"]);
+  const status = statuses.has(String(submitted.status || "").trim()) ? String(submitted.status).trim() : "draft";
+  const fallbackName = submitted.translations?.ru?.name || submitted.translations?.kz?.name || slug;
+
+  if (!id || !slug) {
+    throw Object.assign(new Error("Product slug is required."), {
+      statusCode: 400,
+      code: "PRODUCT_SLUG_REQUIRED",
+    });
+  }
+
+  return {
+    id,
+    slug,
+    pagePath: String(submitted.pagePath || `products/${slug}.html`).trim(),
+    status,
+    sortOrder: Number.isFinite(Number(submitted.sortOrder)) ? Number(submitted.sortOrder) : 0,
+    therapeuticAreaId: normalizeProductSlug(submitted.therapeuticAreaId) || null,
+    accentColor: String(submitted.accentColor || "").trim() || null,
+    isFeatured: Boolean(submitted.isFeatured),
+    translations: normalizeProductTranslations(submitted.translations, fallbackName),
+    images: normalizeProductImages(submitted.images),
+  };
+}
+
+function contentProductFromDatabaseProduct(product, language = "ru") {
+  const translation = product.translations?.[language]
+    || product.translations?.ru
+    || product.translations?.kz
+    || {};
+  const cardImage = product.images?.card || {};
+  const category = product.therapeuticAreaId || "";
+
+  return {
+    id: product.id,
+    href: product.pagePath || `products/${product.slug || product.id}.html`,
+    category,
+    categoryClass: category,
+    accent: product.accentColor || "",
+    image: {
+      id: cardImage.cloudinaryPublicId || "",
+      src: cardImage.src || "",
+      url: cardImage.src || "",
+      alt: cardImage.alt || translation.name || product.id,
+    },
+    name: translation.name || product.id,
+    therapeuticArea: category,
+  };
+}
+
 function sameStringArray(left, right) {
   if (left.length !== right.length) return false;
   return left.every((value, index) => value === right[index]);
@@ -618,10 +722,20 @@ async function handleRequest(request, response) {
       const page = adminEditablePagePath;
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
       const currentPayload = getPagePayload({ country, lang: basePayload.language, page: basePayload.page.path });
+      const editable = buildEditableContent(basePayload, currentPayload);
+
+      try {
+        const products = await listProducts();
+        editable.productCatalog = products
+          .filter(product => product.status !== "archived")
+          .map(product => contentProductFromDatabaseProduct(product, editable.language));
+      } catch (error) {
+        if (error.code !== "DATABASE_URL_MISSING") throw error;
+      }
 
       sendJson(response, 200, {
         countries: listCountries(),
-        editable: buildEditableContent(basePayload, currentPayload),
+        editable,
       });
       return;
     }
@@ -641,6 +755,44 @@ async function handleRequest(request, response) {
         status: "imported",
         ...result,
       });
+      return;
+    }
+
+    if (request.method === "POST" && pathname === "/api/admin/products") {
+      requireAdmin(request);
+      const body = await readJsonBody(request);
+      const product = await upsertProduct(normalizeProductPayload(body));
+      sendJson(response, 201, {
+        status: "saved",
+        product,
+      });
+      return;
+    }
+
+    if (request.method === "PUT" && pathname.startsWith("/api/admin/products/")) {
+      requireAdmin(request);
+      const body = await readJsonBody(request);
+      const product = await upsertProduct(normalizeProductPayload(body, routeProductSlugFromAdminPath(pathname)));
+      sendJson(response, 200, {
+        status: "saved",
+        product,
+      });
+      return;
+    }
+
+    if (request.method === "DELETE" && pathname.startsWith("/api/admin/products/")) {
+      requireAdmin(request);
+      const deleted = await deleteProduct(routeProductSlugFromAdminPath(pathname));
+      if (!deleted) {
+        sendJson(response, 404, {
+          error: {
+            code: "PRODUCT_NOT_FOUND",
+            message: "Product was not found.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, { status: "deleted" });
       return;
     }
 
@@ -773,8 +925,11 @@ async function handleRequest(request, response) {
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",
           "GET /api/admin/products",
+          "POST /api/admin/products",
           "POST /api/admin/products/import-from-site",
           "GET /api/admin/products/:slug",
+          "PUT /api/admin/products/:slug",
+          "DELETE /api/admin/products/:slug",
         ],
       });
       return;
