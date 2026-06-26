@@ -774,6 +774,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
     text,
   }));
   const facts = coerceProductObjectList(sections.overview?.facts || sections.facts?.items, fallbackFacts).slice(0, 4);
+  const metrics = coerceProductObjectList(sections.hero?.metrics, facts.slice(0, 3)).slice(0, 3);
   const formulaPoints = coerceProductObjectList(sections.formula?.points, facts.slice(0, 3)).slice(0, 3);
   const usageItems = coerceProductObjectList(sections.usage?.items, benefits.slice(0, 3).map((text, index) => ({
     title: `${index + 1}`,
@@ -827,6 +828,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
         noteText,
         buyIntro,
         badges,
+        metrics,
         benefits,
         facts,
         formulaPoints,
@@ -1122,13 +1124,85 @@ function getPayloadDomImageValue(payload, id) {
   return (payload.content?.dom?.images || []).find(item => item.id === id) || null;
 }
 
+function getPayloadTextKeysInOrder(payload) {
+  const keys = [];
+  for (const section of payload.content?.sections || []) {
+    for (const item of section.translatedTexts || []) {
+      if (item?.key) keys.push(item.key);
+    }
+  }
+
+  for (const key of Object.keys(payload.content?.text || {})) {
+    if (!keys.includes(key)) keys.push(key);
+  }
+
+  return keys;
+}
+
+function collectTextValuesByPrefix(text, orderedKeys, prefix) {
+  return orderedKeys
+    .filter(key => key.startsWith(prefix))
+    .map(key => text[key])
+    .filter(Boolean);
+}
+
+function collectProductCardItems(text, orderedKeys, keyPrefix, values = []) {
+  const cards = new Map();
+  orderedKeys.forEach(key => {
+    const value = text[key];
+    const match = key.match(new RegExp(`^${keyPrefix}_card_(.+)_(title|text)$`));
+    if (!match || !String(value || "").trim()) return;
+    const [, id, field] = match;
+    cards.set(id, {
+      ...(cards.get(id) || {}),
+      [field === "title" ? "title" : "text"]: value,
+    });
+  });
+
+  return [...cards.values()]
+    .map((card, index) => ({
+      value: values[index] || "",
+      title: card.title || "",
+      text: card.text || "",
+    }))
+    .filter(card => card.value || card.title || card.text);
+}
+
+function collectProductMetricItems(text, orderedKeys, keyPrefix, values = []) {
+  return orderedKeys
+    .filter(key => key.startsWith(`${keyPrefix}_metric_`))
+    .map((key, index) => ({
+      value: values[index] || "",
+      title: text[key] || "",
+      text: "",
+    }))
+    .filter(metric => metric.value || metric.title);
+}
+
+function collectProductUsageItems(text, orderedKeys, keyPrefix) {
+  const items = new Map();
+  orderedKeys.forEach(key => {
+    const value = text[key];
+    const match = key.match(new RegExp(`^${keyPrefix}_usage_(.+)_(title|text)$`));
+    if (!match || !String(value || "").trim()) return;
+    const [, id, field] = match;
+    items.set(id, {
+      ...(items.get(id) || {}),
+      [field === "title" ? "title" : "text"]: value,
+    });
+  });
+
+  return [...items.values()].filter(item => item.title || item.text);
+}
+
 function getProductDetailFallbackFromPayload(payload) {
   const keyPrefix = findProductDetailKeyPrefix(payload);
   const domBase = productDomBaseFromPagePath(payload.page?.path);
   const text = payload.content?.text || {};
+  const orderedTextKeys = getPayloadTextKeysInOrder(payload);
 
   if (keyPrefix) {
-    const benefitKeys = Object.keys(text)
+    const benefitKeys = orderedTextKeys
       .filter(key => key.startsWith(`${keyPrefix}_benefit`))
       .sort((left, right) => Number(left.match(/(\d+)$/)?.[1] || 0) - Number(right.match(/(\d+)$/)?.[1] || 0));
     return {
@@ -1140,11 +1214,34 @@ function getProductDetailFallbackFromPayload(payload) {
         benefits: benefitKeys.map(key => text[key]).filter(Boolean),
       },
       sections: {
-        hero: { lead: text[`${keyPrefix}_page_desc`] || "" },
-        overview: { intro: text[`${keyPrefix}_overview_intro`] || "" },
-        formula: { intro: text[`${keyPrefix}_formula_intro`] || "" },
-        usage: { heading: text[`${keyPrefix}_usage_heading`] || "" },
-        note: { text: text[`${keyPrefix}_note_text`] || "" },
+        hero: {
+          kicker: text[`${keyPrefix}_kicker`] || "",
+          lead: text[`${keyPrefix}_page_desc`] || "",
+          badges: collectTextValuesByPrefix(text, orderedTextKeys, `${keyPrefix}_badge_`),
+          metrics: collectProductMetricItems(text, orderedTextKeys, keyPrefix, [6, 7, 8]
+            .map(number => getPayloadDomTextValue(payload, `products_${domBase}_text_${String(number).padStart(3, "0")}`))),
+        },
+        overview: {
+          label: text[`${keyPrefix}_overview_label`] || "",
+          heading: text[`${keyPrefix}_overview_heading`] || "",
+          intro: text[`${keyPrefix}_overview_intro`] || "",
+          facts: collectProductCardItems(text, orderedTextKeys, keyPrefix, [9, 10, 11, 12]
+            .map(number => getPayloadDomTextValue(payload, `products_${domBase}_text_${String(number).padStart(3, "0")}`))),
+        },
+        formula: {
+          label: text[`${keyPrefix}_formula_label`] || "",
+          heading: text[`${keyPrefix}_formula_heading`] || "",
+          intro: text[`${keyPrefix}_formula_intro`] || "",
+        },
+        usage: {
+          label: text[`${keyPrefix}_usage_label`] || "",
+          heading: text[`${keyPrefix}_usage_heading`] || "",
+          items: collectProductUsageItems(text, orderedTextKeys, keyPrefix),
+        },
+        note: {
+          title: text[`${keyPrefix}_note_title`] || "",
+          text: text[`${keyPrefix}_note_text`] || "",
+        },
         buy: { intro: text[`${keyPrefix}_buy_intro`] || "" },
       },
       detailHeroImage: getPayloadDomImageValue(payload, `products_${domBase}_image_002`),
@@ -1174,12 +1271,24 @@ function getProductDetailFallbackFromPayload(payload) {
 }
 
 function mergeMissingProductSectionContent(current = {}, fallback = {}) {
-  return Object.fromEntries(
-    Object.entries({ ...fallback, ...current }).map(([key]) => [
-      key,
-      String(current[key] || "").trim() || String(fallback[key] || "").trim(),
-    ])
-  );
+  const merged = {};
+  for (const key of Object.keys({ ...fallback, ...current })) {
+    const currentValue = current[key];
+    const fallbackValue = fallback[key];
+
+    if (Array.isArray(currentValue) && currentValue.length) {
+      merged[key] = currentValue;
+    } else if (Array.isArray(fallbackValue)) {
+      merged[key] = fallbackValue;
+    } else if (currentValue && typeof currentValue === "object") {
+      merged[key] = currentValue;
+    } else if (fallbackValue && typeof fallbackValue === "object") {
+      merged[key] = fallbackValue;
+    } else {
+      merged[key] = String(currentValue || "").trim() || String(fallbackValue || "").trim();
+    }
+  }
+  return merged;
 }
 
 function applyStaticProductDetailFallbacks(products, country) {
