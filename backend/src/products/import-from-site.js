@@ -5,8 +5,6 @@ const { getPagePayload } = require("../content-loader");
 const { upsertProduct, upsertTherapeuticArea } = require("./repository");
 
 const contentRoot = path.resolve(__dirname, "..", "..", "content", "main");
-const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
-const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
 
 function normalizeAreaId(value) {
   const firstToken = String(value || "").split(/\s+/).find(Boolean) || "general";
@@ -28,24 +26,6 @@ function cloudinaryPublicIdFromUrl(value) {
 
 function normalizeProductImageSrc(value) {
   return String(value || "").trim().replace(/\\/g, "/").replace(/^(\.\/|\.\.\/)+/, "");
-}
-
-function imageExtensionFromSrc(src) {
-  const match = String(src || "").split(/[?#]/)[0].match(/\.([a-z0-9]+)$/i);
-  const extension = match ? match[1].toLowerCase() : "png";
-  return extension === "jpeg" ? "jpg" : extension;
-}
-
-function stableCloudinaryProductUrl(productId, slot, sourceSrc) {
-  if (!cloudinaryCloudName || !productId || !slot || !sourceSrc) return "";
-  if (/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//i.test(sourceSrc)) return sourceSrc;
-
-  const publicId = [
-    cloudinaryProductUploadFolder.replace(/^\/+|\/+$/g, ""),
-    normalizeAreaId(productId),
-    normalizeAreaId(slot),
-  ].filter(Boolean).join("/");
-  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${publicId}.${imageExtensionFromSrc(sourceSrc)}`;
 }
 
 function makeTranslation(product) {
@@ -123,11 +103,10 @@ function parseProductDetailImages(pagePath, productId) {
     const imageTag = html.match(pattern)?.[0] || "";
     const sourceSrc = normalizeProductImageSrc(getAttributeValue(imageTag, "src"));
     if (!sourceSrc) continue;
-    const src = stableCloudinaryProductUrl(productId, slot, sourceSrc) || sourceSrc;
     images[slot] = {
-      src,
+      src: sourceSrc,
       alt: getAttributeValue(imageTag, "alt") || "",
-      cloudinaryPublicId: cloudinaryPublicIdFromUrl(src),
+      cloudinaryPublicId: cloudinaryPublicIdFromUrl(sourceSrc),
     };
   }
 
