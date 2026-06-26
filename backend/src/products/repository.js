@@ -19,6 +19,7 @@ function mapProductRows(rows) {
         translations: {},
         images: {},
         sections: {},
+        purchaseLinks: [],
       });
     }
 
@@ -45,6 +46,27 @@ function mapProductRows(rows) {
   }
 
   return [...productsById.values()];
+}
+
+function mapPurchaseLinkRows(rows) {
+  const linksByProductId = new Map();
+
+  for (const row of rows) {
+    if (!linksByProductId.has(row.product_id)) {
+      linksByProductId.set(row.product_id, []);
+    }
+
+    linksByProductId.get(row.product_id).push({
+      slot: row.slot,
+      label: row.label,
+      url: row.url,
+      logoSrc: row.logo_src || "",
+      logoAlt: row.logo_alt || row.label || "",
+      sortOrder: row.sort_order,
+    });
+  }
+
+  return linksByProductId;
 }
 
 function mapSectionRows(rows) {
@@ -85,6 +107,37 @@ async function attachProductSections(products) {
   return products;
 }
 
+async function attachProductPurchaseLinks(products) {
+  if (!products.length) return products;
+  const ids = products.map(product => product.id);
+  const result = await query(`
+    select
+      product_id,
+      slot,
+      label,
+      url,
+      logo_src,
+      logo_alt,
+      sort_order
+    from product_purchase_links
+    where product_id = any($1::text[])
+    order by product_id, sort_order, slot
+  `, [ids]);
+  const linksByProductId = mapPurchaseLinkRows(result.rows);
+
+  products.forEach(product => {
+    product.purchaseLinks = linksByProductId.get(product.id) || [];
+  });
+
+  return products;
+}
+
+async function attachProductDetails(products) {
+  await attachProductSections(products);
+  await attachProductPurchaseLinks(products);
+  return products;
+}
+
 async function listProducts() {
   const result = await query(`
     select
@@ -106,7 +159,7 @@ async function listProducts() {
     order by p.sort_order, p.slug, pt.language, pi.slot
   `);
 
-  return attachProductSections(mapProductRows(result.rows));
+  return attachProductDetails(mapProductRows(result.rows));
 }
 
 async function listTherapeuticAreas() {
@@ -163,7 +216,7 @@ async function getProduct(slugOrId) {
     order by pt.language, pi.slot
   `, [slugOrId]);
 
-  const products = await attachProductSections(mapProductRows(result.rows));
+  const products = await attachProductDetails(mapProductRows(result.rows));
   return products[0] || null;
 }
 
@@ -173,6 +226,26 @@ function hasSectionContent(content) {
     if (Array.isArray(value)) return value.some(item => String(item || "").trim());
     return String(value ?? "").trim();
   });
+}
+
+function normalizePurchaseLinks(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((link, index) => {
+      if (!link || typeof link !== "object" || Array.isArray(link)) return null;
+      const label = String(link.label || "").trim();
+      const url = String(link.url || "").trim();
+      if (!label || !url) return null;
+      return {
+        slot: String(link.slot || label).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `link-${index + 1}`,
+        label,
+        url,
+        logoSrc: String(link.logoSrc || link.logo_src || "").trim(),
+        logoAlt: String(link.logoAlt || link.logo_alt || label).trim(),
+        sortOrder: Number.isFinite(Number(link.sortOrder)) ? Number(link.sortOrder) : index,
+      };
+    })
+    .filter(Boolean);
 }
 
 async function upsertProduct(product) {
@@ -299,6 +372,40 @@ async function upsertProduct(product) {
             ]);
             sortOrder += 1;
           }
+        }
+      }
+
+      if (Object.prototype.hasOwnProperty.call(product, "purchaseLinks")) {
+        await client.query("delete from product_purchase_links where product_id = $1", [id]);
+        for (const link of normalizePurchaseLinks(product.purchaseLinks)) {
+          await client.query(`
+            insert into product_purchase_links (
+              product_id,
+              slot,
+              label,
+              url,
+              logo_src,
+              logo_alt,
+              sort_order,
+              updated_at
+            )
+            values ($1, $2, $3, $4, $5, $6, $7, now())
+            on conflict (product_id, slot) do update set
+              label = excluded.label,
+              url = excluded.url,
+              logo_src = excluded.logo_src,
+              logo_alt = excluded.logo_alt,
+              sort_order = excluded.sort_order,
+              updated_at = now()
+          `, [
+            id,
+            link.slot,
+            link.label,
+            link.url,
+            link.logoSrc || null,
+            link.logoAlt || link.label,
+            link.sortOrder,
+          ]);
         }
       }
 

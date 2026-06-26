@@ -506,11 +506,37 @@ function normalizeProductBenefits(value) {
 
 function normalizeProductSectionContent(value) {
   const content = value && typeof value === "object" && !Array.isArray(value) ? value : {};
-  return Object.fromEntries(
-    Object.entries(content)
-      .map(([key, item]) => [key, String(item || "").trim()])
-      .filter(([, item]) => item)
-  );
+  const normalized = {};
+
+  for (const [key, item] of Object.entries(content)) {
+    if (Array.isArray(item)) {
+      const arrayValue = item
+        .map(entry => {
+          if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+            const objectValue = normalizeProductSectionContent(entry);
+            return Object.keys(objectValue).length ? objectValue : null;
+          }
+          return String(entry ?? "").trim();
+        })
+        .filter(entry => {
+          if (entry && typeof entry === "object") return Object.keys(entry).length;
+          return String(entry || "").trim();
+        });
+      if (arrayValue.length) normalized[key] = arrayValue;
+      continue;
+    }
+
+    if (item && typeof item === "object") {
+      const objectValue = normalizeProductSectionContent(item);
+      if (Object.keys(objectValue).length) normalized[key] = objectValue;
+      continue;
+    }
+
+    const textValue = String(item ?? "").trim();
+    if (textValue) normalized[key] = textValue;
+  }
+
+  return normalized;
 }
 
 function normalizeProductSections(value) {
@@ -635,7 +661,7 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
   return {
     id: product.id,
     slug: product.slug || product.id,
-    href: product.pagePath || `products/${product.slug || product.id}.html`,
+    href: `products/product.html?slug=${encodeURIComponent(product.slug || product.id)}`,
     category,
     categoryClass: category,
     accent: product.accentColor || "",
@@ -648,6 +674,166 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
     name: translation.name || product.id,
     shortDescription: translation.shortDescription || "",
     therapeuticArea,
+  };
+}
+
+function coerceProductTextList(...values) {
+  const list = [];
+  for (const value of values) {
+    if (Array.isArray(value)) {
+      value.forEach(item => {
+        const text = String(item || "").trim();
+        if (text) list.push(text);
+      });
+      continue;
+    }
+    String(value || "")
+      .split(/\r?\n|;/)
+      .map(item => item.trim())
+      .filter(Boolean)
+      .forEach(item => list.push(item));
+  }
+  return [...new Set(list)];
+}
+
+function coerceProductObjectList(value, fallback = []) {
+  const source = Array.isArray(value) && value.length ? value : fallback;
+  return source
+    .map(item => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
+      const title = String(item.title || item.label || item.heading || "").trim();
+      const text = String(item.text || item.description || item.body || "").trim();
+      const value = String(item.value || item.metric || item.icon || "").trim();
+      if (!title && !text && !value) return null;
+      return { value, title, text };
+    })
+    .filter(Boolean);
+}
+
+function makeDefaultProductPurchaseLinks(productName = "") {
+  const labelPrefix = productName ? `${productName} - ` : "";
+  return [
+    {
+      slot: "kaspi",
+      label: "KASPI",
+      url: "https://kaspi.kz/shop/",
+      logoSrc: "assets/logos/logo_kaspi.png",
+      logoAlt: "KASPI",
+      ariaLabel: `${labelPrefix}KASPI`,
+      sortOrder: 0,
+    },
+    {
+      slot: "biosfera",
+      label: "Биосфера",
+      url: "https://biosfera.kz/",
+      logoSrc: "assets/logos/logo_biosfera.png",
+      logoAlt: "Биосфера",
+      ariaLabel: `${labelPrefix}Биосфера`,
+      sortOrder: 1,
+    },
+    {
+      slot: "europharma",
+      label: "Europharma",
+      url: "https://europharma.kz/",
+      logoSrc: "assets/logos/logo_europharma.png",
+      logoAlt: "Europharma",
+      ariaLabel: `${labelPrefix}Europharma`,
+      sortOrder: 2,
+    },
+    {
+      slot: "aptekaplus",
+      label: "Аптека плюс",
+      url: "https://aptekaplus.kz/",
+      logoSrc: "assets/logos/logo_aptekaplus.svg",
+      logoAlt: "Аптека плюс",
+      ariaLabel: `${labelPrefix}Аптека плюс`,
+      sortOrder: 3,
+    },
+  ];
+}
+
+function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, country, language = "ru") {
+  const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, language);
+  const translation = getProductPayloadTranslation(product, language);
+  const sections = getProductPayloadSections(product, language);
+  const image = getCanonicalProductImageFromSlots(product.images || {});
+  const name = translation.name || product.slug || product.id;
+  const benefits = coerceProductTextList(translation.benefits);
+  const badges = coerceProductTextList(sections.hero?.badges, sections.overview?.badges).slice(0, 3);
+  const category = product.therapeuticAreaId || "";
+  const therapeuticArea = areaLabels.get(category) || category;
+  const overviewIntro = sections.overview?.intro || translation.fullDescription || translation.shortDescription || "";
+  const heroLead = sections.hero?.lead || translation.fullDescription || translation.shortDescription || overviewIntro;
+  const formulaIntro = sections.formula?.intro || translation.composition || "";
+  const usageHeading = sections.usage?.heading || "";
+  const noteText = sections.note?.text || translation.usageText || "";
+  const buyIntro = sections.buy?.intro || "";
+  const fallbackFacts = benefits.slice(0, 4).map((text, index) => ({
+    value: index + 1,
+    title: text.split(/[.,;:]/)[0].slice(0, 72),
+    text,
+  }));
+  const facts = coerceProductObjectList(sections.overview?.facts || sections.facts?.items, fallbackFacts).slice(0, 4);
+  const formulaPoints = coerceProductObjectList(sections.formula?.points, facts.slice(0, 3)).slice(0, 3);
+  const usageItems = coerceProductObjectList(sections.usage?.items, benefits.slice(0, 3).map((text, index) => ({
+    title: `${index + 1}`,
+    text,
+  }))).slice(0, 3);
+  const purchaseLinks = (Array.isArray(product.purchaseLinks) && product.purchaseLinks.length
+    ? product.purchaseLinks
+    : makeDefaultProductPurchaseLinks(name)
+  ).map((link, index) => ({
+    slot: link.slot || `link-${index + 1}`,
+    label: link.label || link.slot || "",
+    url: link.url || "",
+    logoSrc: link.logoSrc || "",
+    logoAlt: link.logoAlt || link.label || "",
+    ariaLabel: link.ariaLabel || `${name} - ${link.label || link.slot || "pharmacy"}`,
+    sortOrder: Number.isFinite(Number(link.sortOrder)) ? Number(link.sortOrder) : index,
+  })).filter(link => link.label && link.url);
+
+  return {
+    country,
+    language,
+    product: {
+      id: product.id,
+      slug: product.slug || product.id,
+      status: product.status,
+      pagePath: product.pagePath,
+      category,
+      therapeuticArea,
+      accent: product.accentColor || "",
+      isFeatured: Boolean(product.isFeatured),
+      name,
+      shortDescription: translation.shortDescription || "",
+      image: {
+        src: image.src || "",
+        url: image.src || "",
+        alt: image.alt || name,
+      },
+      page: {
+        title: `STADA - ${name}`,
+        kicker: sections.hero?.kicker || therapeuticArea || "",
+        lead: heroLead,
+        overviewLabel: sections.overview?.label || therapeuticArea || "",
+        overviewHeading: sections.overview?.heading || name,
+        overviewIntro,
+        formulaLabel: sections.formula?.label || "Формула",
+        formulaHeading: sections.formula?.heading || name,
+        formulaIntro,
+        usageLabel: sections.usage?.label || "Когда применяют",
+        usageHeading: usageHeading || name,
+        noteTitle: sections.note?.title || "Важно",
+        noteText,
+        buyIntro,
+        badges,
+        benefits,
+        facts,
+        formulaPoints,
+        usageItems,
+        purchaseLinks,
+      },
+    },
   };
 }
 
@@ -1216,6 +1402,11 @@ function routeProductSlugFromAdminPath(pathname) {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+function routeProductSlugFromPublicPath(pathname) {
+  const match = pathname.match(/^\/api\/products\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 async function handleRequest(request, response) {
   const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
   const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
@@ -1419,6 +1610,31 @@ async function handleRequest(request, response) {
       return;
     }
 
+    if (request.method === "GET" && pathname.startsWith("/api/products/")) {
+      const slug = routeProductSlugFromPublicPath(pathname);
+      const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId") || "kazakhstan";
+      const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language") || "ru";
+      const product = await getProduct(slug);
+      if (!product || product.status === "archived") {
+        sendJson(response, 404, {
+          error: {
+            code: "PRODUCT_NOT_FOUND",
+            message: "Product was not found.",
+          },
+        });
+        return;
+      }
+
+      const enrichedProduct = applyStaticProductFallbacks([product], country, { includeDetailFallbacks: true })[0];
+      sendJson(response, 200, productDetailPayloadFromDatabaseProduct(
+        enrichedProduct,
+        await listTherapeuticAreas(),
+        getPagePayload({ country, lang, page: "index.html" }).country,
+        lang
+      ));
+      return;
+    }
+
     if (request.method === "GET" && (pathname === "/api/homepage" || pathname.startsWith("/api/homepage/"))) {
       const payload = getHomepagePayload({
         country: routeCountryFromHomepagePath(pathname) || requestUrl.searchParams.get("country"),
@@ -1470,6 +1686,7 @@ async function handleRequest(request, response) {
           "GET /api/homepage/kazakhstan?lang=kz",
           "GET /api/homepage/kyrgyzstan?lang=kg",
           "GET /api/page/kg?lang=kg&page=products/coldrex.html",
+          "GET /api/products/coldrex?country=kazakhstan&lang=ru",
           "POST /api/homepage { country, lang }",
           "POST /api/page { country, lang, page }",
           "GET /admin",

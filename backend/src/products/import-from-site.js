@@ -1,6 +1,10 @@
 const { runMigrations } = require("../db/migrate");
+const fs = require("node:fs");
+const path = require("node:path");
 const { getPagePayload } = require("../content-loader");
 const { upsertProduct, upsertTherapeuticArea } = require("./repository");
+
+const contentRoot = path.resolve(__dirname, "..", "..", "content", "main");
 
 function normalizeAreaId(value) {
   const firstToken = String(value || "").split(/\s+/).find(Boolean) || "general";
@@ -27,6 +31,49 @@ function makeTranslation(product) {
     shortDescription: product.shortDescription || "",
     benefits: [],
   };
+}
+
+function getAttributeValue(source, name) {
+  const match = String(source || "").match(new RegExp(`\\s${name}=["']([^"']*)["']`, "i"));
+  return match ? match[1].trim() : "";
+}
+
+function stripTags(value) {
+  return String(value || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+function parseProductPurchaseLinks(pagePath) {
+  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return [];
+
+  const filePath = path.resolve(contentRoot, normalizedPagePath);
+  const relativePath = path.relative(contentRoot, filePath);
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return [];
+
+  const html = fs.readFileSync(filePath, "utf8");
+  const links = [];
+  const partnerPattern = /<a\b[^>]*class=["'][^"']*\bpartner-card\b[^"']*["'][^>]*>[\s\S]*?<\/a>/gi;
+  const cards = html.match(partnerPattern) || [];
+
+  cards.forEach((card, index) => {
+    const url = getAttributeValue(card, "href");
+    const imageMatch = card.match(/<img\b[^>]*>/i);
+    const imageTag = imageMatch ? imageMatch[0] : "";
+    const labelMatch = card.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i);
+    const label = stripTags(labelMatch ? labelMatch[1] : getAttributeValue(imageTag, "alt"));
+    if (!url || !label) return;
+
+    links.push({
+      slot: label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `partner-${index + 1}`,
+      label,
+      url,
+      logoSrc: getAttributeValue(imageTag, "src").replace(/^\.\.\//, ""),
+      logoAlt: getAttributeValue(imageTag, "alt") || label,
+      sortOrder: index,
+    });
+  });
+
+  return links;
 }
 
 async function importProductsFromSite() {
@@ -93,6 +140,7 @@ async function importProductsFromSite() {
           cloudinaryPublicId: cloudinaryPublicIdFromUrl(product.image?.url || product.image?.src),
         },
       },
+      purchaseLinks: parseProductPurchaseLinks(product.href || `products/${product.id}.html`),
     });
     imported += 1;
   }
