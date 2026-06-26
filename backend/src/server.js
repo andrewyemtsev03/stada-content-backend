@@ -607,13 +607,13 @@ function syncProductImageSlots(images = {}) {
   const canonicalImage = getCanonicalProductImageFromSlots(images);
   if (!canonicalImage.src) return images;
 
-  const slotNames = new Set([...Object.keys(images), "card", "detailHero", "hero"]);
-  const synced = {};
-  for (const slot of slotNames) {
+  const synced = { ...images };
+  for (const slot of ["card", "detailHero", "hero"]) {
     synced[slot] = {
-      src: canonicalImage.src || "",
+      ...(synced[slot] || {}),
+      src: synced[slot]?.src || canonicalImage.src || "",
       cloudinaryPublicId: canonicalImage.cloudinaryPublicId || null,
-      alt: canonicalImage.alt || images[slot]?.alt || "",
+      alt: synced[slot]?.alt || canonicalImage.alt || "",
     };
   }
   return synced;
@@ -759,6 +759,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const translation = getProductPayloadTranslation(product, language);
   const sections = getProductPayloadSections(product, language);
   const image = getCanonicalProductImageFromSlots(product.images || {});
+  const images = product.images || {};
   const name = translation.name || product.slug || product.id;
   const benefits = coerceProductTextList(translation.benefits);
   const badges = coerceProductTextList(sections.hero?.badges, sections.overview?.badges).slice(0, 3);
@@ -767,7 +768,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const overviewIntro = sections.overview?.intro || translation.fullDescription || translation.shortDescription || "";
   const heroLead = sections.hero?.lead || translation.fullDescription || translation.shortDescription || overviewIntro;
   const formulaIntro = sections.formula?.intro || translation.composition || "";
-  const formulaImage = sections.formula?.image || "";
+  const formulaImage = images.formulaCenter?.src || sections.formula?.image || "";
   const usageHeading = sections.usage?.heading || "";
   const noteText = sections.note?.text || translation.usageText || "";
   const buyIntro = sections.buy?.intro || "";
@@ -778,7 +779,12 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   }));
   const facts = coerceProductObjectList(sections.overview?.facts || sections.facts?.items, fallbackFacts).slice(0, 4);
   const metrics = coerceProductObjectList(sections.hero?.metrics, facts.slice(0, 3)).slice(0, 3);
-  const formulaPoints = coerceProductObjectList(sections.formula?.points, facts.slice(0, 3)).slice(0, 3);
+  const formulaPointFallback = [
+    { ...(sections.formula?.points?.[0] || {}), imageSrc: images.formulaPointActive?.src || sections.formula?.points?.[0]?.imageSrc || "" },
+    { ...(sections.formula?.points?.[1] || {}), imageSrc: images.formulaPointSeawater?.src || sections.formula?.points?.[1]?.imageSrc || "" },
+    { ...(sections.formula?.points?.[2] || {}), imageSrc: images.formulaPointFormat?.src || sections.formula?.points?.[2]?.imageSrc || "" },
+  ].filter(point => point.text || point.title || point.value || point.imageSrc);
+  const formulaPoints = coerceProductObjectList(formulaPointFallback, facts.slice(0, 3)).slice(0, 3);
   const usageItems = coerceProductObjectList(sections.usage?.items, benefits.slice(0, 3).map((text, index) => ({
     title: `${index + 1}`,
     text,

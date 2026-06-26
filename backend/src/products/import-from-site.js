@@ -5,6 +5,8 @@ const { getPagePayload } = require("../content-loader");
 const { upsertProduct, upsertTherapeuticArea } = require("./repository");
 
 const contentRoot = path.resolve(__dirname, "..", "..", "content", "main");
+const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
+const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
 
 function normalizeAreaId(value) {
   const firstToken = String(value || "").split(/\s+/).find(Boolean) || "general";
@@ -22,6 +24,28 @@ function productMapById(products) {
 function cloudinaryPublicIdFromUrl(value) {
   const match = String(value || "").match(/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?:v\d+\/)?(.+)\.[a-z0-9]+(?:[?#].*)?$/i);
   return match ? match[1] : null;
+}
+
+function normalizeProductImageSrc(value) {
+  return String(value || "").trim().replace(/\\/g, "/").replace(/^(\.\/|\.\.\/)+/, "");
+}
+
+function imageExtensionFromSrc(src) {
+  const match = String(src || "").split(/[?#]/)[0].match(/\.([a-z0-9]+)$/i);
+  const extension = match ? match[1].toLowerCase() : "png";
+  return extension === "jpeg" ? "jpg" : extension;
+}
+
+function stableCloudinaryProductUrl(productId, slot, sourceSrc) {
+  if (!cloudinaryCloudName || !productId || !slot || !sourceSrc) return "";
+  if (/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//i.test(sourceSrc)) return sourceSrc;
+
+  const publicId = [
+    cloudinaryProductUploadFolder.replace(/^\/+|\/+$/g, ""),
+    normalizeAreaId(productId),
+    normalizeAreaId(slot),
+  ].filter(Boolean).join("/");
+  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/${publicId}.${imageExtensionFromSrc(sourceSrc)}`;
 }
 
 function makeTranslation(product) {
@@ -76,6 +100,40 @@ function parseProductPurchaseLinks(pagePath) {
   return links;
 }
 
+function parseProductDetailImages(pagePath, productId) {
+  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return {};
+
+  const filePath = path.resolve(contentRoot, normalizedPagePath);
+  const relativePath = path.relative(contentRoot, filePath);
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return {};
+
+  const html = fs.readFileSync(filePath, "utf8");
+  const imageSlots = {
+    image_002: "detailHero",
+    image_003: "formulaCenter",
+    image_004: "formulaPointActive",
+    image_005: "formulaPointSeawater",
+    image_006: "formulaPointFormat",
+  };
+  const images = {};
+
+  for (const [imageIdSuffix, slot] of Object.entries(imageSlots)) {
+    const pattern = new RegExp(`<img\\b[^>]*data-backend-image-id=["']products_${productId.replace(/[^a-z0-9]+/gi, "_")}_${imageIdSuffix}["'][^>]*>`, "i");
+    const imageTag = html.match(pattern)?.[0] || "";
+    const sourceSrc = normalizeProductImageSrc(getAttributeValue(imageTag, "src"));
+    if (!sourceSrc) continue;
+    const src = stableCloudinaryProductUrl(productId, slot, sourceSrc) || sourceSrc;
+    images[slot] = {
+      src,
+      alt: getAttributeValue(imageTag, "alt") || "",
+      cloudinaryPublicId: cloudinaryPublicIdFromUrl(src),
+    };
+  }
+
+  return images;
+}
+
 async function importProductsFromSite() {
   await runMigrations();
 
@@ -120,6 +178,7 @@ async function importProductsFromSite() {
   for (const [index, product] of ruProducts.entries()) {
     const kzProduct = kzById.get(product.id);
     const areaId = normalizeAreaId(product.category);
+    const detailImages = parseProductDetailImages(product.href || `products/${product.id}.html`, product.id);
     await upsertProduct({
       id: product.id,
       slug: product.id,
@@ -139,6 +198,7 @@ async function importProductsFromSite() {
           alt: product.image?.alt || product.name || product.id,
           cloudinaryPublicId: cloudinaryPublicIdFromUrl(product.image?.url || product.image?.src),
         },
+        ...detailImages,
       },
       purchaseLinks: parseProductPurchaseLinks(product.href || `products/${product.id}.html`),
     });
