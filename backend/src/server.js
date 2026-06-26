@@ -596,12 +596,16 @@ function isCloudinaryImageSource(src) {
 }
 
 function getCanonicalProductImageFromSlots(images = {}) {
-  const candidates = [
+  const mainCandidates = [
     images.card,
     images.detailHero,
     images.hero,
-    ...Object.values(images),
   ].filter(image => image?.src);
+  if (mainCandidates.length) {
+    return mainCandidates.find(image => isCloudinaryImageSource(image.src)) || mainCandidates[0] || {};
+  }
+
+  const candidates = Object.values(images).filter(image => image?.src);
   return candidates.find(image => isCloudinaryImageSource(image.src)) || candidates[0] || {};
 }
 
