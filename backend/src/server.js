@@ -704,8 +704,10 @@ function coerceProductObjectList(value, fallback = []) {
       const title = String(item.title || item.label || item.heading || "").trim();
       const text = String(item.text || item.description || item.body || "").trim();
       const value = String(item.value || item.metric || item.icon || "").trim();
-      if (!title && !text && !value) return null;
-      return { value, title, text };
+      const imageSrc = String(item.imageSrc || item.image_src || item.src || "").trim();
+      const imageAlt = String(item.imageAlt || item.image_alt || item.alt || "").trim();
+      if (!title && !text && !value && !imageSrc) return null;
+      return { value, title, text, imageSrc, imageAlt };
     })
     .filter(Boolean);
 }
@@ -765,6 +767,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const overviewIntro = sections.overview?.intro || translation.fullDescription || translation.shortDescription || "";
   const heroLead = sections.hero?.lead || translation.fullDescription || translation.shortDescription || overviewIntro;
   const formulaIntro = sections.formula?.intro || translation.composition || "";
+  const formulaImage = sections.formula?.image || "";
   const usageHeading = sections.usage?.heading || "";
   const noteText = sections.note?.text || translation.usageText || "";
   const buyIntro = sections.buy?.intro || "";
@@ -822,6 +825,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
         formulaLabel: sections.formula?.label || "Формула",
         formulaHeading: sections.formula?.heading || name,
         formulaIntro,
+        formulaImage,
         usageLabel: sections.usage?.label || "Когда применяют",
         usageHeading: usageHeading || name,
         noteTitle: sections.note?.title || "Важно",
@@ -1195,6 +1199,18 @@ function collectProductUsageItems(text, orderedKeys, keyPrefix) {
   return [...items.values()].filter(item => item.title || item.text);
 }
 
+function collectProductFormulaItems(text, orderedKeys, keyPrefix, imageSlots = []) {
+  return orderedKeys
+    .filter(key => key.startsWith(`${keyPrefix}_formula_`) && key.endsWith("_text"))
+    .map((key, index) => ({
+      title: "",
+      text: text[key] || "",
+      imageSrc: imageSlots[index]?.url || imageSlots[index]?.src || "",
+      imageAlt: imageSlots[index]?.alt || "",
+    }))
+    .filter(item => item.text || item.imageSrc);
+}
+
 function getProductDetailFallbackFromPayload(payload) {
   const keyPrefix = findProductDetailKeyPrefix(payload);
   const domBase = productDomBaseFromPagePath(payload.page?.path);
@@ -1232,6 +1248,11 @@ function getProductDetailFallbackFromPayload(payload) {
           label: text[`${keyPrefix}_formula_label`] || "",
           heading: text[`${keyPrefix}_formula_heading`] || "",
           intro: text[`${keyPrefix}_formula_intro`] || "",
+          image: getPayloadDomImageValue(payload, `products_${domBase}_image_003`)?.url
+            || getPayloadDomImageValue(payload, `products_${domBase}_image_003`)?.src
+            || "",
+          points: collectProductFormulaItems(text, orderedTextKeys, keyPrefix, [4, 5, 6]
+            .map(number => getPayloadDomImageValue(payload, `products_${domBase}_image_${String(number).padStart(3, "0")}`))),
         },
         usage: {
           label: text[`${keyPrefix}_usage_label`] || "",
