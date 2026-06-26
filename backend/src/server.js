@@ -1,4 +1,5 @@
 const crypto = require("node:crypto");
+const childProcess = require("node:child_process");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -25,6 +26,7 @@ const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const cloudinaryApiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
 const cloudinaryUploadFolder = String(process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero").trim();
 const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
+const productImageSyncTimeoutMs = Number(process.env.PRODUCT_IMAGE_SYNC_TIMEOUT_MS || 5 * 60 * 1000);
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
@@ -1543,6 +1545,55 @@ function routeProductSlugFromPublicPath(pathname) {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+function runProductImageCloudinarySync() {
+  return new Promise((resolve, reject) => {
+    const scriptPath = path.resolve(__dirname, "..", "scripts", "sync-product-images-to-cloudinary.js");
+    const child = childProcess.spawn(process.execPath, [scriptPath], {
+      cwd: path.resolve(__dirname, ".."),
+      env: process.env,
+      windowsHide: true,
+    });
+    let stdout = "";
+    let stderr = "";
+    let finished = false;
+
+    const timer = setTimeout(() => {
+      if (finished) return;
+      child.kill("SIGTERM");
+      reject(Object.assign(new Error("Cloudinary image sync timed out."), {
+        statusCode: 504,
+        code: "PRODUCT_IMAGE_SYNC_TIMEOUT",
+      }));
+    }, productImageSyncTimeoutMs);
+
+    child.stdout.on("data", chunk => {
+      stdout += chunk.toString();
+    });
+    child.stderr.on("data", chunk => {
+      stderr += chunk.toString();
+    });
+    child.on("error", error => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", code => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve({ stdout, stderr });
+        return;
+      }
+      reject(Object.assign(new Error(stderr || stdout || `Cloudinary image sync failed with exit code ${code}.`), {
+        statusCode: 500,
+        code: "PRODUCT_IMAGE_SYNC_FAILED",
+      }));
+    });
+  });
+}
+
 async function handleRequest(request, response) {
   const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
   const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
@@ -1626,6 +1677,16 @@ async function handleRequest(request, response) {
       const result = await importProductsFromSite();
       sendJson(response, 200, {
         status: "imported",
+        ...result,
+      });
+      return;
+    }
+
+    if (request.method === "POST" && pathname === "/api/admin/products/sync-cloudinary-images") {
+      requireAdmin(request);
+      const result = await runProductImageCloudinarySync();
+      sendJson(response, 200, {
+        status: "synced",
         ...result,
       });
       return;
@@ -1832,6 +1893,7 @@ async function handleRequest(request, response) {
           "GET /api/admin/products",
           "POST /api/admin/products",
           "POST /api/admin/products/import-from-site",
+          "POST /api/admin/products/sync-cloudinary-images",
           "GET /api/admin/products/:slug",
           "PUT /api/admin/products/:slug",
           "DELETE /api/admin/products/:slug",
