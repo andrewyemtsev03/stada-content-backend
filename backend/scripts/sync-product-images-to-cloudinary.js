@@ -17,6 +17,12 @@ const uploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "sta
 const dryRun = ["1", "true", "yes"].includes(
   String(process.env.PRODUCT_IMAGE_SYNC_DRY_RUN || process.env.DRY_RUN || "").trim().toLowerCase()
 );
+const overwriteExistingCloudinary = ["1", "true", "yes"].includes(
+  String(process.env.PRODUCT_IMAGE_SYNC_OVERWRITE_CLOUDINARY || process.env.PRODUCT_IMAGE_SYNC_FORCE || "").trim().toLowerCase()
+);
+const checkDatabaseInDryRun = ["1", "true", "yes"].includes(
+  String(process.env.PRODUCT_IMAGE_SYNC_CHECK_DATABASE || "").trim().toLowerCase()
+);
 const logLimit = Number.parseInt(process.env.PRODUCT_IMAGE_SYNC_LOG_LIMIT || "40", 10);
 
 const imageSlots = {
@@ -127,6 +133,18 @@ function productIdFromFile(fileName) {
   return fileName.replace(/\.html$/i, "");
 }
 
+function existingImageKey(productId, slot) {
+  return `${productId}\0${slot}`;
+}
+
+function isCloudinaryImage(image) {
+  return Boolean(
+    image?.cloudinary_public_id ||
+    /(^|\/\/)res\.cloudinary\.com\//i.test(String(image?.src || "")) ||
+    /cloudinary\.com/i.test(String(image?.src || ""))
+  );
+}
+
 function parseProductImages(fileName) {
   const productId = productIdFromFile(fileName);
   const html = fs.readFileSync(path.join(contentRoot, "products", fileName), "utf8");
@@ -180,6 +198,20 @@ async function upsertProductImage({ productId, slot, uploaded, alt }) {
   ]);
 }
 
+async function listExistingProductImages(productIds) {
+  if (!productIds.length) return new Map();
+
+  const result = await getDbQuery()(`
+    select product_id, slot, src, cloudinary_public_id
+    from product_images
+    where product_id = any($1::text[])
+  `, [productIds]);
+
+  return new Map(
+    result.rows.map(row => [existingImageKey(row.product_id, row.slot), row])
+  );
+}
+
 async function main() {
   assertConfigured();
   const productsDir = path.join(contentRoot, "products");
@@ -189,8 +221,28 @@ async function main() {
   const parsed = productFiles.map(parseProductImages);
   const images = parsed.flatMap(item => item.images);
   const skipped = parsed.flatMap(item => item.skipped);
+  const shouldCheckDatabase = !dryRun || checkDatabaseInDryRun;
+  const existingImages = shouldCheckDatabase
+    ? await listExistingProductImages([...new Set(images.map(image => image.productId))])
+    : new Map();
+  const existingCloudinaryImages = [];
+  const uploadCandidates = images.filter(image => {
+    const existingImage = existingImages.get(existingImageKey(image.productId, image.slot));
+    if (!overwriteExistingCloudinary && isCloudinaryImage(existingImage)) {
+      existingCloudinaryImages.push({
+        productId: image.productId,
+        slot: image.slot,
+        src: existingImage.src,
+      });
+      return false;
+    }
+    return true;
+  });
 
   console.log(`Using product asset root(s): ${assetsRoots.join(", ")}`);
+  if (!overwriteExistingCloudinary) {
+    console.log("Existing Cloudinary images will be kept. Set PRODUCT_IMAGE_SYNC_OVERWRITE_CLOUDINARY=true to replace them.");
+  }
   if (skipped.length) {
     console.log(`Skipped ${skipped.length} product image(s):`);
     skipped.slice(0, logLimit).forEach(item => {
@@ -200,20 +252,32 @@ async function main() {
       console.log(`...and ${skipped.length - logLimit} more skipped image(s).`);
     }
   }
+  if (existingCloudinaryImages.length) {
+    console.log(`Kept ${existingCloudinaryImages.length} existing Cloudinary image(s):`);
+    existingCloudinaryImages.slice(0, logLimit).forEach(item => {
+      console.log(`Kept ${item.productId}/${item.slot}: ${item.src}`);
+    });
+    if (existingCloudinaryImages.length > logLimit) {
+      console.log(`...and ${existingCloudinaryImages.length - logLimit} more existing Cloudinary image(s).`);
+    }
+  }
 
   if (dryRun) {
-    console.log(`Dry run found ${images.length} uploadable product image(s).`);
-    images.slice(0, logLimit).forEach(item => {
+    if (!checkDatabaseInDryRun) {
+      console.log("Dry run did not check the database, so existing Cloudinary rows are not counted here.");
+    }
+    console.log(`Dry run found ${uploadCandidates.length} uploadable product image(s).`);
+    uploadCandidates.slice(0, logLimit).forEach(item => {
       console.log(`Would upload ${item.productId}/${item.slot}: ${item.filePath}`);
     });
-    if (images.length > logLimit) {
-      console.log(`...and ${images.length - logLimit} more uploadable image(s).`);
+    if (uploadCandidates.length > logLimit) {
+      console.log(`...and ${uploadCandidates.length - logLimit} more uploadable image(s).`);
     }
     return;
   }
 
   let uploadedCount = 0;
-  for (const image of images) {
+  for (const image of uploadCandidates) {
     const uploaded = await uploadImage(image);
     await upsertProductImage({ ...image, uploaded });
     uploadedCount += 1;
@@ -221,6 +285,7 @@ async function main() {
   }
 
   console.log(`Synced ${uploadedCount} product image(s) to Cloudinary.`);
+  console.log(`Kept ${existingCloudinaryImages.length} existing Cloudinary image(s).`);
 }
 
 main().catch(error => {
