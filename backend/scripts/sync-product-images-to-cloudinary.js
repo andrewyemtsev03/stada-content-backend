@@ -212,6 +212,18 @@ async function listExistingProductImages(productIds) {
   );
 }
 
+async function listExistingProductIds(productIds) {
+  if (!productIds.length) return new Set();
+
+  const result = await getDbQuery()(`
+    select id
+    from products
+    where id = any($1::text[])
+  `, [productIds]);
+
+  return new Set(result.rows.map(row => row.id));
+}
+
 async function main() {
   assertConfigured();
   const productsDir = path.join(contentRoot, "products");
@@ -222,11 +234,21 @@ async function main() {
   const images = parsed.flatMap(item => item.images);
   const skipped = parsed.flatMap(item => item.skipped);
   const shouldCheckDatabase = !dryRun || checkDatabaseInDryRun;
+  const productIds = [...new Set(images.map(image => image.productId))];
+  const existingProductIds = shouldCheckDatabase
+    ? await listExistingProductIds(productIds)
+    : new Set(productIds);
   const existingImages = shouldCheckDatabase
-    ? await listExistingProductImages([...new Set(images.map(image => image.productId))])
+    ? await listExistingProductImages(productIds)
     : new Map();
+  const missingProductImages = [];
   const existingCloudinaryImages = [];
   const uploadCandidates = images.filter(image => {
+    if (!existingProductIds.has(image.productId)) {
+      missingProductImages.push(image);
+      return false;
+    }
+
     const existingImage = existingImages.get(existingImageKey(image.productId, image.slot));
     if (!overwriteExistingCloudinary && isCloudinaryImage(existingImage)) {
       existingCloudinaryImages.push({
@@ -251,6 +273,10 @@ async function main() {
     if (skipped.length > logLimit) {
       console.log(`...and ${skipped.length - logLimit} more skipped image(s).`);
     }
+  }
+  if (missingProductImages.length) {
+    const missingProductIds = [...new Set(missingProductImages.map(item => item.productId))];
+    console.log(`Skipped ${missingProductImages.length} image(s) for product page(s) missing from PostgreSQL: ${missingProductIds.join(", ")}`);
   }
   if (existingCloudinaryImages.length) {
     console.log(`Kept ${existingCloudinaryImages.length} existing Cloudinary image(s):`);
