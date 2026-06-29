@@ -13,6 +13,7 @@ const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertPro
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
 const adminRoot = path.resolve(__dirname, "..", "..", "admin");
+const productContentRoot = path.resolve(__dirname, "..", "content", "main");
 const adminLogin = process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "andrewyemtsev";
 const adminPassword = process.env.ADMIN_PASSWORD || "StadaAdmin67";
 const adminSessionTtlMs = Number(process.env.ADMIN_SESSION_TTL_MS || 8 * 60 * 60 * 1000);
@@ -1166,6 +1167,219 @@ function collectTextValuesByPrefix(text, orderedKeys, prefix) {
     .filter(Boolean);
 }
 
+function getHtmlAttributeValue(source, name) {
+  const match = String(source || "").match(new RegExp(`\\s${name}=["']([^"']*)["']`, "i"));
+  return match ? match[1].trim() : "";
+}
+
+function stripHtmlTags(value) {
+  return String(value || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
+function getFallbackPayloadText(payload, key) {
+  return payload?.content?.text?.[key] || "";
+}
+
+function getFallbackSnippetText(snippet, payload) {
+  const i18nKey = getHtmlAttributeValue(snippet, "data-i18n-key");
+  if (i18nKey) return getFallbackPayloadText(payload, i18nKey);
+
+  const backendTextId = getHtmlAttributeValue(snippet, "data-backend-text-id");
+  if (backendTextId) return getPayloadDomTextValue(payload, backendTextId) || stripHtmlTags(snippet);
+
+  return stripHtmlTags(snippet);
+}
+
+function findHtmlTag(source, tagName) {
+  return String(source || "").match(new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "i"))?.[0] || "";
+}
+
+function findHtmlBlocks(source, tagName) {
+  return String(source || "").match(new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi")) || [];
+}
+
+function findHtmlBlocksByClass(source, tagName, className) {
+  const escapedClass = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`<${tagName}\\b(?=[^>]*class=["'][^"']*\\b${escapedClass}\\b)[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi");
+  return String(source || "").match(pattern) || [];
+}
+
+function findHtmlBlockByClass(source, tagName, className) {
+  return findHtmlBlocksByClass(source, tagName, className)[0] || "";
+}
+
+function normalizeFallbackImagePath(value) {
+  return String(value || "").trim().replace(/\\/g, "/").replace(/^(\.\/|\.\.\/)+/, "");
+}
+
+function readStaticProductHtml(pagePath) {
+  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
+  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return "";
+
+  const filePath = path.resolve(productContentRoot, normalizedPagePath);
+  const relativePath = path.relative(productContentRoot, filePath);
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return "";
+  return fs.readFileSync(filePath, "utf8");
+}
+
+function parseStaticHeroOptions(html) {
+  const heroText = findHtmlBlockByClass(html, "div", "product-hero-text");
+  return {
+    hasKicker: /\bproduct-kicker\b/.test(heroText),
+    hasActions: /\bproduct-hero-actions\b/.test(heroText),
+    hasBadges: /\bproduct-badges\b/.test(heroText),
+  };
+}
+
+function parseStaticHeroBadges(html, payload) {
+  const badgesBlock = findHtmlBlockByClass(html, "div", "product-badges");
+  return findHtmlBlocks(badgesBlock, "span")
+    .map(item => getFallbackSnippetText(item, payload))
+    .filter(Boolean);
+}
+
+function parseStaticHeroMetrics(html, payload) {
+  return findHtmlBlocksByClass(html, "div", "product-hero-metric")
+    .map(block => ({
+      value: getFallbackSnippetText(findHtmlTag(block, "strong"), payload),
+      title: getFallbackSnippetText(findHtmlTag(block, "span"), payload),
+      text: "",
+    }))
+    .filter(item => item.value || item.title);
+}
+
+function parseStaticFactItems(html, payload) {
+  return findHtmlBlocksByClass(html, "article", "product-fact-card")
+    .map(block => ({
+      value: getFallbackSnippetText(findHtmlTag(block, "span"), payload),
+      title: getFallbackSnippetText(findHtmlTag(block, "h3"), payload),
+      text: getFallbackSnippetText(findHtmlTag(block, "p"), payload),
+    }))
+    .filter(item => item.value || item.title || item.text);
+}
+
+function parseStaticFormulaItems(html, payload) {
+  return findHtmlBlocksByClass(html, "article", "snup-formula-point")
+    .map(block => {
+      const image = String(block || "").match(/<img\b[^>]*>/i)?.[0] || "";
+      return {
+        className: getHtmlAttributeValue(block, "class"),
+        value: getFallbackSnippetText(findHtmlTag(block, "span"), payload),
+        title: getFallbackSnippetText(findHtmlTag(block, "h3"), payload),
+        text: getFallbackSnippetText(findHtmlTag(block, "p"), payload),
+        imageSrc: normalizeFallbackImagePath(getHtmlAttributeValue(image, "src")),
+        imageAlt: getHtmlAttributeValue(image, "alt"),
+      };
+    })
+    .filter(item => item.value || item.title || item.text || item.imageSrc);
+}
+
+function parseStaticUsageItems(html, payload) {
+  return findHtmlBlocksByClass(html, "article", "usage-item")
+    .map((block, index) => ({
+      className: getHtmlAttributeValue(block, "class"),
+      title: getFallbackSnippetText(findHtmlTag(block, "h3"), payload),
+      text: getFallbackSnippetText(findHtmlTag(block, "p"), payload),
+      isActive: index === 0 || /\bis-active\b/.test(getHtmlAttributeValue(block, "class")),
+    }))
+    .filter(item => item.title || item.text);
+}
+
+function parseStaticProductLayout(html) {
+  const bodyTag = String(html || "").match(/<body\b[^>]*>/i)?.[0] || "";
+  const formulaLayout = findHtmlBlockByClass(html, "div", "product-formula-layout");
+  const formulaSystem = findHtmlBlockByClass(html, "div", "snup-formula-system");
+  const formulaLines = String(html || "").match(/<svg\b(?=[^>]*class=["'][^"']*\bsnup-formula-lines\b)[^>]*>/i)?.[0] || "";
+  const formulaLine = String(html || "").match(/<path\b(?=[^>]*class=["'][^"']*\bsnup-formula-line\b)[^>]*>/i)?.[0] || "";
+  const formulaDot = String(html || "").match(/<circle\b(?=[^>]*class=["'][^"']*\bsnup-formula-dot\b)[^>]*>/i)?.[0] || "";
+
+  return {
+    bodyClasses: getHtmlAttributeValue(bodyTag, "class").split(/\s+/).filter(Boolean),
+    formulaLayoutClassName: getHtmlAttributeValue(formulaLayout, "class"),
+    formulaSystemClassName: getHtmlAttributeValue(formulaSystem, "class"),
+    formulaLinesClassName: getHtmlAttributeValue(formulaLines, "class"),
+    formulaLineClassName: getHtmlAttributeValue(formulaLine, "class"),
+    formulaDotClassName: getHtmlAttributeValue(formulaDot, "class"),
+  };
+}
+
+function parseStaticPurchaseLinks(html) {
+  return findHtmlBlocksByClass(html, "a", "partner-card")
+    .map((block, index) => {
+      const image = String(block || "").match(/<img\b[^>]*>/i)?.[0] || "";
+      const label = stripHtmlTags(findHtmlTag(block, "p")) || getHtmlAttributeValue(image, "alt");
+      const url = getHtmlAttributeValue(block, "href");
+      if (!label || !url) return null;
+      return {
+        slot: label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `partner-${index + 1}`,
+        label,
+        url,
+        logoSrc: normalizeFallbackImagePath(getHtmlAttributeValue(image, "src")),
+        logoAlt: getHtmlAttributeValue(image, "alt") || label,
+        ariaLabel: getHtmlAttributeValue(block, "aria-label"),
+        sortOrder: index,
+      };
+    })
+    .filter(Boolean);
+}
+
+function getProductDetailFallbackFromStaticHtml(payload, keyPrefix) {
+  const html = readStaticProductHtml(payload.page?.path);
+  if (!html) return null;
+  const text = payload.content?.text || {};
+  const benefitKeys = getPayloadTextKeysInOrder(payload)
+    .filter(key => key.startsWith(`${keyPrefix}_benefit`))
+    .sort((left, right) => Number(left.match(/(\d+)$/)?.[1] || 0) - Number(right.match(/(\d+)$/)?.[1] || 0));
+
+  return {
+    translation: {
+      name: text[`${keyPrefix}_page_title`] || text[`${keyPrefix}_name`] || "",
+      shortDescription: text[`${keyPrefix}_page_desc`] || "",
+      fullDescription: text[`${keyPrefix}_page_desc`] || "",
+      composition: text[`${keyPrefix}_formula_intro`] || "",
+      usageText: text[`${keyPrefix}_note_text`] || "",
+      benefits: benefitKeys.map(key => text[key]).filter(Boolean),
+    },
+    sections: {
+      hero: {
+        kicker: text[`${keyPrefix}_kicker`] || "",
+        lead: text[`${keyPrefix}_page_desc`] || "",
+        options: parseStaticHeroOptions(html),
+        badges: parseStaticHeroBadges(html, payload),
+        metrics: parseStaticHeroMetrics(html, payload),
+      },
+      overview: {
+        label: text[`${keyPrefix}_overview_label`] || "",
+        heading: text[`${keyPrefix}_overview_heading`] || "",
+        intro: text[`${keyPrefix}_overview_intro`] || "",
+        facts: parseStaticFactItems(html, payload),
+      },
+      formula: {
+        label: text[`${keyPrefix}_formula_label`] || "",
+        heading: text[`${keyPrefix}_formula_heading`] || "",
+        intro: text[`${keyPrefix}_formula_intro`] || "",
+        image: getPayloadDomImageValue(payload, `products_${productDomBaseFromPagePath(payload.page?.path)}_image_003`)?.url
+          || getPayloadDomImageValue(payload, `products_${productDomBaseFromPagePath(payload.page?.path)}_image_003`)?.src
+          || "",
+        points: parseStaticFormulaItems(html, payload),
+      },
+      usage: {
+        label: text[`${keyPrefix}_usage_label`] || "",
+        heading: text[`${keyPrefix}_usage_heading`] || "",
+        items: parseStaticUsageItems(html, payload),
+      },
+      note: {
+        title: text[`${keyPrefix}_note_title`] || "",
+        text: text[`${keyPrefix}_note_text`] || "",
+      },
+      buy: { intro: text[`${keyPrefix}_buy_intro`] || "" },
+      layout: parseStaticProductLayout(html),
+    },
+    purchaseLinks: parseStaticPurchaseLinks(html),
+    detailHeroImage: getPayloadDomImageValue(payload, `products_${productDomBaseFromPagePath(payload.page?.path)}_image_002`),
+  };
+}
+
 function collectProductCardItems(text, orderedKeys, keyPrefix, values = []) {
   const cards = new Map();
   orderedKeys.forEach(key => {
@@ -1234,6 +1448,9 @@ function getProductDetailFallbackFromPayload(payload) {
   const orderedTextKeys = getPayloadTextKeysInOrder(payload);
 
   if (keyPrefix) {
+    const staticFallback = getProductDetailFallbackFromStaticHtml(payload, keyPrefix);
+    if (staticFallback) return staticFallback;
+
     const benefitKeys = orderedTextKeys
       .filter(key => key.startsWith(`${keyPrefix}_benefit`))
       .sort((left, right) => Number(left.match(/(\d+)$/)?.[1] || 0) - Number(right.match(/(\d+)$/)?.[1] || 0));
@@ -1328,6 +1545,17 @@ function mergeMissingProductSectionContent(current = {}, fallback = {}) {
   return merged;
 }
 
+function isGenericProductPurchaseLinks(links = []) {
+  if (!Array.isArray(links) || !links.length) return true;
+  const genericUrls = new Set([
+    "https://kaspi.kz/shop/",
+    "https://biosfera.kz/",
+    "https://europharma.kz/",
+    "https://aptekaplus.kz/",
+  ]);
+  return links.every(link => genericUrls.has(String(link?.url || "").trim()));
+}
+
 function applyStaticProductDetailFallbacks(products, country) {
   const languages = ["ru", "kz"];
   return (products || []).map(product => {
@@ -1380,6 +1608,10 @@ function applyStaticProductDetailFallbacks(products, country) {
           src: fallback.detailHeroImage.url || fallback.detailHeroImage.src || "",
           alt: nextProduct.images.detailHero?.alt || fallback.detailHeroImage.alt || currentTranslation.name || product.id,
         };
+      }
+
+      if (language === "ru" && Array.isArray(fallback.purchaseLinks) && fallback.purchaseLinks.length && isGenericProductPurchaseLinks(nextProduct.purchaseLinks)) {
+        nextProduct.purchaseLinks = fallback.purchaseLinks;
       }
     }
 
