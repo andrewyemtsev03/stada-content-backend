@@ -712,8 +712,10 @@ function coerceProductObjectList(value, fallback = []) {
       const value = String(item.value || item.metric || item.icon || "").trim();
       const imageSrc = String(item.imageSrc || item.image_src || item.src || "").trim();
       const imageAlt = String(item.imageAlt || item.image_alt || item.alt || "").trim();
+      const className = String(item.className || item.class_name || "").trim();
+      const isActive = Boolean(item.isActive || item.is_active);
       if (!title && !text && !value && !imageSrc) return null;
-      return { value, title, text, imageSrc, imageAlt };
+      return { value, title, text, imageSrc, imageAlt, className, isActive };
     })
     .filter(Boolean);
 }
@@ -831,6 +833,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
         title: `STADA - ${name}`,
         kicker: sections.hero?.kicker || therapeuticArea || "",
         lead: heroLead,
+        heroOptions: sections.hero?.options || {},
         overviewLabel: sections.overview?.label || therapeuticArea || "",
         overviewHeading: sections.overview?.heading || name,
         overviewIntro,
@@ -843,6 +846,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
         noteTitle: sections.note?.title || "Важно",
         noteText,
         buyIntro,
+        layout: sections.layout || {},
         badges,
         metrics,
         benefits,
