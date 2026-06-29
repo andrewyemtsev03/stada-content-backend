@@ -1,16 +1,23 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { query } = require("../src/db/client");
 
 const backendRoot = path.resolve(__dirname, "..");
 const contentRoot = path.join(backendRoot, "content", "main");
 const defaultAssetsRoot = path.join(backendRoot, "assets");
-const assetsRoot = path.resolve(process.env.PRODUCT_ASSETS_ROOT || defaultAssetsRoot);
+const assetsRoots = String(process.env.PRODUCT_ASSETS_ROOT || defaultAssetsRoot)
+  .split(path.delimiter)
+  .map(item => item.trim())
+  .filter(Boolean)
+  .map(item => path.resolve(item));
 const cloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const apiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const apiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
 const uploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
+const dryRun = ["1", "true", "yes"].includes(
+  String(process.env.PRODUCT_IMAGE_SYNC_DRY_RUN || process.env.DRY_RUN || "").trim().toLowerCase()
+);
+const logLimit = Number.parseInt(process.env.PRODUCT_IMAGE_SYNC_LOG_LIMIT || "40", 10);
 
 const imageSlots = {
   image_002: "detailHero",
@@ -19,6 +26,15 @@ const imageSlots = {
   image_005: "formulaPointSeawater",
   image_006: "formulaPointFormat",
 };
+
+let dbQuery = null;
+
+function getDbQuery() {
+  if (!dbQuery) {
+    dbQuery = require("../src/db/client").query;
+  }
+  return dbQuery;
+}
 
 function assertConfigured() {
   const missing = [];
@@ -56,12 +72,18 @@ function makeSignature(params) {
 function resolveAssetPath(src) {
   const normalized = String(src || "")
     .replace(/\\/g, "/")
+    .replace(/[?#].*$/, "")
     .replace(/^(\.\/|\.\.\/)+/, "")
     .replace(/^assets\//, "");
-  const filePath = path.resolve(assetsRoot, normalized);
-  const relativePath = path.relative(assetsRoot, filePath);
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) return "";
-  return filePath;
+
+  for (const assetsRoot of assetsRoots) {
+    const filePath = path.resolve(assetsRoot, normalized);
+    const relativePath = path.relative(assetsRoot, filePath);
+    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) continue;
+    if (fs.existsSync(filePath)) return filePath;
+  }
+
+  return "";
 }
 
 function mimeTypeForFile(filePath) {
@@ -110,6 +132,7 @@ function parseProductImages(fileName) {
   const html = fs.readFileSync(path.join(contentRoot, "products", fileName), "utf8");
   const domBase = productId.replace(/[^a-z0-9]+/gi, "_");
   const images = [];
+  const skipped = [];
 
   for (const [suffix, slot] of Object.entries(imageSlots)) {
     const pattern = new RegExp(`<img\\b[^>]*data-backend-image-id=["']products_${domBase}_${suffix}["'][^>]*>`, "i");
@@ -117,7 +140,10 @@ function parseProductImages(fileName) {
     const src = getAttributeValue(imageTag, "src");
     if (!src) continue;
     const filePath = resolveAssetPath(src);
-    if (!filePath || !fs.existsSync(filePath)) continue;
+    if (!filePath) {
+      skipped.push({ productId, slot, src, reason: "local file not found" });
+      continue;
+    }
     images.push({
       productId,
       slot,
@@ -126,11 +152,11 @@ function parseProductImages(fileName) {
     });
   }
 
-  return images;
+  return { images, skipped };
 }
 
 async function upsertProductImage({ productId, slot, uploaded, alt }) {
-  await query(`
+  await getDbQuery()(`
     insert into product_images (
       product_id,
       slot,
@@ -160,7 +186,31 @@ async function main() {
   const productFiles = fs.readdirSync(productsDir)
     .filter(file => file.endsWith(".html") && file !== "index.html")
     .sort();
-  const images = productFiles.flatMap(parseProductImages);
+  const parsed = productFiles.map(parseProductImages);
+  const images = parsed.flatMap(item => item.images);
+  const skipped = parsed.flatMap(item => item.skipped);
+
+  console.log(`Using product asset root(s): ${assetsRoots.join(", ")}`);
+  if (skipped.length) {
+    console.log(`Skipped ${skipped.length} product image(s):`);
+    skipped.slice(0, logLimit).forEach(item => {
+      console.log(`Skipped ${item.productId}/${item.slot}: ${item.src} (${item.reason})`);
+    });
+    if (skipped.length > logLimit) {
+      console.log(`...and ${skipped.length - logLimit} more skipped image(s).`);
+    }
+  }
+
+  if (dryRun) {
+    console.log(`Dry run found ${images.length} uploadable product image(s).`);
+    images.slice(0, logLimit).forEach(item => {
+      console.log(`Would upload ${item.productId}/${item.slot}: ${item.filePath}`);
+    });
+    if (images.length > logLimit) {
+      console.log(`...and ${images.length - logLimit} more uploadable image(s).`);
+    }
+    return;
+  }
 
   let uploadedCount = 0;
   for (const image of images) {
