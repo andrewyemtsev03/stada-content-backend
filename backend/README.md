@@ -15,14 +15,21 @@ By default the API listens on `http://127.0.0.1:3001`. Override with `PORT=4000 
 
 Open the admin panel at `http://127.0.0.1:3001/admin` after the backend is running. The panel edits dynamic homepage text and images for the selected country and language, then stores overrides in `backend/data/content-overrides.json`.
 
-Default admin credentials:
+Configure admin credentials before starting the backend:
 
 ```text
-login: andrewyemtsev
-password: StadaAdmin67
+ADMIN_LOGIN=your_admin_login
+ADMIN_PASSWORD=use_a_long_random_password
 ```
 
-For deployment, override them with `ADMIN_LOGIN` and `ADMIN_PASSWORD`.
+The backend will not accept admin logins until both variables are set. For production, also set:
+
+```text
+NODE_ENV=production
+CORS_ORIGINS=https://your-public-site.example,https://your-admin-site.example
+ADMIN_LOGIN_MAX_ATTEMPTS=8
+ADMIN_LOGIN_WINDOW_MS=900000
+```
 
 ## Cloudinary Uploads
 

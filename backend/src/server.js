@@ -14,29 +14,104 @@ const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
 const adminRoot = path.resolve(__dirname, "..", "..", "admin");
 const productContentRoot = path.resolve(__dirname, "..", "content", "main");
-const adminLogin = process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "andrewyemtsev";
-const adminPassword = process.env.ADMIN_PASSWORD || "StadaAdmin67";
-const adminSessionTtlMs = Number(process.env.ADMIN_SESSION_TTL_MS || 8 * 60 * 60 * 1000);
+const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "").trim();
+const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
+const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
+const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
+const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
 const adminSessions = new Map();
+const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
-const maxJsonBodyBytes = Number(process.env.MAX_JSON_BODY_BYTES || 8 * 1024 * 1024);
+const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 8 * 1024 * 1024);
 const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const cloudinaryApiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
 const cloudinaryUploadFolder = String(process.env.CLOUDINARY_UPLOAD_FOLDER || "stada/hero").trim();
 const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
-const productImageSyncTimeoutMs = Number(process.env.PRODUCT_IMAGE_SYNC_TIMEOUT_MS || 5 * 60 * 1000);
+const productImageSyncTimeoutMs = positiveNumber(process.env.PRODUCT_IMAGE_SYNC_TIMEOUT_MS, 5 * 60 * 1000);
+const allowedCorsOrigins = parseOriginList(process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || "");
+const allowAnyCorsOrigin = allowedCorsOrigins.length === 0 && process.env.NODE_ENV !== "production";
+const securityHeaders = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+  "Content-Security-Policy": [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https:",
+  ].join("; "),
+};
+
+function positiveNumber(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function parseOriginList(value) {
+  return String(value || "")
+    .split(",")
+    .map(origin => {
+      try {
+        return new URL(origin.trim()).origin;
+      } catch (error) {
+        return "";
+      }
+    })
+    .filter(Boolean);
+}
+
+function appendVaryHeader(response, value) {
+  const current = response.getHeader("Vary");
+  const values = String(current || "")
+    .split(",")
+    .map(item => item.trim())
+    .filter(Boolean);
+  if (!values.includes(value)) values.push(value);
+  response.setHeader("Vary", values.join(", "));
+}
+
+function applyRequestHeaders(request, response) {
+  Object.entries(securityHeaders).forEach(([header, value]) => response.setHeader(header, value));
+
+  const origin = String(request.headers.origin || "").trim();
+  if (!origin) return;
+
+  let normalizedOrigin = "";
+  try {
+    normalizedOrigin = new URL(origin).origin;
+  } catch (error) {
+    return;
+  }
+
+  const allowedOrigin = allowAnyCorsOrigin
+    ? "*"
+    : allowedCorsOrigins.includes(normalizedOrigin)
+      ? normalizedOrigin
+      : "";
+  if (!allowedOrigin) return;
+
+  response.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  response.setHeader("Access-Control-Max-Age", "600");
+  if (allowedOrigin !== "*") appendVaryHeader(response, "Origin");
+}
 
 function sendJson(response, statusCode, payload) {
   response.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
-    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "Cache-Control": "no-store",
   });
-  response.end(JSON.stringify(payload, null, 2));
+  response.end(statusCode === 204 ? "" : JSON.stringify(payload, null, 2));
 }
 
 function sendFile(response, filePath) {
@@ -161,6 +236,66 @@ function requireAdmin(request) {
   }
 }
 
+function assertAdminCredentialsConfigured() {
+  if (adminLogin && adminPassword) return;
+  throw Object.assign(new Error("Admin credentials are not configured on the backend."), {
+    statusCode: 500,
+    code: "ADMIN_CREDENTIALS_NOT_CONFIGURED",
+  });
+}
+
+function requestIp(request) {
+  const forwardedFor = String(request.headers["x-forwarded-for"] || "")
+    .split(",")[0]
+    .trim();
+  return forwardedFor || request.socket?.remoteAddress || "unknown";
+}
+
+function adminLoginAttemptKey(request, login) {
+  return `${requestIp(request)}:${String(login || "").trim().toLowerCase() || "unknown"}`;
+}
+
+function cleanupAdminLoginAttempts(now = Date.now()) {
+  for (const [key, attempt] of adminLoginAttempts.entries()) {
+    const isExpired = attempt.blockedUntil
+      ? attempt.blockedUntil <= now
+      : attempt.firstAttemptAt + adminLoginWindowMs <= now;
+    if (isExpired) adminLoginAttempts.delete(key);
+  }
+}
+
+function assertAdminLoginAllowed(request, login) {
+  cleanupAdminLoginAttempts();
+  const attempt = adminLoginAttempts.get(adminLoginAttemptKey(request, login));
+  if (!attempt?.blockedUntil || attempt.blockedUntil <= Date.now()) return;
+
+  throw Object.assign(new Error("Too many failed login attempts. Try again later."), {
+    statusCode: 429,
+    code: "ADMIN_LOGIN_RATE_LIMITED",
+  });
+}
+
+function recordAdminLoginFailure(request, login) {
+  const now = Date.now();
+  cleanupAdminLoginAttempts(now);
+  const key = adminLoginAttemptKey(request, login);
+  const current = adminLoginAttempts.get(key);
+  const firstAttemptAt = current?.firstAttemptAt && current.firstAttemptAt + adminLoginWindowMs > now
+    ? current.firstAttemptAt
+    : now;
+  const count = firstAttemptAt === current?.firstAttemptAt ? current.count + 1 : 1;
+
+  adminLoginAttempts.set(key, {
+    firstAttemptAt,
+    count,
+    blockedUntil: count >= adminLoginMaxAttempts ? now + adminLoginWindowMs : 0,
+  });
+}
+
+function clearAdminLoginFailures(request, login) {
+  adminLoginAttempts.delete(adminLoginAttemptKey(request, login));
+}
+
 function assertCloudinaryConfigured() {
   if (cloudinaryCloudName && cloudinaryApiKey && cloudinaryApiSecret) return;
   throw Object.assign(new Error("Cloudinary upload is not configured on the backend."), {
@@ -229,8 +364,8 @@ function makeCloudinarySignature(params) {
 async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, page, preferredFormat, context, productId, slot }) {
   assertCloudinaryConfigured();
 
-  if (!/^data:image\/(?:png|jpe?g|webp|svg\+xml);base64,/i.test(String(dataUrl || ""))) {
-    throw Object.assign(new Error("Upload must be a PNG, JPEG, WebP, or SVG image."), {
+  if (!/^data:image\/(?:png|jpe?g|webp);base64,/i.test(String(dataUrl || ""))) {
+    throw Object.assign(new Error("Upload must be a PNG, JPEG, or WebP image."), {
       statusCode: 400,
       code: "INVALID_IMAGE_UPLOAD",
     });
@@ -466,7 +601,15 @@ function normalizeSubmittedMap(value) {
 function normalizeEditableImage(image) {
   const normalized = {};
   editableImageFields.forEach(field => {
-    normalized[field] = String(image?.[field] ?? "");
+    if (field === "src") {
+      normalized[field] = normalizeImageSource(image?.[field]);
+    } else if (field === "srcset") {
+      normalized[field] = normalizeImageSrcset(image?.[field]);
+    } else if (field === "loading") {
+      normalized[field] = normalizeLoadingValue(image?.[field]);
+    } else {
+      normalized[field] = String(image?.[field] ?? "").replace(/[\u0000-\u001f\u007f]/g, "").slice(0, 1000);
+    }
   });
   return normalized;
 }
@@ -495,6 +638,99 @@ function normalizeProductSlug(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
+}
+
+function normalizeProductImageSlot(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]+/g, "")
+    .slice(0, 80);
+}
+
+function normalizePublicUrl(value, options = {}) {
+  const {
+    allowRelative = true,
+    allowDataImage = false,
+    requireExternal = false,
+  } = options;
+  const raw = String(value || "").trim();
+  if (!raw || /[\u0000-\u001f\u007f]/.test(raw)) return "";
+
+  if (allowDataImage && /^data:image\/(?:png|jpe?g|webp);base64,/i.test(raw)) {
+    return raw;
+  }
+
+  if (/^\/\//.test(raw)) {
+    try {
+      return new URL(`https:${raw}`).href;
+    } catch (error) {
+      return "";
+    }
+  }
+
+  if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+    try {
+      const url = new URL(raw);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  if (requireExternal || !allowRelative) return "";
+
+  const normalized = raw
+    .replace(/\\/g, "/")
+    .replace(/^(\.\/)+/, "")
+    .replace(/^\/+/, "");
+  if (!normalized || normalized.startsWith("#") || normalized.startsWith("?")) return "";
+  if (normalized.split("/").includes("..")) return "";
+  return normalized.slice(0, 500);
+}
+
+function normalizeImageSource(value) {
+  return normalizePublicUrl(value, { allowRelative: true });
+}
+
+function normalizeExternalLink(value) {
+  return normalizePublicUrl(value, { allowRelative: false, requireExternal: true });
+}
+
+function normalizeImageSrcset(value) {
+  return String(value || "")
+    .split(",")
+    .map(candidate => {
+      const parts = candidate.trim().split(/\s+/).filter(Boolean);
+      const src = normalizeImageSource(parts.shift());
+      if (!src) return "";
+      const descriptors = parts.filter(part => /^\d+(?:\.\d+)?[wx]$/.test(part));
+      return [src, ...descriptors].join(" ");
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
+function normalizeLoadingValue(value) {
+  const loading = String(value || "").trim().toLowerCase();
+  return ["lazy", "eager"].includes(loading) ? loading : "";
+}
+
+function normalizeProductPagePath(value, slug) {
+  const fallback = `products/${slug}.html`;
+  const raw = String(value || fallback)
+    .split(/[?#]/)[0]
+    .replace(/\\/g, "/")
+    .replace(/^\/+/, "")
+    .trim();
+  const withExtension = path.posix.extname(raw) ? raw : `${raw}.html`;
+  if (!withExtension || withExtension.split("/").includes("..")) return fallback;
+  if (path.posix.extname(withExtension).toLowerCase() !== ".html") return fallback;
+  return withExtension.slice(0, 240);
+}
+
+function normalizeCssColor(value) {
+  const color = String(value || "").trim();
+  return /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(color) ? color : null;
 }
 
 function normalizeProductBenefits(value) {
@@ -536,7 +772,12 @@ function normalizeProductSectionContent(value) {
     }
 
     const textValue = String(item ?? "").trim();
-    if (textValue) normalized[key] = textValue;
+    if (textValue && /^(?:image|imageSrc|logoSrc|src)$/i.test(key)) {
+      const imageSource = normalizeImageSource(textValue);
+      if (imageSource) normalized[key] = imageSource;
+    } else if (textValue) {
+      normalized[key] = textValue;
+    }
   }
 
   return normalized;
@@ -584,12 +825,35 @@ function normalizeProductImages(value) {
   const normalized = {};
   for (const [slot, image] of Object.entries(images)) {
     if (!image || typeof image !== "object" || Array.isArray(image)) continue;
-    const src = String(image.src || "").trim();
+    const normalizedSlot = normalizeProductImageSlot(slot);
+    if (!normalizedSlot) continue;
+    const src = normalizeImageSource(image.src);
     const alt = String(image.alt || "").trim();
     const cloudinaryPublicId = String(image.cloudinaryPublicId || "").trim() || null;
-    normalized[slot] = { src, cloudinaryPublicId, alt };
+    normalized[normalizedSlot] = { src, cloudinaryPublicId, alt };
   }
   return syncProductImageSlots(normalized);
+}
+
+function normalizeProductPurchaseLinks(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((link, index) => {
+      if (!link || typeof link !== "object" || Array.isArray(link)) return null;
+      const label = String(link.label || "").trim();
+      const url = normalizeExternalLink(link.url);
+      if (!label || !url) return null;
+      return {
+        slot: normalizeProductSlug(link.slot || label) || `link-${index + 1}`,
+        label,
+        url,
+        logoSrc: normalizeImageSource(link.logoSrc || link.logo_src),
+        logoAlt: String(link.logoAlt || link.logo_alt || label).trim(),
+        sortOrder: Number.isFinite(Number(link.sortOrder)) ? Number(link.sortOrder) : index,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 12);
 }
 
 function isCloudinaryImageSource(src) {
@@ -644,15 +908,16 @@ function normalizeProductPayload(body, routeId = "") {
   return {
     id,
     slug,
-    pagePath: String(submitted.pagePath || `products/${slug}.html`).trim(),
+    pagePath: normalizeProductPagePath(submitted.pagePath, slug),
     status,
     sortOrder: Number.isFinite(Number(submitted.sortOrder)) ? Number(submitted.sortOrder) : 0,
     therapeuticAreaId: normalizeProductSlug(submitted.therapeuticAreaId) || null,
-    accentColor: String(submitted.accentColor || "").trim() || null,
+    accentColor: normalizeCssColor(submitted.accentColor),
     isFeatured: Boolean(submitted.isFeatured),
     translations: normalizeProductTranslations(submitted.translations, fallbackName),
     images: normalizeProductImages(submitted.images),
     sections: normalizeProductSections(submitted.sections),
+    purchaseLinks: normalizeProductPurchaseLinks(submitted.purchaseLinks),
   };
 }
 
@@ -662,6 +927,7 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
     || product.translations?.kz
     || {};
   const cardImage = getCanonicalProductImageFromSlots(product.images || {});
+  const cardImageSrc = normalizeImageSource(cardImage.src);
   const category = product.therapeuticAreaId || "";
   const therapeuticArea = areaLabels.get(category) || category;
 
@@ -674,8 +940,8 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
     accent: product.accentColor || "",
     image: {
       id: cardImage.cloudinaryPublicId || "",
-      src: cardImage.src || "",
-      url: cardImage.src || "",
+      src: cardImageSrc,
+      url: cardImageSrc,
       alt: cardImage.alt || translation.name || product.id,
     },
     name: translation.name || product.id,
@@ -769,6 +1035,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const sections = getProductPayloadSections(product, language);
   const image = getCanonicalProductImageFromSlots(product.images || {});
   const images = product.images || {};
+  const imageSrc = normalizeImageSource(image.src);
   const name = translation.name || product.slug || product.id;
   const benefits = coerceProductTextList(translation.benefits);
   const badges = coerceProductTextList(sections.hero?.badges, sections.overview?.badges).slice(0, 3);
@@ -777,7 +1044,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const overviewIntro = sections.overview?.intro || translation.fullDescription || translation.shortDescription || "";
   const heroLead = sections.hero?.lead || translation.fullDescription || translation.shortDescription || overviewIntro;
   const formulaIntro = sections.formula?.intro || translation.composition || "";
-  const formulaImage = images.formulaCenter?.src || sections.formula?.image || "";
+  const formulaImage = normalizeImageSource(images.formulaCenter?.src || sections.formula?.image || "");
   const usageHeading = sections.usage?.heading || "";
   const noteText = sections.note?.text || translation.usageText || "";
   const buyIntro = sections.buy?.intro || "";
@@ -793,7 +1060,12 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
     { ...(sections.formula?.points?.[1] || {}), imageSrc: images.formulaPointSeawater?.src || sections.formula?.points?.[1]?.imageSrc || "" },
     { ...(sections.formula?.points?.[2] || {}), imageSrc: images.formulaPointFormat?.src || sections.formula?.points?.[2]?.imageSrc || "" },
   ].filter(point => point.text || point.title || point.value || point.imageSrc);
-  const formulaPoints = coerceProductObjectList(formulaPointFallback, facts.slice(0, 3)).slice(0, 3);
+  const formulaPoints = coerceProductObjectList(formulaPointFallback, facts.slice(0, 3))
+    .slice(0, 3)
+    .map(point => ({
+      ...point,
+      imageSrc: normalizeImageSource(point.imageSrc),
+    }));
   const usageItems = coerceProductObjectList(sections.usage?.items, benefits.slice(0, 3).map((text, index) => ({
     title: `${index + 1}`,
     text,
@@ -804,8 +1076,8 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   ).map((link, index) => ({
     slot: link.slot || `link-${index + 1}`,
     label: link.label || link.slot || "",
-    url: link.url || "",
-    logoSrc: link.logoSrc || "",
+    url: normalizeExternalLink(link.url),
+    logoSrc: normalizeImageSource(link.logoSrc),
     logoAlt: link.logoAlt || link.label || "",
     ariaLabel: link.ariaLabel || `${name} - ${link.label || link.slot || "pharmacy"}`,
     sortOrder: Number.isFinite(Number(link.sortOrder)) ? Number(link.sortOrder) : index,
@@ -826,8 +1098,8 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
       name,
       shortDescription: translation.shortDescription || "",
       image: {
-        src: image.src || "",
-        url: image.src || "",
+        src: imageSrc,
+        url: imageSrc,
         alt: image.alt || name,
       },
       page: {
@@ -1018,7 +1290,7 @@ function setPayloadDomTextValue(payload, id, value, { allowEmpty = false } = {})
 }
 
 function setPayloadDomImageValue(payload, id, image) {
-  const src = String(image?.src || "").trim();
+  const src = normalizeImageSource(image?.src);
   if (!id || !src || !Array.isArray(payload.content?.dom?.images)) return;
   const item = payload.content.dom.images.find(candidate => candidate.id === id);
   if (!item) return;
@@ -1111,7 +1383,7 @@ function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
 }
 
 function isAbsoluteImageSource(src) {
-  return /^(?:https?:)?\/\//i.test(String(src || "")) || /^data:/i.test(String(src || ""));
+  return /^(?:https?:)?\/\//i.test(String(src || ""));
 }
 
 function staticCatalogFallbacksByLanguage(country) {
@@ -1835,11 +2107,13 @@ function runProductImageCloudinarySync() {
 }
 
 async function handleRequest(request, response) {
+  applyRequestHeaders(request, response);
   const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
   const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
 
   if (request.method === "OPTIONS") {
-    sendJson(response, 204, {});
+    response.writeHead(204);
+    response.end();
     return;
   }
 
@@ -1865,10 +2139,15 @@ async function handleRequest(request, response) {
 
     if (request.method === "POST" && pathname === "/api/admin/login") {
       const body = await readJsonBody(request);
-      const isValidLogin = timingSafeEqualText(body.login || body.username, adminLogin);
+      const submittedLogin = body.login || body.username;
+      assertAdminCredentialsConfigured();
+      assertAdminLoginAllowed(request, submittedLogin);
+
+      const isValidLogin = timingSafeEqualText(submittedLogin, adminLogin);
       const isValidPassword = timingSafeEqualText(body.password, adminPassword);
 
       if (!isValidLogin || !isValidPassword) {
+        recordAdminLoginFailure(request, submittedLogin);
         sendJson(response, 401, {
           error: {
             code: "INVALID_ADMIN_CREDENTIALS",
@@ -1878,6 +2157,7 @@ async function handleRequest(request, response) {
         return;
       }
 
+      clearAdminLoginFailures(request, submittedLogin);
       sendJson(response, 200, {
         status: "ok",
         session: issueAdminToken(),
