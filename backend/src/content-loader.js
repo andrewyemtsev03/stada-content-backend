@@ -761,13 +761,38 @@ function categoryTokenToClass(category) {
   return firstCategory.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
 }
 
+function normalizeCatalogProductId(product, imageSrc) {
+  const rawId = String(product?.id || "").trim();
+  if (rawId && rawId !== "product") return rawId;
+
+  const imageProductMatch = String(imageSrc || "")
+    .replace(/\\/g, "/")
+    .match(/(?:^|\/)products\/([^/?#]+)/i);
+  const keyProductMatch = String(product?.nameKey || product?.descriptionKey || "")
+    .match(/^product_(.+?)_(?:name|page_desc|page_title)$/i);
+  const inferred = imageProductMatch?.[1] || keyProductMatch?.[1]?.replace(/_/g, "-") || rawId;
+
+  return normalizeSlug(inferred)
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function normalizeCatalogProductHref(product, productId) {
+  const href = String(product?.href || "").trim();
+  if (!href || /(?:^|\/)product\.html(?:$|[?#])/i.test(href)) {
+    return productId ? `products/${productId}.html` : href;
+  }
+  return href;
+}
+
 function normalizeCatalogProduct(product, assetsBaseUrl) {
   const image = product.image || {};
   const imageSrc = normalizeHomepageRelativePath(image.src || image.url || "");
+  const id = normalizeCatalogProductId(product, imageSrc);
 
   return {
-    id: String(product.id || ""),
-    href: String(product.href || ""),
+    id,
+    href: normalizeCatalogProductHref(product, id),
     className: String(product.className || ""),
     category: String(product.category || ""),
     categoryClass: String(product.categoryClass || categoryTokenToClass(product.category)),
@@ -808,9 +833,13 @@ function syncHomeProducts(payload) {
   const catalog = payload.content?.productCatalog || [];
   const catalogById = new Map(catalog.map(product => [product.id, product]));
   const requestedIds = normalizeProductIds(payload.content?.settings?.homeProducts);
+  const fallbackIds = normalizeProductIds([
+    ...defaultHomeProductIds,
+    ...catalog.map(product => product.id),
+  ]);
   const selectedIds = [
-    ...requestedIds.filter(id => catalogById.has(id)),
-    ...defaultHomeProductIds.filter(id => catalogById.has(id) && !requestedIds.includes(id)),
+    ...requestedIds,
+    ...fallbackIds.filter(id => catalogById.has(id) && !requestedIds.includes(id)),
   ].slice(0, 4);
 
   payload.content.settings ||= {};

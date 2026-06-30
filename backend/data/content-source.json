@@ -355,7 +355,7 @@
         },
         {
           "id": "index_image_014",
-          "src": "assets/products/awards/top-employer-kazakhstan-2025.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/awards/top-employer-kazakhstan-2025.png",
           "alt": "Top Employer Kazakhstan 2025",
           "loading": "",
           "srcset": "",
@@ -363,7 +363,7 @@
         },
         {
           "id": "index_image_015",
-          "src": "assets/products/awards/top-employer-europe-2025.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/awards/top-employer-europe-2025.png",
           "alt": "Top Employer Europe 2025",
           "loading": "",
           "srcset": "",
@@ -652,7 +652,9 @@
           "footer_warning_title": "Важно",
           "footer_warning_text": "Информация на сайте не заменяет консультацию специалиста. Перед применением лекарственных средств ознакомьтесь с инструкцией.",
           "footer_rights": "Все права защищены.",
-          "footer_back_top": "Наверх"
+          "footer_back_top": "Наверх",
+          "nav_news": "Новости и Медия",
+          "nav_career": "Карьера"
         },
         "kz": {
           "culture_page_title": "STADA - Корпоративтік мәдениет",
@@ -750,7 +752,9 @@
           "footer_warning_title": "Маңызды",
           "footer_warning_text": "Сайттағы ақпарат маман кеңесін алмастырмайды. Дәрілік заттарды қолданар алдында нұсқаулықпен танысыңыз.",
           "footer_rights": "Барлық құқықтар қорғалған.",
-          "footer_back_top": "Жоғары"
+          "footer_back_top": "Жоғары",
+          "nav_news": "Жаңалықтар мен медиа",
+          "nav_career": "Мансап"
         }
       },
       "domText": [
@@ -1028,7 +1032,9 @@
           "footer_warning_title": "Важно",
           "footer_warning_text": "Информация на сайте не заменяет консультацию специалиста. Перед применением лекарственных средств ознакомьтесь с инструкцией.",
           "footer_rights": "Все права защищены.",
-          "footer_back_top": "Наверх"
+          "footer_back_top": "Наверх",
+          "nav_news": "Новости и Медия",
+          "nav_career": "Карьера"
         },
         "kz": {
           "nav_about": "Компания туралы",
@@ -1055,7 +1061,9 @@
           "footer_warning_title": "Маңызды",
           "footer_warning_text": "Сайттағы ақпарат маман кеңесін алмастырмайды. Дәрілік заттарды қолданар алдында нұсқаулықпен танысыңыз.",
           "footer_rights": "Барлық құқықтар қорғалған.",
-          "footer_back_top": "Жоғары"
+          "footer_back_top": "Жоғары",
+          "nav_news": "Жаңалықтар мен медиа",
+          "nav_career": "Мансап"
         }
       },
       "domText": [
@@ -2513,7 +2521,7 @@
         },
         {
           "id": "products_aqualor_baby_image_002",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -2521,7 +2529,7 @@
         },
         {
           "id": "products_aqualor_baby_image_003",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -2529,7 +2537,7 @@
         },
         {
           "id": "products_aqualor_baby_image_004",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -2537,7 +2545,7 @@
         },
         {
           "id": "products_aqualor_baby_image_005",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -2545,7 +2553,7 @@
         },
         {
           "id": "products_aqualor_baby_image_006",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -2553,7 +2561,7 @@
         },
         {
           "id": "products_aqualor_baby_image_007",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -2561,7 +2569,7 @@
         },
         {
           "id": "products_aqualor_baby_image_008",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -3123,7 +3131,7 @@
         },
         {
           "id": "products_aqualor_forte_image_002",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -3131,7 +3139,7 @@
         },
         {
           "id": "products_aqualor_forte_image_003",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -3139,7 +3147,7 @@
         },
         {
           "id": "products_aqualor_forte_image_004",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -3147,7 +3155,7 @@
         },
         {
           "id": "products_aqualor_forte_image_005",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -3155,7 +3163,7 @@
         },
         {
           "id": "products_aqualor_forte_image_006",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -3163,7 +3171,7 @@
         },
         {
           "id": "products_aqualor_forte_image_007",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -3171,7 +3179,7 @@
         },
         {
           "id": "products_aqualor_forte_image_008",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -3733,7 +3741,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_002",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -3741,7 +3749,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_003",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -3749,7 +3757,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_004",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -3757,7 +3765,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_005",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -3765,7 +3773,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_006",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -3773,7 +3781,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_007",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -3781,7 +3789,7 @@
         },
         {
           "id": "products_aqualor_gorlo_image_008",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -4343,7 +4351,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_002",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -4351,7 +4359,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_003",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -4359,7 +4367,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_004",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -4367,7 +4375,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_005",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -4375,7 +4383,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_006",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -4383,7 +4391,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_007",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -4391,7 +4399,7 @@
         },
         {
           "id": "products_aqualor_soft_mini_image_008",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -4953,7 +4961,7 @@
         },
         {
           "id": "products_aqualor_soft_image_002",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -4961,7 +4969,7 @@
         },
         {
           "id": "products_aqualor_soft_image_003",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -4969,7 +4977,7 @@
         },
         {
           "id": "products_aqualor_soft_image_004",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -4977,7 +4985,7 @@
         },
         {
           "id": "products_aqualor_soft_image_005",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -4985,7 +4993,7 @@
         },
         {
           "id": "products_aqualor_soft_image_006",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -4993,7 +5001,7 @@
         },
         {
           "id": "products_aqualor_soft_image_007",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -5001,7 +5009,7 @@
         },
         {
           "id": "products_aqualor_soft_image_008",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -5565,7 +5573,7 @@
         },
         {
           "id": "products_aqualor_image_002",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Экстра Форте",
           "loading": "",
           "srcset": "",
@@ -5573,7 +5581,7 @@
         },
         {
           "id": "products_aqualor_image_003",
-          "src": "../assets/products/aqualor/extra-forte-packshot.png?v=aqualor-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -5581,7 +5589,7 @@
         },
         {
           "id": "products_aqualor_image_004",
-          "src": "../assets/products/aqualor/soft-packshot.png?v=aqualor-soft-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт",
           "loading": "",
           "srcset": "",
@@ -5589,7 +5597,7 @@
         },
         {
           "id": "products_aqualor_image_005",
-          "src": "../assets/products/aqualor/soft-mini-packshot.png?v=aqualor-soft-mini-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Софт мини",
           "loading": "",
           "srcset": "",
@@ -5597,7 +5605,7 @@
         },
         {
           "id": "products_aqualor_image_006",
-          "src": "../assets/products/aqualor/active-forte-packshot.png?v=aqualor-forte-detail-4",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Актив Форте",
           "loading": "",
           "srcset": "",
@@ -5605,7 +5613,7 @@
         },
         {
           "id": "products_aqualor_image_007",
-          "src": "../assets/products/aqualor/baby-packshot.png?v=aqualor-baby-detail-3",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Беби",
           "loading": "",
           "srcset": "",
@@ -5613,7 +5621,7 @@
         },
         {
           "id": "products_aqualor_image_008",
-          "src": "../assets/products/aqualor/gorlo-packshot.png?v=aqualor-gorlo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
           "alt": "Аквалор Горло",
           "loading": "",
           "srcset": "",
@@ -6100,7 +6108,7 @@
         },
         {
           "id": "products_cardiomagnil_image_002",
-          "src": "../assets/products/cardiomagnil/packshot.jpg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
           "alt": "Кардиомагнил 150 мг",
           "loading": "",
           "srcset": "",
@@ -6108,7 +6116,7 @@
         },
         {
           "id": "products_cardiomagnil_image_003",
-          "src": "../assets/products/cardiomagnil/packshot.jpg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -6566,7 +6574,7 @@
         },
         {
           "id": "products_coldrex_image_002",
-          "src": "../assets/products/coldrex/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
           "alt": "Coldrex",
           "loading": "",
           "srcset": "",
@@ -6574,7 +6582,7 @@
         },
         {
           "id": "products_coldrex_image_003",
-          "src": "../assets/products/coldrex/coldrex-packshot-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -6582,7 +6590,7 @@
         },
         {
           "id": "products_coldrex_image_004",
-          "src": "../assets/products/coldrex/coldrex-paracetamol-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/coldrex-paracetamol-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -6590,7 +6598,7 @@
         },
         {
           "id": "products_coldrex_image_005",
-          "src": "../assets/products/coldrex/coldrex-phenylephrine-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/coldrex-phenylephrine-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -6598,7 +6606,7 @@
         },
         {
           "id": "products_coldrex_image_006",
-          "src": "../assets/products/coldrex/coldrex-vitamin-c-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/coldrex-vitamin-c-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7073,7 +7081,7 @@
         },
         {
           "id": "products_edarbi_klo_image_002",
-          "src": "../assets/products/edarbi-klo/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
           "alt": "Edarbi Klo",
           "loading": "",
           "srcset": "",
@@ -7081,7 +7089,7 @@
         },
         {
           "id": "products_edarbi_klo_image_003",
-          "src": "../assets/products/edarbi-klo/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7089,7 +7097,7 @@
         },
         {
           "id": "products_edarbi_klo_image_004",
-          "src": "../assets/products/edarbi-klo/azilsartan-formula.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/azilsartan-formula.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7097,7 +7105,7 @@
         },
         {
           "id": "products_edarbi_klo_image_005",
-          "src": "../assets/products/edarbi-klo/chlorthalidone-formula.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/chlorthalidone-formula.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7105,7 +7113,7 @@
         },
         {
           "id": "products_edarbi_klo_image_006",
-          "src": "../assets/products/edarbi-klo/blood-pressure-control.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/blood-pressure-control.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7577,7 +7585,7 @@
         },
         {
           "id": "products_enterogermina_capsules_image_002",
-          "src": "../assets/products/enterogermina-capsules/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
           "alt": "Enterogermina capsules",
           "loading": "",
           "srcset": "",
@@ -7585,7 +7593,7 @@
         },
         {
           "id": "products_enterogermina_capsules_image_003",
-          "src": "../assets/products/enterogermina-capsules/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7593,7 +7601,7 @@
         },
         {
           "id": "products_enterogermina_capsules_image_004",
-          "src": "../assets/products/enterogermina/shared/bacillus-clausii.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7601,7 +7609,7 @@
         },
         {
           "id": "products_enterogermina_capsules_image_005",
-          "src": "../assets/products/enterogermina/shared/spore.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -7609,7 +7617,7 @@
         },
         {
           "id": "products_enterogermina_capsules_image_006",
-          "src": "../assets/products/enterogermina-capsules/capsules.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8086,7 +8094,7 @@
         },
         {
           "id": "products_enterogermina_forte_image_002",
-          "src": "../assets/products/enterogermina-forte/packshot.png?v=20260606-1415",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
           "alt": "Enterogermina Forte",
           "loading": "",
           "srcset": "",
@@ -8094,7 +8102,7 @@
         },
         {
           "id": "products_enterogermina_forte_image_003",
-          "src": "../assets/products/enterogermina-forte/packshot.png?v=20260606-1415",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8102,7 +8110,7 @@
         },
         {
           "id": "products_enterogermina_forte_image_004",
-          "src": "../assets/products/enterogermina/shared/bacillus-clausii.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8110,7 +8118,7 @@
         },
         {
           "id": "products_enterogermina_forte_image_005",
-          "src": "../assets/products/enterogermina/shared/spore.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8118,7 +8126,7 @@
         },
         {
           "id": "products_enterogermina_forte_image_006",
-          "src": "../assets/products/enterogermina/shared/flacon.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8595,7 +8603,7 @@
         },
         {
           "id": "products_enterogermina_image_002",
-          "src": "../assets/products/enterogermina/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "Enterogermina",
           "loading": "",
           "srcset": "",
@@ -8603,7 +8611,7 @@
         },
         {
           "id": "products_enterogermina_image_003",
-          "src": "../assets/products/enterogermina/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8611,7 +8619,7 @@
         },
         {
           "id": "products_enterogermina_image_004",
-          "src": "../assets/products/enterogermina/shared/bacillus-clausii.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8619,7 +8627,7 @@
         },
         {
           "id": "products_enterogermina_image_005",
-          "src": "../assets/products/enterogermina/shared/spore.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -8627,7 +8635,7 @@
         },
         {
           "id": "products_enterogermina_image_006",
-          "src": "../assets/products/enterogermina/shared/flacon.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -9114,7 +9122,7 @@
         },
         {
           "id": "products_essentiale_image_002",
-          "src": "../assets/products/essentiale/packshot.png?v=essentiale-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
           "alt": "Эссенциале Форте Н",
           "loading": "",
           "srcset": "",
@@ -9122,7 +9130,7 @@
         },
         {
           "id": "products_essentiale_image_003",
-          "src": "../assets/products/essentiale/packshot.png?v=essentiale-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -9699,7 +9707,7 @@
         },
         {
           "id": "products_femilex_image_002",
-          "src": "../assets/products/femilex/packshot.png?v=femilex-detail-2",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
           "alt": "Фемилекс 100 мг 10 суппозиториев",
           "loading": "",
           "srcset": "",
@@ -9707,7 +9715,7 @@
         },
         {
           "id": "products_femilex_image_003",
-          "src": "../assets/products/femilex/packshot.png?v=femilex-detail-2",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -10284,7 +10292,7 @@
         },
         {
           "id": "products_gecsikon_image_002",
-          "src": "../assets/products/gecsikon/packshot.png?v=gecsikon-packshot-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
           "alt": "Гексикон 16 мг 10 вагинальных суппозиториев",
           "loading": "",
           "srcset": "",
@@ -10292,7 +10300,7 @@
         },
         {
           "id": "products_gecsikon_image_003",
-          "src": "../assets/products/gecsikon/packshot.png?v=gecsikon-packshot-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -10664,7 +10672,9 @@
           "footer_warning_title": "Важно",
           "footer_warning_text": "Информация на сайте не заменяет консультацию специалиста. Перед применением лекарственных средств ознакомьтесь с инструкцией.",
           "footer_rights": "Все права защищены.",
-          "footer_back_top": "Наверх"
+          "footer_back_top": "Наверх",
+          "nav_news": "Новости и Медия",
+          "nav_career": "Карьера"
         },
         "kz": {
           "nav_about": "Компания туралы",
@@ -10758,7 +10768,9 @@
           "footer_warning_title": "Маңызды",
           "footer_warning_text": "Сайттағы ақпарат маман кеңесін алмастырмайды. Дәрілік заттарды қолданар алдында нұсқаулықпен танысыңыз.",
           "footer_rights": "Барлық құқықтар қорғалған.",
-          "footer_back_top": "Жоғары"
+          "footer_back_top": "Жоғары",
+          "nav_news": "Жаңалықтар мен медиа",
+          "nav_career": "Мансап"
         }
       },
       "domText": [
@@ -11739,7 +11751,7 @@
         },
         {
           "id": "products_kamistad_baby_image_002",
-          "src": "../assets/products/kamistad-baby/packshot.png?v=kamistad-baby-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
           "alt": "Камистад Бэби гель 20 г",
           "loading": "",
           "srcset": "",
@@ -11747,7 +11759,7 @@
         },
         {
           "id": "products_kamistad_baby_image_003",
-          "src": "../assets/products/kamistad-baby/packshot.png?v=kamistad-baby-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -12143,7 +12155,7 @@
         },
         {
           "id": "products_kamistad_image_002",
-          "src": "../assets/products/kamistad/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad/card.png",
           "alt": "Камистад-Гель N",
           "loading": "",
           "srcset": "",
@@ -12151,7 +12163,7 @@
         },
         {
           "id": "products_kamistad_image_003",
-          "src": "../assets/products/kamistad/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -12693,7 +12705,7 @@
         },
         {
           "id": "products_klopidogrel_teva_image_002",
-          "src": "../assets/products/klopidogrel-teva/packshot.png?v=klopidogrel-teva-packshot-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
           "alt": "Клопидогрель-Тева 75 мг 28 таблеток",
           "loading": "",
           "srcset": "",
@@ -12701,7 +12713,7 @@
         },
         {
           "id": "products_klopidogrel_teva_image_003",
-          "src": "../assets/products/klopidogrel-teva/packshot.png?v=klopidogrel-teva-packshot-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -13179,7 +13191,7 @@
         },
         {
           "id": "products_magneb6kids_image_002",
-          "src": "../assets/products/magneb6kids/kids2-cropped.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/kids2-cropped.png",
           "alt": "Magne B6 Kids",
           "loading": "",
           "srcset": "",
@@ -13187,7 +13199,7 @@
         },
         {
           "id": "products_magneb6kids_image_003",
-          "src": "../assets/products/magneb6kids/kids2-cropped.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/kids2-cropped.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -13195,7 +13207,7 @@
         },
         {
           "id": "products_magneb6kids_image_004",
-          "src": "../assets/products/magneb6kids/magnesium-mineral.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/magnesium-mineral.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -13203,7 +13215,7 @@
         },
         {
           "id": "products_magneb6kids_image_005",
-          "src": "../assets/products/magneb6kids/vitamin-b6-nerves.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/vitamin-b6-nerves.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -13211,7 +13223,7 @@
         },
         {
           "id": "products_magneb6kids_image_006",
-          "src": "../assets/products/magneb6kids/chewable-tablets.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/chewable-tablets.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -13786,7 +13798,7 @@
         },
         {
           "id": "products_nizoral_shampoo_image_002",
-          "src": "../assets/products/nizoral-shampoo/packshot.png?v=nizoral-shampoo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
           "alt": "Низорал шампунь 2% 60 мл",
           "loading": "",
           "srcset": "",
@@ -13794,7 +13806,7 @@
         },
         {
           "id": "products_nizoral_shampoo_image_003",
-          "src": "../assets/products/nizoral-shampoo/packshot.png?v=nizoral-shampoo-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -14369,7 +14381,7 @@
         },
         {
           "id": "products_nizoral_image_002",
-          "src": "../assets/products/nizoral/packshot.png?v=nizoral-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
           "alt": "Низорал крем 2% 15 г",
           "loading": "",
           "srcset": "",
@@ -14377,7 +14389,7 @@
         },
         {
           "id": "products_nizoral_image_003",
-          "src": "../assets/products/nizoral/packshot.png?v=nizoral-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -14858,7 +14870,7 @@
         },
         {
           "id": "products_no_shpa_forte_image_002",
-          "src": "../assets/products/no-shpa-forte/packshot.png?v=noshpa-forte-packshot-2",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
           "alt": "НО-ШПА Форте 80 мг",
           "loading": "",
           "srcset": "",
@@ -14866,7 +14878,7 @@
         },
         {
           "id": "products_no_shpa_forte_image_003",
-          "src": "../assets/products/no-shpa-forte/packshot.png?v=noshpa-forte-packshot-2",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -15337,7 +15349,7 @@
         },
         {
           "id": "products_no_shpa_image_002",
-          "src": "../assets/products/no-shpa/packshot.png?v=noshpa-cutout-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
           "alt": "НО-ШПА 40 мг",
           "loading": "",
           "srcset": "",
@@ -15345,7 +15357,7 @@
         },
         {
           "id": "products_no_shpa_image_003",
-          "src": "../assets/products/no-shpa/packshot.png?v=noshpa-cutout-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -16065,7 +16077,7 @@
         },
         {
           "id": "products_psilo_balsam_image_002",
-          "src": "../assets/products/psilo-balsam/packshot.png?v=psilo-balsam-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
           "alt": "Псило-бальзам 1% 20 г",
           "loading": "",
           "srcset": "",
@@ -16073,7 +16085,7 @@
         },
         {
           "id": "products_psilo_balsam_image_003",
-          "src": "../assets/products/psilo-balsam/packshot.png?v=psilo-balsam-detail-1",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -16551,7 +16563,7 @@
         },
         {
           "id": "products_sinulan_duo_image_002",
-          "src": "../assets/products/sinulan-duo/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
           "alt": "Sinulan Duo",
           "loading": "",
           "srcset": "",
@@ -16559,7 +16571,7 @@
         },
         {
           "id": "products_sinulan_duo_image_003",
-          "src": "../assets/products/sinulan-duo/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -16567,7 +16579,7 @@
         },
         {
           "id": "products_sinulan_duo_image_004",
-          "src": "../assets/products/sinulan-duo/plant-extracts.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/plant-extracts.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -16575,7 +16587,7 @@
         },
         {
           "id": "products_sinulan_duo_image_005",
-          "src": "../assets/products/sinulan-duo/free-breathing.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/free-breathing.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -16583,7 +16595,7 @@
         },
         {
           "id": "products_sinulan_duo_image_006",
-          "src": "../assets/products/sinulan-duo/family-age.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/family-age.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -17072,7 +17084,7 @@
         },
         {
           "id": "products_snup_image_002",
-          "src": "../assets/products/snup/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
           "alt": "Снуп назальный спрей",
           "loading": "",
           "srcset": "",
@@ -17080,7 +17092,7 @@
         },
         {
           "id": "products_snup_image_003",
-          "src": "../assets/products/snup/snup-center-packshot-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -17088,7 +17100,7 @@
         },
         {
           "id": "products_snup_image_004",
-          "src": "../assets/products/snup/xylometazoline-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/xylometazoline-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -17096,7 +17108,7 @@
         },
         {
           "id": "products_snup_image_005",
-          "src": "../assets/products/snup/water-drop-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/water-drop-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -17104,7 +17116,7 @@
         },
         {
           "id": "products_snup_image_006",
-          "src": "../assets/products/snup/snup-format-bottle-cutout.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/snup-format-bottle-cutout.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -17594,7 +17606,7 @@
         },
         {
           "id": "products_vitaprost_image_002",
-          "src": "../assets/products/vitaprost/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
           "alt": "Витапрост таблетки",
           "loading": "",
           "srcset": "",
@@ -17602,7 +17614,7 @@
         },
         {
           "id": "products_vitaprost_image_003",
-          "src": "../assets/products/vitaprost/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18071,7 +18083,7 @@
         },
         {
           "id": "products_vitrum_energy_image_002",
-          "src": "../assets/products/vitrum-energy/packshot-transparent.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
           "alt": "Vitrum Energy Gummies",
           "loading": "",
           "srcset": "",
@@ -18079,7 +18091,7 @@
         },
         {
           "id": "products_vitrum_energy_image_003",
-          "src": "../assets/products/vitrum-energy/packshot-transparent.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18087,7 +18099,7 @@
         },
         {
           "id": "products_vitrum_energy_image_004",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-protection.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-protection.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18095,7 +18107,7 @@
         },
         {
           "id": "products_vitrum_energy_image_005",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-resources.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-resources.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18103,7 +18115,7 @@
         },
         {
           "id": "products_vitrum_energy_image_006",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-beta.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-beta.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18572,7 +18584,7 @@
         },
         {
           "id": "products_vitrum_immunactive_fizzy_image_002",
-          "src": "../assets/products/vitrum-immunactive-fizzy/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
           "alt": "Vitrum Immunactive Fizzy",
           "loading": "",
           "srcset": "",
@@ -18580,7 +18592,7 @@
         },
         {
           "id": "products_vitrum_immunactive_fizzy_image_003",
-          "src": "../assets/products/vitrum-immunactive-fizzy/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18588,7 +18600,7 @@
         },
         {
           "id": "products_vitrum_immunactive_fizzy_image_004",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-protection.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-protection.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18596,7 +18608,7 @@
         },
         {
           "id": "products_vitrum_immunactive_fizzy_image_005",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-resources.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-resources.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -18604,7 +18616,7 @@
         },
         {
           "id": "products_vitrum_immunactive_fizzy_image_006",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-beta.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-beta.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19093,7 +19105,7 @@
         },
         {
           "id": "products_vitrum_immunaktiv_image_002",
-          "src": "../assets/products/vitrum-immunaktiv/hero-product.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
           "alt": "Vitrum Immunaktiv tablets",
           "loading": "",
           "srcset": "",
@@ -19101,7 +19113,7 @@
         },
         {
           "id": "products_vitrum_immunaktiv_image_003",
-          "src": "../assets/products/vitrum-immunaktiv/hero-product.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19109,7 +19121,7 @@
         },
         {
           "id": "products_vitrum_immunaktiv_image_004",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-protection.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-protection.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19117,7 +19129,7 @@
         },
         {
           "id": "products_vitrum_immunaktiv_image_005",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-resources.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-resources.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19125,7 +19137,7 @@
         },
         {
           "id": "products_vitrum_immunaktiv_image_006",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-beta.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-beta.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19594,7 +19606,7 @@
         },
         {
           "id": "products_vitrum_kids_proimmun_image_002",
-          "src": "../assets/products/vitrum-syrop/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-syrop/card.png",
           "alt": "Vitrum Kids Proimmun syrup",
           "loading": "",
           "srcset": "",
@@ -19602,7 +19614,7 @@
         },
         {
           "id": "products_vitrum_kids_proimmun_image_003",
-          "src": "../assets/products/vitrum-syrop/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-syrop/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19610,7 +19622,7 @@
         },
         {
           "id": "products_vitrum_kids_proimmun_image_004",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-protection.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-protection.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19618,7 +19630,7 @@
         },
         {
           "id": "products_vitrum_kids_proimmun_image_005",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-resources.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-resources.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -19626,7 +19638,7 @@
         },
         {
           "id": "products_vitrum_kids_proimmun_image_006",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-beta.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-beta.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20104,7 +20116,7 @@
         },
         {
           "id": "products_vitrum_magneb6_image_002",
-          "src": "../assets/products/vitrum-magneb6/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
           "alt": "Витрум Магний В6",
           "loading": "",
           "srcset": "",
@@ -20112,7 +20124,7 @@
         },
         {
           "id": "products_vitrum_magneb6_image_003",
-          "src": "../assets/products/vitrum-magneb6/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20120,7 +20132,7 @@
         },
         {
           "id": "products_vitrum_magneb6_image_004",
-          "src": "../assets/products/magneb6kids/magnesium-mineral.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/magnesium-mineral.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20128,7 +20140,7 @@
         },
         {
           "id": "products_vitrum_magneb6_image_005",
-          "src": "../assets/products/magneb6kids/vitamin-b6-nerves.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/vitamin-b6-nerves.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20136,7 +20148,7 @@
         },
         {
           "id": "products_vitrum_magneb6_image_006",
-          "src": "../assets/products/magneb6kids/chewable-tablets.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/chewable-tablets.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20605,7 +20617,7 @@
         },
         {
           "id": "products_vitrum_vitamin_c_fizzy_image_002",
-          "src": "../assets/products/vitrum-vitaminc-fizzy/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitaminc-fizzy/card.png",
           "alt": "Vitrum Vitamin C Fizzy",
           "loading": "",
           "srcset": "",
@@ -20613,7 +20625,7 @@
         },
         {
           "id": "products_vitrum_vitamin_c_fizzy_image_003",
-          "src": "../assets/products/vitrum-vitaminc-fizzy/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitaminc-fizzy/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20621,7 +20633,7 @@
         },
         {
           "id": "products_vitrum_vitamin_c_fizzy_image_004",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-protection.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-protection.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20629,7 +20641,7 @@
         },
         {
           "id": "products_vitrum_vitamin_c_fizzy_image_005",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-resources.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-resources.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -20637,7 +20649,7 @@
         },
         {
           "id": "products_vitrum_vitamin_c_fizzy_image_006",
-          "src": "../assets/products/vitrum-immunaktiv/benefit-beta.svg",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/benefit-beta.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -21127,7 +21139,7 @@
         },
         {
           "id": "products_zodak_kapli_image_002",
-          "src": "../assets/products/zodak-kapli/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
           "alt": "Зодак капли",
           "loading": "",
           "srcset": "",
@@ -21135,7 +21147,7 @@
         },
         {
           "id": "products_zodak_kapli_image_003",
-          "src": "../assets/products/zodak-kapli/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -21625,7 +21637,7 @@
         },
         {
           "id": "products_zodak_image_002",
-          "src": "../assets/products/zodak/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
           "alt": "Зодак таблетки",
           "loading": "",
           "srcset": "",
@@ -21633,7 +21645,7 @@
         },
         {
           "id": "products_zodak_image_003",
-          "src": "../assets/products/zodak/packshot.png",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
           "alt": "",
           "loading": "",
           "srcset": "",
@@ -21837,7 +21849,9 @@
           "footer_warning_title": "Важно",
           "footer_warning_text": "Информация на сайте не заменяет консультацию специалиста. Перед применением лекарственных средств ознакомьтесь с инструкцией.",
           "footer_rights": "Все права защищены.",
-          "footer_back_top": "Наверх"
+          "footer_back_top": "Наверх",
+          "nav_news": "Новости и Медия",
+          "nav_career": "Карьера"
         },
         "kz": {
           "worldwide_page_title": "STADA - Біздің филиалдарымыз",
@@ -21873,7 +21887,9 @@
           "footer_warning_title": "Маңызды",
           "footer_warning_text": "Сайттағы ақпарат маман кеңесін алмастырмайды. Дәрілік заттарды қолданар алдында нұсқаулықпен танысыңыз.",
           "footer_rights": "Барлық құқықтар қорғалған.",
-          "footer_back_top": "Жоғары"
+          "footer_back_top": "Жоғары",
+          "nav_news": "Жаңалықтар мен медиа",
+          "nav_career": "Мансап"
         }
       },
       "domText": [

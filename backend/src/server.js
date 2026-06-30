@@ -1160,7 +1160,7 @@ function syncPayloadHomeProducts(payload) {
   const catalog = payload.content?.productCatalog || [];
   payload.content.settings ||= {};
   const selectedIds = normalizePayloadProductIds(payload.content.settings.homeProducts, catalog);
-  const fallbackIds = catalog.map(product => product.id).filter(Boolean);
+  const fallbackIds = [...new Set(catalog.map(product => product.id).filter(Boolean))];
   payload.content.settings.homeProducts = [
     ...selectedIds,
     ...fallbackIds.filter(id => !selectedIds.includes(id)),
@@ -1345,24 +1345,16 @@ function applyDatabaseProductsToPayload(payload, products, therapeuticAreas) {
   if (!payload?.content) return payload;
 
   const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, payload.language);
-  const databaseProducts = (products || [])
+  const enrichedProducts = applyStaticProductFallbacks(products || [], payload.country?.id);
+  const databaseProducts = enrichedProducts
     .filter(product => product.status !== "archived")
     .map(product => contentProductFromDatabaseProduct(product, payload.language, areaLabels));
   if (!databaseProducts.length) return payload;
 
-  const databaseProductsById = new Map(databaseProducts.map(product => [product.id, product]));
-  const staticCatalog = payload.content.productCatalog || [];
-  const staticIds = new Set(staticCatalog.map(product => product.id));
-  payload.content.productCatalog = [
-    ...staticCatalog.map(product => {
-      const databaseProduct = databaseProductsById.get(product.id);
-      return databaseProduct ? mergeContentProduct(product, databaseProduct) : product;
-    }),
-    ...databaseProducts.filter(product => !staticIds.has(product.id)),
-  ];
+  payload.content.productCatalog = databaseProducts;
   syncPayloadHomeProducts(payload);
   syncPayloadProductMetrics(payload);
-  applyDatabaseProductDetailToPayload(payload, products);
+  applyDatabaseProductDetailToPayload(payload, enrichedProducts);
   return payload;
 }
 
@@ -2145,6 +2137,10 @@ async function handleRequest(request, response) {
       const page = adminEditablePagePath;
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
       const currentPayload = getPagePayload({ country, lang: basePayload.language, page: basePayload.page.path });
+      await Promise.all([
+        attachDatabaseProductsToPayload(basePayload),
+        attachDatabaseProductsToPayload(currentPayload),
+      ]);
       const editable = buildEditableContent(basePayload, currentPayload);
       await attachEditableProductCatalog(editable);
 
@@ -2274,6 +2270,7 @@ async function handleRequest(request, response) {
         page,
         applyOverrides: false,
       });
+      await attachDatabaseProductsToPayload(basePayload);
       const overrides = buildChangedOverrides(basePayload, body);
       const savedOverrides = savePageOverrides({
         countryId: basePayload.country.id,
@@ -2286,6 +2283,7 @@ async function handleRequest(request, response) {
         lang: basePayload.language,
         page: basePayload.page.path,
       });
+      await attachDatabaseProductsToPayload(currentPayload);
 
       sendJson(response, 200, {
         status: "saved",
