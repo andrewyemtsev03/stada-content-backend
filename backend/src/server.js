@@ -79,6 +79,15 @@ function appendVaryHeader(response, value) {
   response.setHeader("Vary", values.join(", "));
 }
 
+function isDefaultPublicCorsOrigin(origin) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return protocol === "https:" && (hostname === "stada.kz" || hostname.endsWith(".stada.kz"));
+  } catch (error) {
+    return false;
+  }
+}
+
 function applyRequestHeaders(request, response) {
   Object.entries(securityHeaders).forEach(([header, value]) => response.setHeader(header, value));
 
@@ -94,7 +103,7 @@ function applyRequestHeaders(request, response) {
 
   const allowedOrigin = allowAnyCorsOrigin
     ? "*"
-    : allowedCorsOrigins.includes(normalizedOrigin)
+    : allowedCorsOrigins.includes(normalizedOrigin) || isDefaultPublicCorsOrigin(normalizedOrigin)
       ? normalizedOrigin
       : "";
   if (!allowedOrigin) return;
