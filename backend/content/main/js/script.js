@@ -3456,7 +3456,17 @@ function applyProductMetrics(payload) {
 }
 
 function normalizeProductCardId(value) {
-  return String(value || '')
+  const rawValue = String(value || '').trim();
+  const slugMatch = rawValue.match(/[?&]slug=([^&#]+)/);
+  if (slugMatch) {
+    try {
+      return decodeURIComponent(slugMatch[1]).trim();
+    } catch (error) {
+      return slugMatch[1].trim();
+    }
+  }
+
+  return rawValue
     .split(/[?#]/)[0]
     .replace(/\\/g, '/')
     .replace(/^(\.\/)+/, '')
@@ -3483,6 +3493,7 @@ function createProductCatalogCard(product) {
   card.className = 'catalog-card';
   card.dataset.productCard = '';
   card.dataset.dynamicProductCard = 'true';
+  card.dataset.productId = product.id || '';
   card.dataset.category = product.category || '';
   card.href = resolveProductCardHref(product.href || `products/${product.id}.html`);
   if (product.accent) card.style.setProperty('--card-accent', product.accent);
@@ -3524,10 +3535,11 @@ function applyProductCatalogCards(payload) {
 
   const productsById = new Map(products.map(product => [product.id, product]));
   document.querySelectorAll('[data-product-card]').forEach(card => {
-    const cardId = normalizeProductCardId(card.getAttribute('href'));
+    const cardId = card.dataset.productId || normalizeProductCardId(card.getAttribute('href'));
     const product = productsById.get(cardId);
     if (!product) return;
 
+    card.dataset.productId = product.id;
     if (product.href) card.setAttribute('href', resolveProductCardHref(product.href));
     if (product.category) card.dataset.category = product.category;
     if (product.accent) card.style.setProperty('--card-accent', product.accent);
@@ -3561,7 +3573,7 @@ function applyProductCatalogCards(payload) {
 
   const existingIds = new Set(
     Array.from(grid.querySelectorAll('[data-product-card]'))
-      .map(card => normalizeProductCardId(card.getAttribute('href')))
+      .map(card => card.dataset.productId || normalizeProductCardId(card.getAttribute('href')))
       .filter(Boolean)
   );
   products.forEach(product => {
