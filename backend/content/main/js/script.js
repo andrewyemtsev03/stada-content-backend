@@ -9,10 +9,24 @@ function hideStadaPageLoader() {
   document.body.classList.add('stada-page-loaded');
 }
 
-if (document.readyState === 'complete') {
+function showStadaPageLoader() {
+  document.body.classList.remove('stada-page-loaded');
+}
+
+function shouldWaitForBackendContent() {
+  return document.body?.classList.contains('backend-content-pending')
+    || !!document.querySelector('[data-dynamic-product-page], [data-i18n-key], [data-backend-text-id], [data-backend-image-id]');
+}
+
+function hideStadaPageLoaderWhenReady() {
+  if (shouldWaitForBackendContent()) return;
   hideStadaPageLoader();
+}
+
+if (document.readyState === 'complete') {
+  hideStadaPageLoaderWhenReady();
 } else {
-  window.addEventListener('load', hideStadaPageLoader, { once: true });
+  window.addEventListener('load', hideStadaPageLoaderWhenReady, { once: true });
 }
 
 // Translation dictionary. Each key maps to a Russian and Kazakh version.
@@ -3107,7 +3121,62 @@ const STADA_DOMAIN_COUNTRY = getCountryCodeFromHostname(window.location.hostname
 const STADA_CONFIG_COUNTRY = getConfiguredCountryCode();
 const STADA_DEFAULT_COUNTRY = STADA_DOMAIN_COUNTRY || STADA_CONFIG_COUNTRY || 'kz';
 const backendPageCache = {};
+const backendProductCache = {};
+const legacyProductPageCache = {};
 let backendPagePayload = null;
+let backendProductPayload = null;
+const BACKEND_REQUEST_TIMEOUT_MS = 12000;
+const CRITICAL_IMAGE_WAIT_MS = 2500;
+
+async function fetchJsonWithTimeout(url) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), BACKEND_REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`Backend returned ${response.status}`);
+    }
+    return response.json();
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
+function wait(ms) {
+  return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+async function waitForCriticalImages() {
+  const selectors = [
+    'img[fetchpriority="high"]',
+    '.catalog-hero img',
+    '.product-hero img',
+    '[data-product-image]',
+    '[data-product-formula-image]'
+  ];
+  const images = Array.from(new Set(
+    selectors.flatMap(selector => Array.from(document.querySelectorAll(selector)))
+  )).filter(img => img instanceof HTMLImageElement && (img.currentSrc || img.src));
+
+  if (!images.length) return;
+
+  const imagePromises = images.map(img => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    if (typeof img.decode === 'function') {
+      return img.decode().catch(() => undefined);
+    }
+    return new Promise(resolve => {
+      img.addEventListener('load', resolve, { once: true });
+      img.addEventListener('error', resolve, { once: true });
+    });
+  });
+
+  await Promise.race([
+    Promise.all(imagePromises),
+    wait(CRITICAL_IMAGE_WAIT_MS)
+  ]);
+}
 
 function normalizeCountryCode(countryInput) {
   const requested = String(countryInput || '').trim().toLowerCase();
@@ -3212,6 +3281,10 @@ function isBackendDrivenPage() {
   return !!document.querySelector('[data-i18n-key], [data-backend-text-id], [data-backend-image-id]');
 }
 
+function isDynamicProductDetailPage() {
+  return !!document.querySelector('[data-dynamic-product-page]');
+}
+
 function getCurrentBackendPagePath() {
   const pathname = decodeURIComponent(window.location.pathname || '').replace(/\\/g, '/');
   const mainMarker = '/main/';
@@ -3237,16 +3310,41 @@ function buildBackendPageUrl(lang) {
   return url.href;
 }
 
+function getDynamicProductSlug() {
+  const params = new URLSearchParams(window.location.search || '');
+  const explicitSlug = params.get('slug') || params.get('product') || params.get('id');
+  if (explicitSlug) return normalizeProductCardId(explicitSlug);
+
+  const slugFromPath = normalizeProductCardId(window.location.pathname.split('/').pop() || '');
+  return slugFromPath && slugFromPath !== 'product' ? slugFromPath : '';
+}
+
+function buildBackendProductUrl(lang) {
+  const slug = getDynamicProductSlug();
+  const country = getCountryConfig();
+  const url = new URL(`/api/products/${encodeURIComponent(slug)}`, STADA_BACKEND_BASE_URL);
+  url.searchParams.set('country', country.backendCountry);
+  url.searchParams.set('lang', lang);
+  return url.href;
+}
+
+async function fetchBackendProduct(lang) {
+  const slug = getDynamicProductSlug();
+  if (!slug) {
+    throw new Error('Product slug is missing.');
+  }
+
+  const cacheKey = `${currentCountry}:${lang}:${slug}`;
+  if (!backendProductCache[cacheKey]) {
+    backendProductCache[cacheKey] = fetchJsonWithTimeout(buildBackendProductUrl(lang));
+  }
+  return backendProductCache[cacheKey];
+}
+
 async function fetchBackendPage(lang) {
   const cacheKey = `${currentCountry}:${lang}:${getCurrentBackendPagePath()}`;
   if (!backendPageCache[cacheKey]) {
-    backendPageCache[cacheKey] = fetch(buildBackendPageUrl(lang))
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Backend returned ${response.status}`);
-        }
-        return response.json();
-      });
+    backendPageCache[cacheKey] = fetchJsonWithTimeout(buildBackendPageUrl(lang));
   }
   return backendPageCache[cacheKey];
 }
@@ -3488,6 +3586,11 @@ function resolveProductCardHref(href) {
   return normalized;
 }
 
+function getDynamicProductHref(product) {
+  const slug = product?.slug || product?.id || normalizeProductCardId(product?.href || '');
+  return `product.html?slug=${encodeURIComponent(slug)}`;
+}
+
 function createProductCatalogCard(product) {
   const card = document.createElement('a');
   card.className = 'catalog-card';
@@ -3495,7 +3598,7 @@ function createProductCatalogCard(product) {
   card.dataset.dynamicProductCard = 'true';
   card.dataset.productId = product.id || '';
   card.dataset.category = product.category || '';
-  card.href = resolveProductCardHref(product.href || `products/${product.id}.html`);
+  card.href = resolveProductCardHref(getDynamicProductHref(product));
   if (product.accent) card.style.setProperty('--card-accent', product.accent);
 
   const media = document.createElement('div');
@@ -3540,7 +3643,7 @@ function applyProductCatalogCards(payload) {
     if (!product) return;
 
     card.dataset.productId = product.id;
-    if (product.href) card.setAttribute('href', resolveProductCardHref(product.href));
+    card.setAttribute('href', resolveProductCardHref(getDynamicProductHref(product)));
     if (product.category) card.dataset.category = product.category;
     if (product.accent) card.style.setProperty('--card-accent', product.accent);
 
@@ -3624,11 +3727,557 @@ function useStaticBackendPageFallback(error) {
   console.warn('Page backend unavailable; using static page content.', error);
 }
 
+function normalizeDynamicProductImageSrc(src) {
+  const value = String(src || '').trim();
+  if (!value) return getSiteAssetPath('assets/products/catalog-thumbs/catalog-hero-podium.webp');
+  if (/^(?:https?:)?\/\//i.test(value) || /^data:/i.test(value)) return withRuntimeImageRefresh(value);
+  return getSiteAssetPath(value.replace(/^(\.\/|\.\.\/)+/, ''));
+}
+
+function hexToRgbTriplet(hex) {
+  const value = String(hex || '').trim().replace(/^#/, '');
+  const normalized = value.length === 3
+    ? value.split('').map(char => `${char}${char}`).join('')
+    : value;
+  if (!/^[0-9a-f]{6}$/i.test(normalized)) return '';
+  return [
+    parseInt(normalized.slice(0, 2), 16),
+    parseInt(normalized.slice(2, 4), 16),
+    parseInt(normalized.slice(4, 6), 16)
+  ].join(', ');
+}
+
+function setText(selector, value, { hideEmpty = false } = {}) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  const text = String(value || '').trim();
+  el.textContent = text;
+  if (hideEmpty) el.hidden = !text;
+}
+
+function replaceChildrenFromList(selector, items, renderItem, { hideEmpty = false } = {}) {
+  const container = document.querySelector(selector);
+  if (!container) return;
+  container.innerHTML = '';
+  const renderedItems = (items || []).map(renderItem).filter(Boolean);
+  renderedItems.forEach(item => container.appendChild(item));
+  if (hideEmpty) container.hidden = !renderedItems.length;
+}
+
+function createDynamicProductMetric(item) {
+  const article = document.createElement('div');
+  article.className = 'product-hero-metric';
+  const value = document.createElement('strong');
+  value.textContent = item.value || item.title || '';
+  const label = document.createElement('span');
+  label.textContent = item.title && item.value ? item.title : item.text || '';
+  article.append(value, label);
+  return article;
+}
+
+function createDynamicProductFact(item) {
+  const article = document.createElement('article');
+  article.className = 'product-fact-card vitrum-animate is-visible';
+  const value = document.createElement('span');
+  value.textContent = item.value || '';
+  const title = document.createElement('h3');
+  title.textContent = item.title || '';
+  const text = document.createElement('p');
+  text.textContent = item.text || '';
+  article.append(value, title, text);
+  return article;
+}
+
+function createDynamicProductBenefit(text) {
+  const item = document.createElement('li');
+  item.className = 'vitrum-animate is-visible';
+  item.textContent = text;
+  return item;
+}
+
+function createDynamicPartnerCard(link) {
+  const card = document.createElement('a');
+  card.className = 'partner-card vitrum-animate is-visible';
+  card.href = link.url;
+  card.target = '_blank';
+  card.rel = 'noopener noreferrer';
+  card.setAttribute('aria-label', link.ariaLabel || link.label || 'Pharmacy partner');
+
+  const image = document.createElement('img');
+  image.src = normalizeDynamicProductImageSrc(link.logoSrc);
+  image.alt = link.logoAlt || link.label || '';
+  image.loading = 'lazy';
+  const label = document.createElement('p');
+  label.textContent = link.label || '';
+  card.append(image, label);
+  return card;
+}
+
+function getElementTextFromLegacy(el) {
+  if (!el) return '';
+  const key = el.getAttribute('data-i18n-key') || el.getAttribute('data-static-i18n-key');
+  if (key) return getTranslatedText(currentLang, key);
+  return el.textContent?.replace(/\s+/g, ' ').trim() || '';
+}
+
+function getLegacyImageSrc(img) {
+  const src = img?.getAttribute('src') || '';
+  return src ? normalizeDynamicProductImageSrc(src) : '';
+}
+
+function getLegacyClassName(el) {
+  return el?.getAttribute('class') || '';
+}
+
+function getLegacyHeroOptions(doc) {
+  const heroText = doc.querySelector('.product-hero-text');
+  return {
+    hasKicker: !!heroText?.querySelector('.product-kicker'),
+    hasActions: !!heroText?.querySelector('.product-hero-actions'),
+    hasBadges: !!heroText?.querySelector('.product-badges'),
+  };
+}
+
+function getLegacyHeroCopy(doc) {
+  const heroText = doc.querySelector('.product-hero-text');
+  return {
+    kicker: getElementTextFromLegacy(heroText?.querySelector(':scope > .product-kicker')),
+    title: getElementTextFromLegacy(heroText?.querySelector(':scope > h1')),
+    lead: getElementTextFromLegacy(heroText?.querySelector(':scope > p')),
+  };
+}
+
+function getLegacySectionCopy(section) {
+  const header = section?.querySelector('.product-section-header');
+  return {
+    label: getElementTextFromLegacy(header?.querySelector('.product-kicker')),
+    heading: getElementTextFromLegacy(header?.querySelector('h2')),
+    intro: getElementTextFromLegacy(header?.querySelector('p')),
+  };
+}
+
+function getLegacyBadges(doc) {
+  return Array.from(doc.querySelectorAll('.product-badges > *'))
+    .map(getElementTextFromLegacy)
+    .filter(Boolean);
+}
+
+function getLegacyHeroMetrics(doc) {
+  return Array.from(doc.querySelectorAll('.product-hero-metric')).map(metric => ({
+    value: getElementTextFromLegacy(metric.querySelector('strong')),
+    title: getElementTextFromLegacy(metric.querySelector('span')),
+    text: '',
+  })).filter(item => item.value || item.title);
+}
+
+function getLegacyFacts(doc) {
+  return Array.from(doc.querySelectorAll('.product-facts-grid .product-fact-card')).map(card => ({
+    value: getElementTextFromLegacy(card.querySelector('span')),
+    title: getElementTextFromLegacy(card.querySelector('h3')),
+    text: getElementTextFromLegacy(card.querySelector('p')),
+  })).filter(item => item.value || item.title || item.text);
+}
+
+function getLegacyFormulaPoints(doc) {
+  return Array.from(doc.querySelectorAll('.snup-formula-points .snup-formula-point')).map(point => ({
+    className: getLegacyClassName(point),
+    value: getElementTextFromLegacy(point.querySelector(':scope > span')),
+    title: getElementTextFromLegacy(point.querySelector('h3')),
+    text: getElementTextFromLegacy(point.querySelector('p')),
+    imageSrc: getLegacyImageSrc(point.querySelector('img')),
+    imageAlt: point.querySelector('img')?.getAttribute('alt') || '',
+  })).filter(item => item.value || item.title || item.text || item.imageSrc);
+}
+
+function getLegacyUsageItems(doc) {
+  return Array.from(doc.querySelectorAll('[data-vitrum-usage] .usage-item')).map((item, index) => ({
+    className: getLegacyClassName(item),
+    title: getElementTextFromLegacy(item.querySelector('h3')),
+    text: getElementTextFromLegacy(item.querySelector('p')),
+    isActive: index === 0 || item.classList.contains('is-active'),
+  })).filter(item => item.title || item.text);
+}
+
+function getLegacyBenefits(doc) {
+  return Array.from(doc.querySelectorAll('.benefits-list li'))
+    .map(getElementTextFromLegacy)
+    .filter(Boolean);
+}
+
+function getLegacyPurchaseLinks(doc) {
+  return Array.from(doc.querySelectorAll('.partners-grid .partner-card')).map((card, index) => {
+    const image = card.querySelector('img');
+    return {
+      slot: `legacy-${index + 1}`,
+      label: getElementTextFromLegacy(card.querySelector('p')) || image?.getAttribute('alt') || '',
+      url: card.getAttribute('href') || '',
+      logoSrc: getLegacyImageSrc(image),
+      logoAlt: image?.getAttribute('alt') || '',
+      ariaLabel: card.getAttribute('aria-label') || '',
+      sortOrder: index,
+    };
+  }).filter(link => link.label && link.url);
+}
+
+function getLegacyProductBlueprint(doc) {
+  if (!doc) return null;
+  const bodyClasses = Array.from(doc.body?.classList || []);
+  const overviewSection = doc.querySelector('.product-overview');
+  const formulaSection = doc.querySelector('.product-formula');
+  const usageSection = doc.querySelector('.product-usage');
+  const buySection = doc.querySelector('.product-where-to-buy');
+  const note = doc.querySelector('.product-note');
+  const heroImage = doc.querySelector('.product-hero-image img');
+  const formulaImage = doc.querySelector('.snup-formula-core img');
+  const formulaLayout = doc.querySelector('.product-formula-layout');
+  const formulaSystem = doc.querySelector('.snup-formula-system');
+  const formulaLines = doc.querySelector('.snup-formula-lines');
+  const formulaLineClass = getLegacyClassName(doc.querySelector('.snup-formula-line'));
+  const formulaDotClass = getLegacyClassName(doc.querySelector('.snup-formula-dot'));
+
+  return {
+    bodyClasses,
+    heroOptions: getLegacyHeroOptions(doc),
+    copy: {
+      hero: getLegacyHeroCopy(doc),
+      overview: getLegacySectionCopy(overviewSection),
+      formula: getLegacySectionCopy(formulaSection),
+      usage: getLegacySectionCopy(usageSection),
+      buy: getLegacySectionCopy(buySection),
+      note: {
+        title: getElementTextFromLegacy(note?.querySelector('h3')),
+        text: getElementTextFromLegacy(note?.querySelector('p')),
+      },
+    },
+    badges: getLegacyBadges(doc),
+    heroImageSrc: getLegacyImageSrc(heroImage),
+    heroImageAlt: heroImage?.getAttribute('alt') || '',
+    metrics: getLegacyHeroMetrics(doc),
+    facts: getLegacyFacts(doc),
+    benefits: getLegacyBenefits(doc),
+    formulaImageSrc: getLegacyImageSrc(formulaImage),
+    formulaLayoutClassName: getLegacyClassName(formulaLayout),
+    formulaSystemClassName: getLegacyClassName(formulaSystem),
+    formulaLinesClassName: getLegacyClassName(formulaLines),
+    formulaLineClassName: formulaLineClass,
+    formulaDotClassName: formulaDotClass,
+    formulaPoints: getLegacyFormulaPoints(doc),
+    usageItems: getLegacyUsageItems(doc),
+    purchaseLinks: getLegacyPurchaseLinks(doc),
+  };
+}
+
+async function fetchLegacyProductBlueprint(slug) {
+  const normalizedSlug = normalizeProductCardId(slug);
+  if (!normalizedSlug) return null;
+  if (!legacyProductPageCache[normalizedSlug]) {
+    const legacyUrl = `${encodeURIComponent(normalizedSlug)}.html`;
+    legacyProductPageCache[normalizedSlug] = fetch(legacyUrl)
+      .then(response => {
+        if (!response.ok) return null;
+        return response.text();
+      })
+      .then(html => {
+        if (!html) return null;
+        return getLegacyProductBlueprint(new DOMParser().parseFromString(html, 'text/html'));
+      })
+      .catch(() => null);
+  }
+  return legacyProductPageCache[normalizedSlug];
+}
+
+function applyLegacyProductLayout(legacy) {
+  if (!legacy) return;
+  legacy.bodyClasses
+    .filter(className => className.startsWith('product-') && className !== 'product-detail-page')
+    .forEach(className => document.body.classList.add(className));
+
+  const heroKicker = document.querySelector('[data-product-kicker]');
+  if (heroKicker) heroKicker.hidden = !legacy.heroOptions.hasKicker || !heroKicker.textContent.trim();
+
+  const actions = document.querySelector('.product-hero-actions');
+  if (actions) actions.hidden = !legacy.heroOptions.hasActions;
+
+  const badges = document.querySelector('[data-product-badges]');
+  if (badges) badges.hidden = !legacy.heroOptions.hasBadges || !badges.children.length;
+
+  const formulaLayout = document.querySelector('.product-formula-layout');
+  if (formulaLayout && legacy.formulaLayoutClassName) {
+    formulaLayout.className = legacy.formulaLayoutClassName;
+  }
+
+  const formulaSystem = document.querySelector('.snup-formula-system');
+  if (formulaSystem && legacy.formulaSystemClassName) {
+    formulaSystem.className = legacy.formulaSystemClassName;
+  }
+
+  const formulaLines = document.querySelector('.snup-formula-lines');
+  if (formulaLines && legacy.formulaLinesClassName) {
+    formulaLines.setAttribute('class', legacy.formulaLinesClassName);
+  }
+
+  if (legacy.formulaLineClassName) {
+    document.querySelectorAll('.snup-formula-lines path').forEach(path => path.setAttribute('class', legacy.formulaLineClassName));
+  }
+  if (legacy.formulaDotClassName) {
+    document.querySelectorAll('.snup-formula-lines circle').forEach(circle => circle.setAttribute('class', legacy.formulaDotClassName));
+  }
+}
+
+function getApiProductBlueprint(product, page) {
+  const layout = page?.layout || {};
+  const heroOptions = page?.heroOptions || {};
+  const hasLayout = Object.values(layout).some(value => {
+    return Array.isArray(value) ? value.length : String(value || '').trim();
+  });
+  const hasHeroOptions = Object.prototype.hasOwnProperty.call(heroOptions, 'hasKicker')
+    || Object.prototype.hasOwnProperty.call(heroOptions, 'hasActions')
+    || Object.prototype.hasOwnProperty.call(heroOptions, 'hasBadges');
+
+  if (!hasLayout && !hasHeroOptions) return null;
+
+  return {
+    bodyClasses: Array.isArray(layout.bodyClasses) ? layout.bodyClasses : [],
+    heroOptions: {
+      hasKicker: heroOptions.hasKicker !== false,
+      hasActions: heroOptions.hasActions !== false,
+      hasBadges: heroOptions.hasBadges !== false,
+    },
+    badges: [],
+    metrics: [],
+    facts: [],
+    benefits: [],
+    formulaPoints: [],
+    usageItems: [],
+    purchaseLinks: [],
+    heroImageSrc: '',
+    heroImageAlt: product?.image?.alt || product?.name || '',
+    formulaImageSrc: '',
+    formulaLayoutClassName: layout.formulaLayoutClassName || '',
+    formulaSystemClassName: layout.formulaSystemClassName || '',
+    formulaLinesClassName: layout.formulaLinesClassName || '',
+    formulaLineClassName: layout.formulaLineClassName || '',
+    formulaDotClassName: layout.formulaDotClassName || '',
+  };
+}
+
+function createDynamicFormulaPoint(item, index) {
+  const article = document.createElement('article');
+  const modifiers = ['active', 'seawater', 'format'];
+  article.className = item.className || `snup-formula-point snup-formula-point--${modifiers[index] || 'format'} vitrum-animate is-visible`;
+  if (!article.classList.contains('is-visible')) article.classList.add('is-visible');
+  if (item.imageSrc) {
+    const image = document.createElement('img');
+    image.src = normalizeDynamicProductImageSrc(item.imageSrc);
+    image.alt = item.imageAlt || '';
+    image.loading = 'lazy';
+    article.appendChild(image);
+  } else {
+    const value = document.createElement('span');
+    value.textContent = item.value || String(index + 1);
+    article.appendChild(value);
+  }
+
+  if (item.title) {
+    const title = document.createElement('h3');
+    title.textContent = item.title;
+    article.appendChild(title);
+  }
+
+  const text = document.createElement('p');
+  text.textContent = item.text || '';
+  article.appendChild(text);
+  return article;
+}
+
+function createDynamicUsageItem(item, index) {
+  const article = document.createElement('article');
+  article.className = item.className || `usage-item vitrum-animate is-visible${index === 0 ? ' is-active' : ''}`;
+  if (!article.classList.contains('is-visible')) article.classList.add('is-visible');
+  if (item.isActive || index === 0) article.classList.add('is-active');
+  article.tabIndex = 0;
+  const marker = document.createElement('span');
+  const content = document.createElement('div');
+  const title = document.createElement('h3');
+  title.textContent = item.title || '';
+  const text = document.createElement('p');
+  text.textContent = item.text || '';
+  content.append(title, text);
+  article.append(marker, content);
+  return article;
+}
+
+function getProductFallbackCardImageSrc(slug) {
+  const normalizedSlug = normalizeProductCardId(slug);
+  if (!normalizedSlug) return '';
+  const extension = normalizedSlug === 'cardiomagnil' ? 'jpg' : 'png';
+  return `https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/${normalizedSlug}/card.${extension}`;
+}
+
+function createLegacyProductFallbackPayload(slug, legacy) {
+  const normalizedSlug = normalizeProductCardId(slug);
+  const copy = legacy?.copy || {};
+  const name = copy.hero?.title || copy.overview?.heading || normalizedSlug;
+  const therapeuticArea = copy.hero?.kicker || copy.overview?.label || '';
+  const shortDescription = copy.hero?.lead || copy.overview?.intro || '';
+  const imageSrc = getProductFallbackCardImageSrc(normalizedSlug) || legacy?.heroImageSrc || '';
+
+  return {
+    product: {
+      id: normalizedSlug,
+      slug: normalizedSlug,
+      name,
+      therapeuticArea,
+      shortDescription,
+      image: {
+        src: imageSrc,
+        url: imageSrc,
+        alt: legacy?.heroImageAlt || name,
+      },
+      page: {
+        title: name ? `STADA - ${name}` : 'STADA - Product',
+      },
+    },
+  };
+}
+
+function navigateToLegacyProductPage(slug) {
+  const normalizedSlug = normalizeProductCardId(slug);
+  if (!normalizedSlug) return false;
+  window.location.replace(`${encodeURIComponent(normalizedSlug)}.html`);
+  return true;
+}
+
+function renderDynamicProductPage(payload, legacy = null) {
+  const product = payload?.product || {};
+  const page = product.page || {};
+  const blueprint = getApiProductBlueprint(product, page) || legacy;
+  const body = document.body;
+  const accent = product.accent || '#005db9';
+  const accentRgb = hexToRgbTriplet(accent);
+
+  backendProductPayload = payload;
+  clearBackendRequiredMessage();
+  body.dataset.productSlug = product.slug || product.id || '';
+  const productClass = `product-${String(product.slug || product.id || 'dynamic').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-page`;
+  body.classList.add(productClass);
+  body.style.setProperty('--product-accent', accent);
+  body.style.setProperty('--product-accent-strong', accent);
+  if (accentRgb) {
+    body.style.setProperty('--product-accent-rgb', accentRgb);
+    body.style.setProperty('--product-accent-strong-rgb', accentRgb);
+  }
+
+  const legacyCopy = blueprint?.copy || {};
+  setText('[data-product-kicker]', legacyCopy.hero?.kicker || page.kicker || product.therapeuticArea);
+  setText('[data-product-title]', legacyCopy.hero?.title || product.name);
+  setText('[data-product-lead]', legacyCopy.hero?.lead || page.lead || product.shortDescription);
+  setText('[data-product-overview-label]', legacyCopy.overview?.label || page.overviewLabel || product.therapeuticArea);
+  setText('[data-product-overview-heading]', legacyCopy.overview?.heading || page.overviewHeading || product.name);
+  setText('[data-product-overview-intro]', legacyCopy.overview?.intro || page.overviewIntro || product.shortDescription, { hideEmpty: true });
+  setText('[data-product-formula-label]', legacyCopy.formula?.label || page.formulaLabel);
+  setText('[data-product-formula-heading]', legacyCopy.formula?.heading || page.formulaHeading || product.name);
+  setText('[data-product-formula-intro]', legacyCopy.formula?.intro || page.formulaIntro, { hideEmpty: true });
+  setText('[data-product-usage-label]', legacyCopy.usage?.label || page.usageLabel);
+  setText('[data-product-usage-heading]', legacyCopy.usage?.heading || page.usageHeading || product.name);
+  setText('[data-product-note-title]', legacyCopy.note?.title || page.noteTitle);
+  setText('[data-product-note-text]', legacyCopy.note?.text || page.noteText, { hideEmpty: true });
+  setText('[data-product-buy-intro]', legacyCopy.buy?.intro || page.buyIntro, { hideEmpty: true });
+
+  const image = document.querySelector('[data-product-image]');
+  if (image) {
+    image.src = blueprint?.heroImageSrc || normalizeDynamicProductImageSrc(product.image?.url || product.image?.src);
+    image.alt = blueprint?.heroImageAlt || product.image?.alt || product.name || '';
+  }
+  const formulaImage = document.querySelector('[data-product-formula-image]');
+  if (formulaImage) {
+    formulaImage.src = blueprint?.formulaImageSrc || normalizeDynamicProductImageSrc(page.formulaImage || product.image?.url || product.image?.src);
+    formulaImage.alt = '';
+  }
+
+  const badges = blueprint?.badges?.length ? blueprint.badges : page.badges?.length ? page.badges : [product.therapeuticArea, product.shortDescription].filter(Boolean).slice(0, 3);
+  replaceChildrenFromList('[data-product-badges]', badges, text => {
+    const item = document.createElement('span');
+    item.textContent = text;
+    return item;
+  }, { hideEmpty: true });
+
+  const metrics = blueprint?.metrics?.length ? blueprint.metrics : page.metrics?.length ? page.metrics : page.facts?.length ? page.facts.slice(0, 3) : [];
+  const facts = blueprint?.facts?.length ? blueprint.facts : page.facts || [];
+  const formulaPoints = blueprint?.formulaPoints?.length ? blueprint.formulaPoints : page.formulaPoints || [];
+  const usageItems = blueprint?.usageItems?.length ? blueprint.usageItems : page.usageItems || [];
+  const benefits = blueprint?.benefits?.length ? blueprint.benefits : page.benefits || [];
+  const purchaseLinks = blueprint?.purchaseLinks?.length ? blueprint.purchaseLinks : page.purchaseLinks || [];
+  replaceChildrenFromList('[data-product-metrics]', metrics, createDynamicProductMetric, { hideEmpty: true });
+  replaceChildrenFromList('[data-product-facts]', facts, createDynamicProductFact, { hideEmpty: true });
+  replaceChildrenFromList('[data-product-benefits]', benefits, createDynamicProductBenefit, { hideEmpty: true });
+  replaceChildrenFromList('[data-product-formula-points]', formulaPoints, createDynamicFormulaPoint, { hideEmpty: true });
+  replaceChildrenFromList('[data-product-usage-items]', usageItems, createDynamicUsageItem, { hideEmpty: true });
+  replaceChildrenFromList('[data-product-partners]', purchaseLinks, createDynamicPartnerCard, { hideEmpty: true });
+  applyLegacyProductLayout(blueprint);
+
+  document.title = page.title || `STADA - ${product.name || ''}`;
+  document.dispatchEvent(new CustomEvent('stada:dynamicproductrender', { detail: { product, lang: currentLang, country: currentCountry } }));
+
+  document.querySelectorAll('[data-vitrum-usage] .usage-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('[data-vitrum-usage] .usage-item').forEach(current => current.classList.toggle('is-active', current === item));
+    });
+    item.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      item.click();
+    });
+  });
+
+}
+
+async function updateDynamicProductPage(lang) {
+  lang = resolveLanguageForCountry(lang);
+  currentLang = lang;
+  persistLocaleState();
+  document.documentElement.lang = lang;
+  document.body.classList.add('backend-content-pending');
+  showStadaPageLoader();
+  setLanguageToggleState(lang);
+  applyStaticI18n(lang);
+  updateStaticLanguage(lang);
+  const slug = getDynamicProductSlug();
+  const legacyPromise = fetchLegacyProductBlueprint(slug);
+  let payload = null;
+  let legacy = null;
+  try {
+    [payload, legacy] = await Promise.all([
+      fetchBackendProduct(lang),
+      legacyPromise
+    ]);
+  } catch (error) {
+    legacy = await legacyPromise.catch(() => null);
+    if (!legacy) {
+      if (window.location.protocol === 'file:' && navigateToLegacyProductPage(slug)) return;
+      throw error;
+    }
+    const fallbackImageSrc = getProductFallbackCardImageSrc(slug);
+    if (fallbackImageSrc) {
+      legacy.heroImageSrc = fallbackImageSrc;
+      legacy.formulaImageSrc = fallbackImageSrc;
+    }
+    payload = createLegacyProductFallbackPayload(slug, legacy);
+    console.warn('Product backend unavailable; using legacy product page content.', error);
+  }
+  renderDynamicProductPage(payload, legacy);
+  await waitForCriticalImages();
+  document.body.classList.remove('backend-content-pending');
+  hideStadaPageLoader();
+}
+
 async function updateBackendDrivenPage(lang) {
   lang = resolveLanguageForCountry(lang);
   currentLang = lang;
   persistLocaleState();
   document.documentElement.lang = lang;
+  document.body.classList.add('backend-content-pending');
+  showStadaPageLoader();
   setLanguageToggleState(lang);
   applyStaticI18n(lang);
 
@@ -3641,7 +4290,9 @@ async function updateBackendDrivenPage(lang) {
   applyProductCatalogCards(payload);
   renderHomeProductPreview(payload);
   applyProductMetrics(payload);
+  await waitForCriticalImages();
   document.body.classList.remove('backend-content-pending');
+  hideStadaPageLoader();
 
   updateDocumentTitle(lang);
   const backToTop = document.getElementById('backToTop');
@@ -3703,6 +4354,13 @@ function updateStaticLanguage(lang) {
 // Helper to update all elements with data-i18n-key
 function updateLanguage(lang) {
   lang = resolveLanguageForCountry(lang);
+  if (isDynamicProductDetailPage()) {
+    updateDynamicProductPage(lang).catch(error => {
+      updateStaticLanguage(lang);
+      showBackendRequiredMessage(error);
+    });
+    return;
+  }
   if (isBackendDrivenPage()) {
     updateBackendDrivenPage(lang).catch(error => {
       updateStaticLanguage(lang);
