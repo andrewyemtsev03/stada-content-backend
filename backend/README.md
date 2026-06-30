@@ -53,9 +53,9 @@ Admin homepage image uploads use a stable Cloudinary public ID based on country,
 
 ## Content Source
 
-The backend-owned content source lives in `backend/data/content-source.json`. It defines the default editable homepage text, image slots, and admin sections. Admin changes are stored separately in `backend/data/content-overrides.json`.
+The backend-owned content source lives in `backend/data/content-source.json`. It defines the default page text, image slots, admin sections, and structured product-page fallback content. Admin changes are stored separately in `backend/data/content-overrides.json`.
 
-The public frontend still calls `/api/page` and `/api/homepage`, but the homepage response is now built from backend data instead of a copied frontend folder. `backend/content/main` remains only as a temporary compatibility fallback for non-migrated pages.
+Product catalog defaults live in `backend/data/product-catalog.json`, and worldwide country metadata lives in `backend/data/worldwide-countries.json`. The backend no longer carries a copied frontend snapshot folder.
 
 ## Endpoints
 
@@ -102,11 +102,11 @@ The page response includes:
 - `content.text`: all translated `data-i18n-key` values used by the page.
 - `content.dom.text`: unkeyed text nodes marked with `data-backend-text-id`.
 - `content.dom.images`: image nodes marked with `data-backend-image-id`.
-- `content.staticTexts`: visible static text discovered in fallback HTML pages.
+- `content.staticTexts`: reserved for legacy static text extraction.
 - `content.photos`: all image paths from the page, with resolved URLs.
 - `content.sections`: the same text and photos grouped by page section.
 
-`/api/page` first checks `data/content-source.json`, then falls back to configured HTML snapshots for pages that have not been migrated yet. Parent-directory paths and non-HTML files are rejected. The frontend hydrates both keyed translations and backend-id DOM text/image items from this endpoint.
+`/api/page` reads page defaults from `data/content-source.json`. Parent-directory paths and non-HTML files are rejected. The frontend hydrates both keyed translations and backend-id DOM text/image items from this endpoint.
 
 Configured language pairs:
 

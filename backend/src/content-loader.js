@@ -396,6 +396,10 @@ function applyTranslationMutations(source, translations) {
 function loadWorldwideCountries(countriesDataPath) {
   if (!countriesDataPath || !fs.existsSync(countriesDataPath)) return [];
   const source = fs.readFileSync(countriesDataPath, "utf8");
+  if (countriesDataPath.toLowerCase().endsWith(".json")) {
+    const parsed = JSON.parse(source);
+    return Array.isArray(parsed) ? parsed : parsed.countries || [];
+  }
   const literal = extractJsLiteral(source, "countriesData", "[", "]");
   return evaluateLiteral(literal, "countriesData");
 }
@@ -757,75 +761,42 @@ function categoryTokenToClass(category) {
   return firstCategory.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
 }
 
-function loadProductCatalog({ homepageConfig, translations, productFallbackTools, language, fallbackLanguage, assetsBaseUrl }) {
-  const homepagePath = resolveBackendPath(homepageConfig.htmlPath);
-  const catalogPath = path.join(path.dirname(homepagePath), "products", "index.html");
+function normalizeCatalogProduct(product, assetsBaseUrl) {
+  const image = product.image || {};
+  const imageSrc = normalizeHomepageRelativePath(image.src || image.url || "");
+
+  return {
+    id: String(product.id || ""),
+    href: String(product.href || ""),
+    className: String(product.className || ""),
+    category: String(product.category || ""),
+    categoryClass: String(product.categoryClass || categoryTokenToClass(product.category)),
+    accent: String(product.accent || ""),
+    image: {
+      id: String(image.id || ""),
+      src: imageSrc,
+      url: makeAssetUrl(imageSrc, assetsBaseUrl),
+      alt: String(image.alt || ""),
+    },
+    nameKey: String(product.nameKey || ""),
+    name: String(product.name || ""),
+    descriptionKey: String(product.descriptionKey || ""),
+    shortDescription: String(product.shortDescription || ""),
+    categoryKey: String(product.categoryKey || ""),
+    therapeuticArea: String(product.therapeuticArea || ""),
+  };
+}
+
+function loadProductCatalog({ homepageConfig, language, fallbackLanguage, assetsBaseUrl }) {
+  const catalogPath = resolveBackendPath(homepageConfig.productCatalogPath || "data/product-catalog.json");
   if (!fs.existsSync(catalogPath)) return [];
 
-  const html = fs.readFileSync(catalogPath, "utf8");
-  const cards = [];
-  const cardPattern = /<a\b([^>]*)\bdata-product-card\b([^>]*)>([\s\S]*?)<\/a>/gi;
-  let match;
-
-  while ((match = cardPattern.exec(html)) !== null) {
-    const attributes = parseAttributes(`${match[1]} ${match[2]}`);
-    const id = normalizeProductIdFromHref(attributes.href);
-    if (!id || id === "index") continue;
-
-    const body = match[3];
-    const image = findImage(body);
-    const category = findElementByClass(body, "span", "catalog-card__category");
-    const name = body.match(/<h3\b([^>]*)>([\s\S]*?)<\/h3>/i);
-    const description = body.match(/<p\b([^>]*)>([\s\S]*?)<\/p>/i);
-    const nameAttributes = name ? parseAttributes(name[1]) : {};
-    const descriptionAttributes = description ? parseAttributes(description[1]) : {};
-    const imageSrc = normalizeHomepageRelativePath(image["data-backend-src"] || image.src || "");
-    const href = `products/${normalizeProductIdFromHref(attributes.href)}.html`;
-    const categoryKey = category?.attributes?.["data-i18n-key"] || "";
-    const nameKey = nameAttributes["data-i18n-key"] || "";
-    const descriptionKey = descriptionAttributes["data-i18n-key"] || "";
-
-    cards.push({
-      id,
-      href,
-      className: getClassList(attributes).filter(value => value !== "catalog-card").join(" "),
-      category: String(attributes["data-category"] || ""),
-      categoryClass: categoryTokenToClass(attributes["data-category"]),
-      accent: extractCardAccent(attributes.style),
-      image: {
-        id: String(image["data-backend-image-id"] || ""),
-        src: imageSrc,
-        url: makeAssetUrl(imageSrc, assetsBaseUrl),
-        alt: String(image.alt || ""),
-      },
-      nameKey,
-      name: resolveCatalogText(
-        { key: nameKey, text: name ? stripHtml(name[2]) : "" },
-        translations,
-        productFallbackTools,
-        language,
-        fallbackLanguage
-      ),
-      descriptionKey,
-      shortDescription: resolveCatalogText(
-        { key: descriptionKey, text: description ? stripHtml(description[2]) : "" },
-        translations,
-        productFallbackTools,
-        language,
-        fallbackLanguage
-      ),
-      categoryKey,
-      therapeuticArea: resolveCatalogText(
-        { key: categoryKey, text: category?.text || "" },
-        translations,
-        productFallbackTools,
-        language,
-        fallbackLanguage
-      ),
-    });
-  }
-
-  return cards;
+  const source = readJson(catalogPath);
+  const catalogs = source.products && typeof source.products === "object" ? source.products : {};
+  const catalog = catalogs[language] || catalogs[fallbackLanguage] || catalogs.ru || [];
+  return Array.isArray(catalog)
+    ? catalog.map(product => normalizeCatalogProduct(product, assetsBaseUrl)).filter(product => product.id)
+    : [];
 }
 
 function normalizeProductIds(value) {
@@ -848,20 +819,9 @@ function syncHomeProducts(payload) {
 }
 
 function attachProductCatalog(payload, countryConfig, homepageConfig) {
-  const translationScriptPath = resolveBackendPath(homepageConfig.translationScriptPath);
-  if (!fs.existsSync(translationScriptPath)) {
-    payload.content.productCatalog = [];
-    syncHomeProducts(payload);
-    return;
-  }
-
-  const translations = loadTranslations(translationScriptPath);
-  const productFallbackTools = loadProductFallbackTools(translationScriptPath);
   const fallbackLanguage = countryConfig.defaultLanguage || payload.language;
   payload.content.productCatalog = loadProductCatalog({
     homepageConfig,
-    translations,
-    productFallbackTools,
     language: payload.language,
     fallbackLanguage,
     assetsBaseUrl: homepageConfig.assetsBaseUrl,
@@ -875,6 +835,7 @@ function buildContentSourcePayload({
   pageSource,
   languageInput,
   assetsBaseUrl,
+  worldwideCountry,
 }) {
   const language = chooseContentSourceLanguage(countryConfig, pageSource.text, languageInput);
   const fallbackLanguage = countryConfig.defaultLanguage || language;
@@ -897,7 +858,12 @@ function buildContentSourcePayload({
       photos,
     };
   });
-  const allKeys = unique(sections.flatMap(section => section.translatedTexts.map(item => item.key)));
+  const allKeys = unique([
+    ...sections.flatMap(section => section.translatedTexts.map(item => item.key)),
+    ...Object.keys(pageSource.text?.[language] || {}),
+    ...Object.keys(pageSource.text?.[fallbackLanguage] || {}),
+    ...Object.keys(pageSource.text?.ru || {}),
+  ]);
   const text = Object.fromEntries(
     allKeys.map(key => {
       const translated = resolveContentSourceText(pageSource, language, fallbackLanguage, key);
@@ -914,7 +880,7 @@ function buildContentSourcePayload({
       siteUrl: countryConfig.siteUrl,
       defaultLanguage: countryConfig.defaultLanguage,
       supportedLanguages: countryConfig.supportedLanguages || [],
-      worldwide: null,
+      worldwide: worldwideCountry || null,
     },
     language,
     requestedLanguage: languageInput || null,
@@ -939,6 +905,7 @@ function buildContentSourcePayload({
         ...(pageSource.settings && typeof pageSource.settings === "object" ? pageSource.settings : {}),
         homeProducts: normalizeProductIds(pageSource.settings?.homeProducts || defaultHomeProductIds),
       },
+      purchaseLinks: Array.isArray(pageSource.purchaseLinks) ? pageSource.purchaseLinks : [],
       sections,
     },
   };
@@ -1029,6 +996,9 @@ function getPagePayload(options = {}) {
   validateNormalizedPagePath(requestedPagePath);
   const contentSource = loadContentSource(config);
   const pageSource = contentSource.pages[requestedPagePath];
+  const countriesDataPath = resolveBackendPath(homepageConfig.worldwideCountriesPath || homepageConfig.countriesDataPath);
+  const worldwideCountries = loadWorldwideCountries(countriesDataPath);
+  const worldwideCountry = findWorldwideCountry(countryConfig, worldwideCountries);
 
   if (pageSource) {
     const payload = buildContentSourcePayload({
@@ -1037,6 +1007,7 @@ function getPagePayload(options = {}) {
       pageSource,
       languageInput: options.lang || options.language,
       assetsBaseUrl: homepageConfig.assetsBaseUrl,
+      worldwideCountry,
     });
     attachProductCatalog(payload, countryConfig, homepageConfig);
 
@@ -1053,17 +1024,22 @@ function getPagePayload(options = {}) {
     return payload;
   }
 
+  if (!homepageConfig.htmlPath) {
+    throw Object.assign(new Error(`Page "${requestedPagePath}" was not found.`), {
+      statusCode: 404,
+      code: "PAGE_NOT_FOUND",
+      page: requestedPagePath,
+    });
+  }
+
   const { htmlPath, pagePath } = resolveHtmlPath(homepageConfig, requestedPagePath);
   const translationScriptPath = resolveBackendPath(homepageConfig.translationScriptPath);
-  const countriesDataPath = resolveBackendPath(homepageConfig.countriesDataPath);
 
   const html = fs.readFileSync(htmlPath, "utf8");
   const translations = loadTranslations(translationScriptPath);
   const productFallbackTools = loadProductFallbackTools(translationScriptPath);
   const language = chooseLanguage(countryConfig, translations, options.lang || options.language);
   const fallbackLanguage = countryConfig.defaultLanguage || language;
-  const worldwideCountries = loadWorldwideCountries(countriesDataPath);
-  const worldwideCountry = findWorldwideCountry(countryConfig, worldwideCountries);
   const sections = extractSections(html).map(section =>
     buildSectionPayload(section, translations, productFallbackTools, language, fallbackLanguage, homepageConfig.assetsBaseUrl)
   );

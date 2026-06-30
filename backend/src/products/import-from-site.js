@@ -1,10 +1,14 @@
 const { runMigrations } = require("../db/migrate");
-const fs = require("node:fs");
-const path = require("node:path");
 const { getPagePayload } = require("../content-loader");
 const { upsertProduct, upsertTherapeuticArea } = require("./repository");
 
-const contentRoot = path.resolve(__dirname, "..", "..", "content", "main");
+const detailImageSlots = {
+  image_002: "detailHero",
+  image_003: "formulaCenter",
+  image_004: "formulaPointActive",
+  image_005: "formulaPointSeawater",
+  image_006: "formulaPointFormat",
+};
 
 function normalizeAreaId(value) {
   const firstToken = String(value || "").split(/\s+/).find(Boolean) || "general";
@@ -17,6 +21,10 @@ function normalizeAreaId(value) {
 
 function productMapById(products) {
   return new Map((products || []).map(product => [product.id, product]));
+}
+
+function productDomBase(productId) {
+  return String(productId || "").replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
 }
 
 function cloudinaryPublicIdFromUrl(value) {
@@ -37,15 +45,6 @@ function makeTranslation(product) {
   };
 }
 
-function getAttributeValue(source, name) {
-  const match = String(source || "").match(new RegExp(`\\s${name}=["']([^"']*)["']`, "i"));
-  return match ? match[1].trim() : "";
-}
-
-function stripTags(value) {
-  return String(value || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-}
-
 function getPayloadText(payload, key) {
   return payload?.content?.text?.[key] || "";
 }
@@ -54,39 +53,34 @@ function getPayloadDomText(payload, id) {
   return (payload?.content?.dom?.text || []).find(item => item.id === id)?.value || "";
 }
 
-function getSnippetText(snippet, payload) {
-  const i18nKey = getAttributeValue(snippet, "data-i18n-key");
-  if (i18nKey) return getPayloadText(payload, i18nKey);
-
-  const backendTextId = getAttributeValue(snippet, "data-backend-text-id");
-  if (backendTextId) return getPayloadDomText(payload, backendTextId) || stripTags(snippet);
-
-  return stripTags(snippet);
+function getPayloadDomImage(payload, id) {
+  return (payload?.content?.dom?.images || []).find(item => item.id === id) || null;
 }
 
-function findFirstTag(source, tagName) {
-  return String(source || "").match(new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "i"))?.[0] || "";
+function getPayloadTextKeysInOrder(payload) {
+  const keys = [];
+  for (const section of payload.content?.sections || []) {
+    for (const item of section.translatedTexts || []) {
+      if (item?.key && !keys.includes(item.key)) keys.push(item.key);
+    }
+  }
+
+  for (const key of Object.keys(payload.content?.text || {})) {
+    if (!keys.includes(key)) keys.push(key);
+  }
+  return keys;
 }
 
-function findTaggedBlocksByClass(source, tagName, className) {
-  const escapedClass = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`<${tagName}\\b(?=[^>]*class=["'][^"']*\\b${escapedClass}\\b)[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi");
-  return String(source || "").match(pattern) || [];
-}
+function findProductKeyPrefix(payload, productId) {
+  const preferredPrefix = `product_${productDomBase(productId)}`;
+  if (Object.prototype.hasOwnProperty.call(payload.content?.text || {}, `${preferredPrefix}_page_title`)) {
+    return preferredPrefix;
+  }
 
-function findTaggedBlocks(source, tagName) {
-  return String(source || "").match(new RegExp(`<${tagName}\\b[^>]*>[\\s\\S]*?<\\/${tagName}>`, "gi")) || [];
-}
-
-function findFirstTaggedBlockByClass(source, tagName, className) {
-  return findTaggedBlocksByClass(source, tagName, className)[0] || "";
-}
-
-function getKeyPrefixFromDetailHtml(html, productId) {
-  const heading = findFirstTag(findFirstTaggedBlockByClass(html, "div", "product-hero-text"), "h1");
-  const key = getAttributeValue(heading, "data-i18n-key");
-  if (key.endsWith("_page_title")) return key.replace(/_page_title$/, "");
-  return `product_${String(productId || "").replace(/-/g, "_")}`;
+  const match = Object.keys(payload.content?.text || {})
+    .map(key => key.match(/^(product_.+)_page_title$/))
+    .find(Boolean);
+  return match ? match[1] : preferredPrefix;
 }
 
 function collectBenefitsFromPayload(payload, keyPrefix) {
@@ -97,95 +91,81 @@ function collectBenefitsFromPayload(payload, keyPrefix) {
     .filter(Boolean);
 }
 
-function parseHeroOptions(html) {
-  const heroText = findFirstTaggedBlockByClass(html, "div", "product-hero-text");
-  return {
-    hasKicker: /\bproduct-kicker\b/.test(heroText),
-    hasActions: /\bproduct-hero-actions\b/.test(heroText),
-    hasBadges: /\bproduct-badges\b/.test(heroText),
-  };
-}
-
-function parseHeroBadges(html, payload) {
-  const badgesBlock = findFirstTaggedBlockByClass(html, "div", "product-badges");
-  return findTaggedBlocks(badgesBlock, "span")
-    .map(item => getSnippetText(item, payload))
+function collectTextValuesByPrefix(text, orderedKeys, prefix) {
+  return orderedKeys
+    .filter(key => key.startsWith(prefix))
+    .map(key => text[key])
     .filter(Boolean);
 }
 
-function parseMetricItems(html, payload) {
-  return findTaggedBlocksByClass(html, "div", "product-hero-metric")
-    .map(block => ({
-      value: getSnippetText(findFirstTag(block, "strong"), payload),
-      title: getSnippetText(findFirstTag(block, "span"), payload),
+function collectPairedItems(text, orderedKeys, pattern, values = []) {
+  const items = new Map();
+  orderedKeys.forEach(key => {
+    const value = text[key];
+    const match = key.match(pattern);
+    if (!match || !String(value || "").trim()) return;
+    const [, id, field] = match;
+    items.set(id, {
+      ...(items.get(id) || {}),
+      [field === "title" ? "title" : "text"]: value,
+    });
+  });
+
+  return [...items.values()]
+    .map((item, index) => ({
+      value: values[index] || "",
+      title: item.title || "",
+      text: item.text || "",
+    }))
+    .filter(item => item.value || item.title || item.text);
+}
+
+function collectMetricItems(text, orderedKeys, keyPrefix, payload, domBase) {
+  return orderedKeys
+    .filter(key => key.startsWith(`${keyPrefix}_metric_`))
+    .map((key, index) => ({
+      value: getPayloadDomText(payload, `products_${domBase}_text_${String(index + 2).padStart(3, "0")}`),
+      title: text[key] || "",
       text: "",
     }))
     .filter(item => item.value || item.title);
 }
 
-function parseFactItems(html, payload) {
-  return findTaggedBlocksByClass(html, "article", "product-fact-card")
-    .map(block => ({
-      value: getSnippetText(findFirstTag(block, "span"), payload),
-      title: getSnippetText(findFirstTag(block, "h3"), payload),
-      text: getSnippetText(findFirstTag(block, "p"), payload),
-    }))
-    .filter(item => item.value || item.title || item.text);
+function collectFormulaItems(text, orderedKeys, keyPrefix, payload, domBase) {
+  const items = collectPairedItems(
+    text,
+    orderedKeys,
+    new RegExp(`^${keyPrefix}_formula_(.+)_(title|text)$`)
+  );
+
+  return items.map((item, index) => {
+    const image = getPayloadDomImage(payload, `products_${domBase}_image_${String(index + 4).padStart(3, "0")}`);
+    return {
+      ...item,
+      imageSrc: normalizeProductImageSrc(image?.src || image?.url || ""),
+      imageAlt: image?.alt || "",
+    };
+  });
 }
 
-function parseFormulaItems(html, payload) {
-  return findTaggedBlocksByClass(html, "article", "snup-formula-point")
-    .map(block => {
-      const image = findFirstTag(block, "img");
-      return {
-        className: getAttributeValue(block, "class"),
-        value: getSnippetText(findFirstTag(block, "span"), payload),
-        title: getSnippetText(findFirstTag(block, "h3"), payload),
-        text: getSnippetText(findFirstTag(block, "p"), payload),
-        imageSrc: normalizeProductImageSrc(getAttributeValue(image, "src")),
-        imageAlt: getAttributeValue(image, "alt"),
-      };
-    })
-    .filter(item => item.value || item.title || item.text || item.imageSrc);
+function collectUsageItems(text, orderedKeys, keyPrefix) {
+  return collectPairedItems(
+    text,
+    orderedKeys,
+    new RegExp(`^${keyPrefix}_usage_(.+)_(title|text)$`)
+  ).map(item => ({
+    className: "",
+    title: item.title,
+    text: item.text,
+    isActive: false,
+  }));
 }
 
-function parseUsageItems(html, payload) {
-  return findTaggedBlocksByClass(html, "article", "usage-item")
-    .map((block, index) => ({
-      className: getAttributeValue(block, "class"),
-      title: getSnippetText(findFirstTag(block, "h3"), payload),
-      text: getSnippetText(findFirstTag(block, "p"), payload),
-      isActive: index === 0 || /\bis-active\b/.test(getAttributeValue(block, "class")),
-    }))
-    .filter(item => item.title || item.text);
-}
-
-function parseProductLayout(html) {
-  const bodyTag = String(html || "").match(/<body\b[^>]*>/i)?.[0] || "";
-  const formulaLayout = findFirstTaggedBlockByClass(html, "div", "product-formula-layout");
-  const formulaSystem = findFirstTaggedBlockByClass(html, "div", "snup-formula-system");
-  const formulaLines = String(html || "").match(/<svg\b(?=[^>]*class=["'][^"']*\bsnup-formula-lines\b)[^>]*>/i)?.[0] || "";
-  const formulaLine = String(html || "").match(/<path\b(?=[^>]*class=["'][^"']*\bsnup-formula-line\b)[^>]*>/i)?.[0] || "";
-  const formulaDot = String(html || "").match(/<circle\b(?=[^>]*class=["'][^"']*\bsnup-formula-dot\b)[^>]*>/i)?.[0] || "";
-
-  return {
-    bodyClasses: getAttributeValue(bodyTag, "class").split(/\s+/).filter(Boolean),
-    formulaLayoutClassName: getAttributeValue(formulaLayout, "class"),
-    formulaSystemClassName: getAttributeValue(formulaSystem, "class"),
-    formulaLinesClassName: getAttributeValue(formulaLines, "class"),
-    formulaLineClassName: getAttributeValue(formulaLine, "class"),
-    formulaDotClassName: getAttributeValue(formulaDot, "class"),
-  };
-}
-
-function parseProductDetailContent(pagePath, productId, payload) {
-  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
-  const filePath = path.resolve(contentRoot, normalizedPagePath);
-  const relativePath = path.relative(contentRoot, filePath);
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return null;
-
-  const html = fs.readFileSync(filePath, "utf8");
-  const keyPrefix = getKeyPrefixFromDetailHtml(html, productId);
+function parseProductDetailContent(productId, payload) {
+  const keyPrefix = findProductKeyPrefix(payload, productId);
+  const domBase = productDomBase(productId);
+  const text = payload.content?.text || {};
+  const orderedKeys = getPayloadTextKeysInOrder(payload);
 
   return {
     translation: {
@@ -200,26 +180,33 @@ function parseProductDetailContent(pagePath, productId, payload) {
       hero: {
         kicker: getPayloadText(payload, `${keyPrefix}_kicker`) || "",
         lead: getPayloadText(payload, `${keyPrefix}_page_desc`) || "",
-        options: parseHeroOptions(html),
-        badges: parseHeroBadges(html, payload),
-        metrics: parseMetricItems(html, payload),
+        badges: collectTextValuesByPrefix(text, orderedKeys, `${keyPrefix}_badge_`),
+        metrics: collectMetricItems(text, orderedKeys, keyPrefix, payload, domBase),
       },
       overview: {
         label: getPayloadText(payload, `${keyPrefix}_overview_label`) || "",
         heading: getPayloadText(payload, `${keyPrefix}_overview_heading`) || "",
         intro: getPayloadText(payload, `${keyPrefix}_overview_intro`) || "",
-        facts: parseFactItems(html, payload),
+        facts: collectPairedItems(
+          text,
+          orderedKeys,
+          new RegExp(`^${keyPrefix}_card_(.+)_(title|text)$`),
+          [5, 6, 7, 8].map(number => getPayloadDomText(payload, `products_${domBase}_text_${String(number).padStart(3, "0")}`))
+        ),
       },
       formula: {
         label: getPayloadText(payload, `${keyPrefix}_formula_label`) || "",
         heading: getPayloadText(payload, `${keyPrefix}_formula_heading`) || "",
         intro: getPayloadText(payload, `${keyPrefix}_formula_intro`) || "",
-        points: parseFormulaItems(html, payload),
+        image: getPayloadDomImage(payload, `products_${domBase}_image_003`)?.url
+          || getPayloadDomImage(payload, `products_${domBase}_image_003`)?.src
+          || "",
+        points: collectFormulaItems(text, orderedKeys, keyPrefix, payload, domBase),
       },
       usage: {
         label: getPayloadText(payload, `${keyPrefix}_usage_label`) || "",
         heading: getPayloadText(payload, `${keyPrefix}_usage_heading`) || "",
-        items: parseUsageItems(html, payload),
+        items: collectUsageItems(text, orderedKeys, keyPrefix),
       },
       note: {
         title: getPayloadText(payload, `${keyPrefix}_note_title`) || "",
@@ -228,71 +215,25 @@ function parseProductDetailContent(pagePath, productId, payload) {
       buy: {
         intro: getPayloadText(payload, `${keyPrefix}_buy_intro`) || "",
       },
-      layout: parseProductLayout(html),
     },
   };
 }
 
-function parseProductPurchaseLinks(pagePath) {
-  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
-  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return [];
-
-  const filePath = path.resolve(contentRoot, normalizedPagePath);
-  const relativePath = path.relative(contentRoot, filePath);
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return [];
-
-  const html = fs.readFileSync(filePath, "utf8");
-  const links = [];
-  const partnerPattern = /<a\b[^>]*class=["'][^"']*\bpartner-card\b[^"']*["'][^>]*>[\s\S]*?<\/a>/gi;
-  const cards = html.match(partnerPattern) || [];
-
-  cards.forEach((card, index) => {
-    const url = getAttributeValue(card, "href");
-    const imageMatch = card.match(/<img\b[^>]*>/i);
-    const imageTag = imageMatch ? imageMatch[0] : "";
-    const labelMatch = card.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i);
-    const label = stripTags(labelMatch ? labelMatch[1] : getAttributeValue(imageTag, "alt"));
-    if (!url || !label) return;
-
-    links.push({
-      slot: label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `partner-${index + 1}`,
-      label,
-      url,
-      logoSrc: getAttributeValue(imageTag, "src").replace(/^\.\.\//, ""),
-      logoAlt: getAttributeValue(imageTag, "alt") || label,
-      sortOrder: index,
-    });
-  });
-
-  return links;
+function parseProductPurchaseLinks(payload) {
+  return Array.isArray(payload.content?.purchaseLinks) ? payload.content.purchaseLinks : [];
 }
 
-function parseProductDetailImages(pagePath, productId) {
-  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
-  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return {};
-
-  const filePath = path.resolve(contentRoot, normalizedPagePath);
-  const relativePath = path.relative(contentRoot, filePath);
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return {};
-
-  const html = fs.readFileSync(filePath, "utf8");
-  const imageSlots = {
-    image_002: "detailHero",
-    image_003: "formulaCenter",
-    image_004: "formulaPointActive",
-    image_005: "formulaPointSeawater",
-    image_006: "formulaPointFormat",
-  };
+function parseProductDetailImages(productId, payload) {
+  const domBase = productDomBase(productId);
   const images = {};
 
-  for (const [imageIdSuffix, slot] of Object.entries(imageSlots)) {
-    const pattern = new RegExp(`<img\\b[^>]*data-backend-image-id=["']products_${productId.replace(/[^a-z0-9]+/gi, "_")}_${imageIdSuffix}["'][^>]*>`, "i");
-    const imageTag = html.match(pattern)?.[0] || "";
-    const sourceSrc = normalizeProductImageSrc(getAttributeValue(imageTag, "src"));
+  for (const [imageIdSuffix, slot] of Object.entries(detailImageSlots)) {
+    const image = getPayloadDomImage(payload, `products_${domBase}_${imageIdSuffix}`);
+    const sourceSrc = normalizeProductImageSrc(image?.src || image?.url || "");
     if (!sourceSrc) continue;
     images[slot] = {
       src: sourceSrc,
-      alt: getAttributeValue(imageTag, "alt") || "",
+      alt: image?.alt || "",
       cloudinaryPublicId: cloudinaryPublicIdFromUrl(sourceSrc),
     };
   }
@@ -345,7 +286,6 @@ async function importProductsFromSite() {
     const kzProduct = kzById.get(product.id);
     const areaId = normalizeAreaId(product.category);
     const pagePath = product.href || `products/${product.id}.html`;
-    const detailImages = parseProductDetailImages(pagePath, product.id);
     const ruDetailPayload = getPagePayload({
       country: "kazakhstan",
       lang: "ru",
@@ -358,8 +298,9 @@ async function importProductsFromSite() {
       page: pagePath,
       applyOverrides: false,
     });
-    const ruDetail = parseProductDetailContent(pagePath, product.id, ruDetailPayload);
-    const kzDetail = parseProductDetailContent(pagePath, product.id, kzDetailPayload);
+    const detailImages = parseProductDetailImages(product.id, ruDetailPayload);
+    const ruDetail = parseProductDetailContent(product.id, ruDetailPayload);
+    const kzDetail = parseProductDetailContent(product.id, kzDetailPayload);
 
     await upsertProduct({
       id: product.id,
@@ -386,7 +327,7 @@ async function importProductsFromSite() {
         ru: ruDetail?.sections || {},
         kz: kzDetail?.sections || {},
       },
-      purchaseLinks: parseProductPurchaseLinks(pagePath),
+      purchaseLinks: parseProductPurchaseLinks(ruDetailPayload),
     });
     imported += 1;
   }

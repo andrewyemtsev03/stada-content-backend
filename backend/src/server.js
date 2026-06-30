@@ -12,7 +12,6 @@ const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertPro
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
-const productContentRoot = path.resolve(__dirname, "..", "content", "main");
 const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "").trim();
 const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
@@ -1470,13 +1469,7 @@ function normalizeFallbackImagePath(value) {
 }
 
 function readStaticProductHtml(pagePath) {
-  const normalizedPagePath = String(pagePath || "").replace(/\\/g, "/").replace(/^\/+/, "");
-  if (!normalizedPagePath || normalizedPagePath.endsWith("/index.html") || normalizedPagePath === "products/index.html") return "";
-
-  const filePath = path.resolve(productContentRoot, normalizedPagePath);
-  const relativePath = path.relative(productContentRoot, filePath);
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath) || !fs.existsSync(filePath)) return "";
-  return fs.readFileSync(filePath, "utf8");
+  return "";
 }
 
 function parseStaticHeroOptions(html) {

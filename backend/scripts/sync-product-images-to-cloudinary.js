@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const backendRoot = path.resolve(__dirname, "..");
-const contentRoot = path.join(backendRoot, "content", "main");
+const contentSourcePath = path.join(backendRoot, "data", "content-source.json");
 const defaultAssetsRoot = path.join(backendRoot, "assets");
 const assetsRoots = String(process.env.PRODUCT_ASSETS_ROOT || defaultAssetsRoot)
   .split(path.delimiter)
@@ -129,8 +129,11 @@ async function uploadImage({ filePath, productId, slot }) {
   return payload;
 }
 
-function productIdFromFile(fileName) {
-  return fileName.replace(/\.html$/i, "");
+function productIdFromPagePath(pagePath) {
+  return String(pagePath || "")
+    .replace(/\\/g, "/")
+    .replace(/^products\//, "")
+    .replace(/\.html$/i, "");
 }
 
 function existingImageKey(productId, slot) {
@@ -145,17 +148,16 @@ function isCloudinaryImage(image) {
   );
 }
 
-function parseProductImages(fileName) {
-  const productId = productIdFromFile(fileName);
-  const html = fs.readFileSync(path.join(contentRoot, "products", fileName), "utf8");
+function parseProductImages(pagePath, pageSource) {
+  const productId = productIdFromPagePath(pagePath);
   const domBase = productId.replace(/[^a-z0-9]+/gi, "_");
+  const imagesById = new Map((pageSource.images || []).map(image => [image.id, image]));
   const images = [];
   const skipped = [];
 
   for (const [suffix, slot] of Object.entries(imageSlots)) {
-    const pattern = new RegExp(`<img\\b[^>]*data-backend-image-id=["']products_${domBase}_${suffix}["'][^>]*>`, "i");
-    const imageTag = html.match(pattern)?.[0] || "";
-    const src = getAttributeValue(imageTag, "src");
+    const image = imagesById.get(`products_${domBase}_${suffix}`);
+    const src = image?.src || image?.url || "";
     if (!src) continue;
     const filePath = resolveAssetPath(src);
     if (!filePath) {
@@ -166,11 +168,22 @@ function parseProductImages(fileName) {
       productId,
       slot,
       filePath,
-      alt: getAttributeValue(imageTag, "alt") || "",
+      alt: image.alt || "",
     });
   }
 
   return { images, skipped };
+}
+
+function listProductPages() {
+  if (!fs.existsSync(contentSourcePath)) return [];
+  const source = JSON.parse(fs.readFileSync(contentSourcePath, "utf8"));
+  return Object.entries(source.pages || {})
+    .filter(([pagePath]) => pagePath.startsWith("products/")
+      && pagePath.endsWith(".html")
+      && pagePath !== "products/index.html"
+      && !pagePath.endsWith("/index.html"))
+    .sort(([left], [right]) => left.localeCompare(right));
 }
 
 async function upsertProductImage({ productId, slot, uploaded, alt }) {
@@ -226,11 +239,7 @@ async function listExistingProductIds(productIds) {
 
 async function main() {
   assertConfigured();
-  const productsDir = path.join(contentRoot, "products");
-  const productFiles = fs.readdirSync(productsDir)
-    .filter(file => file.endsWith(".html") && file !== "index.html")
-    .sort();
-  const parsed = productFiles.map(parseProductImages);
+  const parsed = listProductPages().map(([pagePath, pageSource]) => parseProductImages(pagePath, pageSource));
   const images = parsed.flatMap(item => item.images);
   const skipped = parsed.flatMap(item => item.skipped);
   const shouldCheckDatabase = !dryRun || checkDatabaseInDryRun;

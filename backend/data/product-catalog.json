@@ -1,0 +1,1301 @@
+{
+  "version": 1,
+  "products": {
+    "ru": [
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_003",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
+          "alt": "Coldrex"
+        },
+        "nameKey": "product_coldrex_name",
+        "name": "Колдрекс",
+        "descriptionKey": "product_coldrex_page_desc",
+        "shortDescription": "Колдрекс — комбинированный препарат для облегчения симптомов простуды и гриппа.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Простуда и дыхание"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--vitrum",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#008a72",
+        "image": {
+          "id": "products_index_image_004",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
+          "alt": "Vitrum Immunaktiv"
+        },
+        "nameKey": "product_vitrum_immunaktiv_name",
+        "name": "Витрум Иммунактив",
+        "descriptionKey": "product_vitrum_immunaktiv_page_desc",
+        "shortDescription": "Витрум Иммунактив — витаминно-минеральный комплекс из 13 витаминов, 8 минералов и β-глюкана для поддержки иммунитета.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-fizzy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#00a878",
+        "image": {
+          "id": "products_index_image_005",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
+          "alt": "Vitrum Immunaktiv Fizzy"
+        },
+        "nameKey": "product_vitrum_fizzy_name",
+        "name": "Витрум Иммунактив шипучие таблетки",
+        "descriptionKey": "product_vitrum_fizzy_page_desc",
+        "shortDescription": "Шипучий витаминно-минеральный комплекс с витаминами, минералами и β-глюканом для поддержки иммунитета взрослых.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-energy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_006",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
+          "alt": "Vitrum Energy"
+        },
+        "nameKey": "product_vitrum_energy_name",
+        "name": "Витрум Энерджи",
+        "descriptionKey": "product_vitrum_energy_page_desc",
+        "shortDescription": "Шипучий витаминно-минеральный комплекс для поддержки энергии, активности и ежедневного тонуса взрослых.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-vitaminc",
+        "category": "immunity cold",
+        "categoryClass": "immunity",
+        "accent": "#ff8a00",
+        "image": {
+          "id": "products_index_image_007",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitamin-c-fizzy/card.png",
+          "alt": "Vitrum Vitamin C 900 mg"
+        },
+        "nameKey": "product_vitrum_vitaminc_name",
+        "name": "Витрум Витамин C 900 мг",
+        "descriptionKey": "product_vitrum_vitaminc_page_desc",
+        "shortDescription": "Шипучие таблетки с витамином C 900 мг для поддержки иммунитета и восполнения потребности в витамине C.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-magneb6",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#6f54c7",
+        "image": {
+          "id": "products_index_image_008",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
+          "alt": "Vitrum Magnesium B6"
+        },
+        "nameKey": "product_vitrum_magneb6_name",
+        "name": "Витрум Магний B6",
+        "descriptionKey": "product_vitrum_magneb6_page_desc",
+        "shortDescription": "Комплекс магния и витамина B6 для поддержки нервной системы, энергетического обмена и ежедневной устойчивости к нагрузкам.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#f2b400",
+        "image": {
+          "id": "products_index_image_009",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/card.png",
+          "alt": "Magne B6 Kids"
+        },
+        "nameKey": "product_magneb6kids_name",
+        "name": "Магне B6 Кидс",
+        "descriptionKey": "product_magneb6kids_page_desc",
+        "shortDescription": "Магне B6 Кидс — жевательные таблетки с магнием и витамином B6 для детей с 4 лет. Компоненты помогают поддерживать нормальную работу нервной системы и энергетический обмен.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Для детей"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-syrop",
+        "category": "kids immunity",
+        "categoryClass": "kids",
+        "accent": "#2fb56f",
+        "image": {
+          "id": "products_index_image_010",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-kids-proimmun/card.png",
+          "alt": "Vitrum Kids Proimmun"
+        },
+        "nameKey": "product_vitrum_syrop_name",
+        "name": "Витрум Кидс Проиммун",
+        "descriptionKey": "product_vitrum_syrop_page_desc",
+        "shortDescription": "Детский продукт для поддержки иммунитета с витамином C, β-глюканом и растительными компонентами в удобном формате.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Для детей"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--kamistad-baby",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_011",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
+          "alt": "Камистад Бэби"
+        },
+        "nameKey": "",
+        "name": "Камистад Бэби",
+        "descriptionKey": "",
+        "shortDescription": "Гель при прорезывании зубов у детей, 20 г, для нанесения на десны по инструкции.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Для детей"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#0071ce",
+        "image": {
+          "id": "products_index_image_012",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
+          "alt": "Enterogermina"
+        },
+        "nameKey": "product_enterogermina_name",
+        "name": "Энтерожермина",
+        "descriptionKey": "product_enterogermina_page_desc",
+        "shortDescription": "Энтерожермина — пробиотик для лечения и профилактики дисбактериоза. Содержит споры Bacillus clausii, которые помогают восстановить кишечную микрофлору.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--enterogermina-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#1f9d45",
+        "image": {
+          "id": "products_index_image_013",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
+          "alt": "Enterogermina Forte"
+        },
+        "nameKey": "product_enterogermina_forte_name",
+        "name": "Энтерожермина Форте",
+        "descriptionKey": "product_enterogermina_forte_page_desc",
+        "shortDescription": "Энтерожермина Форте — пробиотик со спорами Bacillus clausii для лечения и профилактики дисбактериоза. Формат суспензии рассчитан на удобный прием 1 раз в день согласно инструкции.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#00a651",
+        "image": {
+          "id": "products_index_image_014",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
+          "alt": "Enterogermina capsules"
+        },
+        "nameKey": "product_enterogermina_capsules_name",
+        "name": "Энтерожермина капсулы",
+        "descriptionKey": "product_enterogermina_capsules_page_desc",
+        "shortDescription": "Энтерожермина капсулы — пробиотик со спорами Bacillus clausii для лечения и профилактики дисбактериоза. Формат капсул удобен для взрослых и детей старше 6 лет согласно инструкции.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--noshpa",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#d71920",
+        "image": {
+          "id": "products_index_image_015",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
+          "alt": "НО-ШПА"
+        },
+        "nameKey": "product_noshpa_name",
+        "name": "НО-ШПА",
+        "descriptionKey": "product_noshpa_page_desc",
+        "shortDescription": "НО-ШПА 40 мг — таблетки с дротаверина гидрохлоридом для облегчения спазмов гладкой мускулатуры согласно инструкции.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--noshpa-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#b8241a",
+        "image": {
+          "id": "products_index_image_016",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
+          "alt": "НО-ШПА Форте"
+        },
+        "nameKey": "",
+        "name": "НО-ШПА Форте",
+        "descriptionKey": "",
+        "shortDescription": "Таблетки 80 мг с дротаверином для облегчения спазмов гладкой мускулатуры согласно инструкции.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--essentiale",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_017",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
+          "alt": "Эссенциале"
+        },
+        "nameKey": "product_essentiale_name",
+        "name": "Эссенциале",
+        "descriptionKey": "product_essentiale_page_desc",
+        "shortDescription": "Эссенциале Форте Н — капсулы с эссенциальными фосфолипидами для поддержки функций печени согласно инструкции и рекомендациям специалиста.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Пищеварение"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--femilex",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#e1007a",
+        "image": {
+          "id": "products_index_image_018",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
+          "alt": "Фемилекс"
+        },
+        "nameKey": "",
+        "name": "Фемилекс",
+        "descriptionKey": "",
+        "shortDescription": "Вагинальные суппозитории 100 мг с молочной кислотой для нормализации микрофлоры и pH.",
+        "categoryKey": "",
+        "therapeuticArea": "Гинекология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_019",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
+          "alt": "Низорал"
+        },
+        "nameKey": "",
+        "name": "Низорал",
+        "descriptionKey": "",
+        "shortDescription": "Крем 2% с кетоконазолом для наружного применения, 15 г.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral catalog-card--nizoral-shampoo",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_020",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
+          "alt": "Низорал шампунь"
+        },
+        "nameKey": "",
+        "name": "Низорал шампунь",
+        "descriptionKey": "",
+        "shortDescription": "Лечебный шампунь 2% с кетоконазолом, 60 мл, для применения согласно инструкции.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--psilo-balsam",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#005bb9",
+        "image": {
+          "id": "products_index_image_021",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
+          "alt": "Псило-бальзам"
+        },
+        "nameKey": "",
+        "name": "Псило-бальзам",
+        "descriptionKey": "",
+        "shortDescription": "Гель 1% 20 г с дифенгидрамина гидрохлоридом для наружного применения по инструкции.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--gecsikon",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#005ea8",
+        "image": {
+          "id": "products_index_image_022",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
+          "alt": "Гексикон"
+        },
+        "nameKey": "",
+        "name": "Гексикон",
+        "descriptionKey": "",
+        "shortDescription": "Вагинальные суппозитории 16 мг с хлоргексидином для местного применения.",
+        "categoryKey": "",
+        "therapeuticArea": "Гинекология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_023",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
+          "alt": "Аквалор"
+        },
+        "nameKey": "product_aqualor_name",
+        "name": "Аквалор",
+        "descriptionKey": "product_aqualor_page_desc",
+        "shortDescription": "Аквалор Экстра Форте — стерильный раствор морской воды 125 мл для ухода за полостью носа при сильном насморке согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-forte",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_024",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-forte/card.png",
+          "alt": "Аквалор Актив Форте"
+        },
+        "nameKey": "product_aqualor_forte_name",
+        "name": "Аквалор Актив Форте",
+        "descriptionKey": "product_aqualor_forte_page_desc",
+        "shortDescription": "Аквалор Актив Форте — спрей морской воды 150 мл с CO2 для ухода и промывания полости носа согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-baby",
+        "category": "cold kids",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_025",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-baby/card.png",
+          "alt": "Аквалор Беби"
+        },
+        "nameKey": "product_aqualor_baby_name",
+        "name": "Аквалор Беби",
+        "descriptionKey": "product_aqualor_baby_page_desc",
+        "shortDescription": "Аквалор Беби — капли морской воды 15 мл для ежедневного ухода за носом малыша согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-gorlo",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_026",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-gorlo/card.png",
+          "alt": "Аквалор Горло спрей"
+        },
+        "nameKey": "product_aqualor_gorlo_name",
+        "name": "Аквалор Горло",
+        "descriptionKey": "product_aqualor_gorlo_page_desc",
+        "shortDescription": "Аквалор Горло спрей — стерильный гипертонический раствор морской воды 50 мл для орошения и промывания горла согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_027",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft/card.png",
+          "alt": "Аквалор Софт"
+        },
+        "nameKey": "product_aqualor_soft_name",
+        "name": "Аквалор Софт",
+        "descriptionKey": "product_aqualor_soft_page_desc",
+        "shortDescription": "Аквалор Софт — стерильный изотонический раствор морской воды 125 мл в формате душ для орошения и промывания полости носа согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft-mini",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_028",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft-mini/card.png",
+          "alt": "Аквалор Софт мини"
+        },
+        "nameKey": "product_aqualor_soft_mini_name",
+        "name": "Аквалор Софт мини",
+        "descriptionKey": "product_aqualor_soft_mini_page_desc",
+        "shortDescription": "Аквалор Софт мини — стерильный изотонический раствор морской воды 50 мл в формате душ для орошения и промывания полости носа согласно инструкции.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold immunity",
+        "categoryClass": "cold",
+        "accent": "#4d8f38",
+        "image": {
+          "id": "products_index_image_029",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
+          "alt": "Sinulan Duo"
+        },
+        "nameKey": "product_sinulan_duo_name",
+        "name": "Синулан Дуо",
+        "descriptionKey": "product_sinulan_duo_page_desc",
+        "shortDescription": "Синулан Дуо — комплекс растительных экстрактов для облегчения дыхания при простуде и поддержания здоровья дыхательных путей.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Дыхательные пути"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a3ad",
+        "image": {
+          "id": "products_index_image_030",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
+          "alt": "Snup"
+        },
+        "nameKey": "product_snup_name",
+        "name": "Снуп",
+        "descriptionKey": "product_snup_page_desc",
+        "shortDescription": "Снуп — дозированный назальный спрей с ксилометазолином и морской водой для облегчения носового дыхания при заложенности носа.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Простуда и дыхание"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak",
+        "category": "allergy",
+        "categoryClass": "allergy",
+        "accent": "#2366b8",
+        "image": {
+          "id": "products_index_image_031",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
+          "alt": "Zodak tablets"
+        },
+        "nameKey": "product_zodak_name",
+        "name": "Зодак",
+        "descriptionKey": "product_zodak_page_desc",
+        "shortDescription": "Антигистаминный препарат с цетиризином для облегчения симптомов аллергического ринита и крапивницы.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Аллергия"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak-drops",
+        "category": "allergy kids",
+        "categoryClass": "allergy",
+        "accent": "#2698d6",
+        "image": {
+          "id": "products_index_image_032",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
+          "alt": "Zodak drops"
+        },
+        "nameKey": "product_zodak_drops_name",
+        "name": "Зодак капли",
+        "descriptionKey": "product_zodak_drops_page_desc",
+        "shortDescription": "Капли с цетиризином для облегчения симптомов аллергии у взрослых и детей согласно инструкции.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Аллергия"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#5f6f89",
+        "image": {
+          "id": "products_index_image_033",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
+          "alt": "Edarbi Klo"
+        },
+        "nameKey": "product_edarbi_klo_name",
+        "name": "Эдарби Кло",
+        "descriptionKey": "product_edarbi_klo_page_desc",
+        "shortDescription": "Эдарби Кло — комбинированный препарат на основе азилсартана медоксомила и хлорталидона для снижения артериального давления.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitaprost",
+        "category": "urology",
+        "categoryClass": "urology",
+        "accent": "#1f7a62",
+        "image": {
+          "id": "products_index_image_034",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
+          "alt": "Vitaprost"
+        },
+        "nameKey": "product_vitaprost_name",
+        "name": "Витапрост",
+        "descriptionKey": "product_vitaprost_page_desc",
+        "shortDescription": "Урологический препарат в форме таблеток для применения согласно инструкции и назначению специалиста.",
+        "categoryKey": "products_category_urology",
+        "therapeuticArea": "Урология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--cardiomagnil",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#b41523",
+        "image": {
+          "id": "products_index_image_035",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
+          "alt": "Кардиомагнил"
+        },
+        "nameKey": "product_cardiomagnil_name",
+        "name": "Кардиомагнил",
+        "descriptionKey": "product_cardiomagnil_page_desc",
+        "shortDescription": "Кардиомагнил 150 мг — препарат ацетилсалициловой кислоты с магния гидроксидом для профилактики инфаркта и тромбоза по назначению врача.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--klopidogrel-teva",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#cf1730",
+        "image": {
+          "id": "products_index_image_036",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
+          "alt": "Клопидогрель-Тева"
+        },
+        "nameKey": "",
+        "name": "Клопидогрель-Тева",
+        "descriptionKey": "",
+        "shortDescription": "Таблетки, покрытые пленочной оболочкой, 75 мг №28 для применения по назначению врача.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      }
+    ],
+    "kz": [
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_003",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
+          "alt": "Coldrex"
+        },
+        "nameKey": "product_coldrex_name",
+        "name": "Колдрекс",
+        "descriptionKey": "product_coldrex_page_desc",
+        "shortDescription": "Колдрекс — суық тию мен тұмаудың белгілерін жеңілдететін кешенді препарат.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Суық тию және тыныс алу"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--vitrum",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#008a72",
+        "image": {
+          "id": "products_index_image_004",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
+          "alt": "Vitrum Immunaktiv"
+        },
+        "nameKey": "product_vitrum_immunaktiv_name",
+        "name": "Витрум Иммунактив",
+        "descriptionKey": "product_vitrum_immunaktiv_page_desc",
+        "shortDescription": "Витрум Иммунактив — иммунитетті қолдау үшін 13 витамин, 8 минерал және β-глюканнан тұратын витамин-минерал кешені.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-fizzy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#00a878",
+        "image": {
+          "id": "products_index_image_005",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
+          "alt": "Vitrum Immunaktiv Fizzy"
+        },
+        "nameKey": "product_vitrum_fizzy_name",
+        "name": "Витрум Иммунактив көпіршікті таблеткалары",
+        "descriptionKey": "product_vitrum_fizzy_page_desc",
+        "shortDescription": "Ересектердің иммунитетін қолдауға арналған витаминдер, минералдар және β-глюкан бар көпіршікті витамин-минералды кешен.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-energy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_006",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
+          "alt": "Vitrum Energy"
+        },
+        "nameKey": "product_vitrum_energy_name",
+        "name": "Витрум Энерджи",
+        "descriptionKey": "product_vitrum_energy_page_desc",
+        "shortDescription": "Энергияны, белсенділікті және күнделікті тонусты қолдауға арналған көпіршікті витамин-минералды кешен.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-vitaminc",
+        "category": "immunity cold",
+        "categoryClass": "immunity",
+        "accent": "#ff8a00",
+        "image": {
+          "id": "products_index_image_007",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitamin-c-fizzy/card.png",
+          "alt": "Vitrum Vitamin C 900 mg"
+        },
+        "nameKey": "product_vitrum_vitaminc_name",
+        "name": "Витрум Витамин C 900 мг",
+        "descriptionKey": "product_vitrum_vitaminc_page_desc",
+        "shortDescription": "Иммунитетті қолдау және C витаминіне қажеттілікті толықтыруға арналған 900 мг C витамині бар көпіршікті таблеткалар.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-magneb6",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#6f54c7",
+        "image": {
+          "id": "products_index_image_008",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
+          "alt": "Vitrum Magnesium B6"
+        },
+        "nameKey": "product_vitrum_magneb6_name",
+        "name": "Витрум Магний B6",
+        "descriptionKey": "product_vitrum_magneb6_page_desc",
+        "shortDescription": "Жүйке жүйесін және қалыпты энергия алмасуын қолдауға арналған магний мен B6 витамині кешені.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Иммунитет"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#f2b400",
+        "image": {
+          "id": "products_index_image_009",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/card.png",
+          "alt": "Magne B6 Kids"
+        },
+        "nameKey": "product_magneb6kids_name",
+        "name": "Магне B6 Кидс",
+        "descriptionKey": "product_magneb6kids_page_desc",
+        "shortDescription": "Магне B6 Кидс — 4 жастан бастап балаларға арналған магний мен B6 дәрумені бар шайнайтын таблеткалар. Компоненттер жүйке жүйесінің қалыпты жұмысын және энергия алмасуын қолдауға көмектеседі.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Балаларға арналған"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-syrop",
+        "category": "kids immunity",
+        "categoryClass": "kids",
+        "accent": "#2fb56f",
+        "image": {
+          "id": "products_index_image_010",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-kids-proimmun/card.png",
+          "alt": "Vitrum Kids Proimmun"
+        },
+        "nameKey": "product_vitrum_syrop_name",
+        "name": "Витрум Кидс Проиммун",
+        "descriptionKey": "product_vitrum_syrop_page_desc",
+        "shortDescription": "Баланың иммунитетін және күнделікті рационын нұсқаулыққа сай қолдауға арналған балалар кешені.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Балаларға арналған"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--kamistad-baby",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_011",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
+          "alt": "Камистад Бэби"
+        },
+        "nameKey": "",
+        "name": "Камистад Бэби",
+        "descriptionKey": "",
+        "shortDescription": "Гель при прорезывании зубов у детей, 20 г, для нанесения на десны по инструкции.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "Балаларға арналған"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#0071ce",
+        "image": {
+          "id": "products_index_image_012",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
+          "alt": "Enterogermina"
+        },
+        "nameKey": "product_enterogermina_name",
+        "name": "Энтерожермина",
+        "descriptionKey": "product_enterogermina_page_desc",
+        "shortDescription": "Энтерожермина — пробиотик, дисбактериозды емдеу және алдын алу үшін қолданылады. Bacillus clausii спораларын қамтиды, ішек микрофлорасын қалпына келтіруге көмектеседі.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--enterogermina-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#1f9d45",
+        "image": {
+          "id": "products_index_image_013",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
+          "alt": "Enterogermina Forte"
+        },
+        "nameKey": "product_enterogermina_forte_name",
+        "name": "Энтерожермина Форте",
+        "descriptionKey": "product_enterogermina_forte_page_desc",
+        "shortDescription": "Энтерожермина Форте — Bacillus clausii споралары бар пробиотик, дисбактериозды емдеу және алдын алу үшін қолданылады. Суспензия форматы нұсқаулыққа сай күніне 1 рет қабылдауға ыңғайлы.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#00a651",
+        "image": {
+          "id": "products_index_image_014",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
+          "alt": "Enterogermina capsules"
+        },
+        "nameKey": "product_enterogermina_capsules_name",
+        "name": "Энтерожермина капсулалары",
+        "descriptionKey": "product_enterogermina_capsules_page_desc",
+        "shortDescription": "Энтерожермина капсулалары — Bacillus clausii споралары бар пробиотик, дисбактериозды емдеу және алдын алу үшін қолданылады. Капсула форматы ересектерге және 6 жастан асқан балаларға нұсқаулыққа сай ыңғайлы.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--noshpa",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#d71920",
+        "image": {
+          "id": "products_index_image_015",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
+          "alt": "НО-ШПА"
+        },
+        "nameKey": "product_noshpa_name",
+        "name": "НО-ШПА",
+        "descriptionKey": "product_noshpa_page_desc",
+        "shortDescription": "НО-ШПА 40 мг — нұсқаулыққа сай тегіс бұлшықет түйілуін жеңілдетуге арналған дротаверин гидрохлориді бар таблеткалар.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--noshpa-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#b8241a",
+        "image": {
+          "id": "products_index_image_016",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
+          "alt": "НО-ШПА Форте"
+        },
+        "nameKey": "",
+        "name": "НО-ШПА Форте",
+        "descriptionKey": "",
+        "shortDescription": "Таблетки 80 мг с дротаверином для облегчения спазмов гладкой мускулатуры согласно инструкции.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--essentiale",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_017",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
+          "alt": "Эссенциале"
+        },
+        "nameKey": "product_essentiale_name",
+        "name": "Эссенциале",
+        "descriptionKey": "product_essentiale_page_desc",
+        "shortDescription": "Эссенциале Форте Н — нұсқаулық пен маман ұсынымдарына сай бауыр функцияларын қолдауға арналған эссенциальды фосфолипидтері бар капсулалар.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Ас қорыту"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--femilex",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#e1007a",
+        "image": {
+          "id": "products_index_image_018",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
+          "alt": "Фемилекс"
+        },
+        "nameKey": "",
+        "name": "Фемилекс",
+        "descriptionKey": "",
+        "shortDescription": "Вагинальные суппозитории 100 мг с молочной кислотой для нормализации микрофлоры и pH.",
+        "categoryKey": "",
+        "therapeuticArea": "Гинекология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_019",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
+          "alt": "Низорал"
+        },
+        "nameKey": "",
+        "name": "Низорал",
+        "descriptionKey": "",
+        "shortDescription": "Крем 2% с кетоконазолом для наружного применения, 15 г.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral catalog-card--nizoral-shampoo",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_020",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
+          "alt": "Низорал шампунь"
+        },
+        "nameKey": "",
+        "name": "Низорал шампунь",
+        "descriptionKey": "",
+        "shortDescription": "Лечебный шампунь 2% с кетоконазолом, 60 мл, для применения согласно инструкции.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--psilo-balsam",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#005bb9",
+        "image": {
+          "id": "products_index_image_021",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
+          "alt": "Псило-бальзам"
+        },
+        "nameKey": "",
+        "name": "Псило-бальзам",
+        "descriptionKey": "",
+        "shortDescription": "Гель 1% 20 г с дифенгидрамина гидрохлоридом для наружного применения по инструкции.",
+        "categoryKey": "",
+        "therapeuticArea": "Дерматология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--gecsikon",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#005ea8",
+        "image": {
+          "id": "products_index_image_022",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
+          "alt": "Гексикон"
+        },
+        "nameKey": "",
+        "name": "Гексикон",
+        "descriptionKey": "",
+        "shortDescription": "Вагинальные суппозитории 16 мг с хлоргексидином для местного применения.",
+        "categoryKey": "",
+        "therapeuticArea": "Гинекология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_023",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
+          "alt": "Аквалор"
+        },
+        "nameKey": "product_aqualor_name",
+        "name": "Аквалор",
+        "descriptionKey": "product_aqualor_page_desc",
+        "shortDescription": "Аквалор Экстра Форте — нұсқаулыққа сай қатты тұмау кезінде мұрын қуысына күтім жасауға арналған 125 мл стерильді теңіз суы ерітіндісі.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-forte",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_024",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-forte/card.png",
+          "alt": "Аквалор Актив Форте"
+        },
+        "nameKey": "product_aqualor_forte_name",
+        "name": "Аквалор Актив Форте",
+        "descriptionKey": "product_aqualor_forte_page_desc",
+        "shortDescription": "Аквалор Актив Форте — нұсқаулыққа сай мұрын қуысын күту және шаюға арналған CO2 қосылған 150 мл теңіз суы спрейі.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-baby",
+        "category": "cold kids",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_025",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-baby/card.png",
+          "alt": "Аквалор Беби"
+        },
+        "nameKey": "product_aqualor_baby_name",
+        "name": "Аквалор Беби",
+        "descriptionKey": "product_aqualor_baby_page_desc",
+        "shortDescription": "Аквалор Беби — нұсқаулыққа сай сәбидің мұрнына күнделікті күтім жасауға арналған 15 мл теңіз суы тамшылары.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-gorlo",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_026",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-gorlo/card.png",
+          "alt": "Аквалор Горло спрей"
+        },
+        "nameKey": "product_aqualor_gorlo_name",
+        "name": "Аквалор Горло",
+        "descriptionKey": "product_aqualor_gorlo_page_desc",
+        "shortDescription": "Аквалор Горло спрей — нұсқаулыққа сай тамақты шаюға және бүркуге арналған 50 мл стерильді гипертониялық теңіз суы ерітіндісі.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_027",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft/card.png",
+          "alt": "Аквалор Софт"
+        },
+        "nameKey": "product_aqualor_soft_name",
+        "name": "Аквалор Софт",
+        "descriptionKey": "product_aqualor_soft_page_desc",
+        "shortDescription": "Аквалор Софт — нұсқаулыққа сай мұрын қуысын сулауға және шаюға арналған душ форматындағы 125 мл стерильді изотониялық теңіз суы ерітіндісі.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft-mini",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_028",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft-mini/card.png",
+          "alt": "Аквалор Софт мини"
+        },
+        "nameKey": "product_aqualor_soft_mini_name",
+        "name": "Аквалор Софт мини",
+        "descriptionKey": "product_aqualor_soft_mini_page_desc",
+        "shortDescription": "Аквалор Софт мини — нұсқаулыққа сай мұрын қуысын сулауға және шаюға арналған душ форматындағы 50 мл стерильді изотониялық теңіз суы ерітіндісі.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold immunity",
+        "categoryClass": "cold",
+        "accent": "#4d8f38",
+        "image": {
+          "id": "products_index_image_029",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
+          "alt": "Sinulan Duo"
+        },
+        "nameKey": "product_sinulan_duo_name",
+        "name": "Синулан Дуо",
+        "descriptionKey": "product_sinulan_duo_page_desc",
+        "shortDescription": "Синулан Дуо — суық тию кезінде тыныс алуды жеңілдетуге және тыныс алу жолдарының денсаулығын қолдауға арналған өсімдік сығындыларының кешені.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Тыныс алу жолдары"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a3ad",
+        "image": {
+          "id": "products_index_image_030",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
+          "alt": "Snup"
+        },
+        "nameKey": "product_snup_name",
+        "name": "Снуп",
+        "descriptionKey": "product_snup_page_desc",
+        "shortDescription": "Снуп — мұрын бітелгенде тыныс алуды жеңілдетуге арналған ксилометазолин мен теңіз суы бар дозаланған мұрын спрейі.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Суық тию және тыныс алу"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak",
+        "category": "allergy",
+        "categoryClass": "allergy",
+        "accent": "#2366b8",
+        "image": {
+          "id": "products_index_image_031",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
+          "alt": "Zodak tablets"
+        },
+        "nameKey": "product_zodak_name",
+        "name": "Зодак",
+        "descriptionKey": "product_zodak_page_desc",
+        "shortDescription": "Аллергиялық ринит және есекжем белгілерін жеңілдетуге арналған цетиризині бар антигистаминдік препарат.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Аллергия"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak-drops",
+        "category": "allergy kids",
+        "categoryClass": "allergy",
+        "accent": "#2698d6",
+        "image": {
+          "id": "products_index_image_032",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
+          "alt": "Zodak drops"
+        },
+        "nameKey": "product_zodak_drops_name",
+        "name": "Зодак тамшылары",
+        "descriptionKey": "product_zodak_drops_page_desc",
+        "shortDescription": "Ересектер мен балалардағы аллергия белгілерін нұсқаулыққа сай жеңілдетуге арналған цетиризині бар тамшылар.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Аллергия"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#5f6f89",
+        "image": {
+          "id": "products_index_image_033",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
+          "alt": "Edarbi Klo"
+        },
+        "nameKey": "product_edarbi_klo_name",
+        "name": "Эдарби Кло",
+        "descriptionKey": "product_edarbi_klo_page_desc",
+        "shortDescription": "Эдарби Кло — азилсартан медоксомил калийі мен хлорталидон негізіндегі артериялық қысымды төмендететін біріктірілген препарат.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitaprost",
+        "category": "urology",
+        "categoryClass": "urology",
+        "accent": "#1f7a62",
+        "image": {
+          "id": "products_index_image_034",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
+          "alt": "Vitaprost"
+        },
+        "nameKey": "product_vitaprost_name",
+        "name": "Витапрост",
+        "descriptionKey": "product_vitaprost_page_desc",
+        "shortDescription": "Нұсқаулыққа және маман тағайындауына сай урологияда қолдануға арналған таблетка форматындағы препарат.",
+        "categoryKey": "products_category_urology",
+        "therapeuticArea": "Урология"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--cardiomagnil",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#b41523",
+        "image": {
+          "id": "products_index_image_035",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
+          "alt": "Кардиомагнил"
+        },
+        "nameKey": "product_cardiomagnil_name",
+        "name": "Кардиомагнил",
+        "descriptionKey": "product_cardiomagnil_page_desc",
+        "shortDescription": "Кардиомагнил 150 мг — дәрігер тағайындауы бойынша инфаркт пен тромбоздың профилактикасына арналған магний гидроксиді бар ацетилсалицил қышқылы препараты.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--klopidogrel-teva",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#cf1730",
+        "image": {
+          "id": "products_index_image_036",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
+          "alt": "Клопидогрель-Тева"
+        },
+        "nameKey": "",
+        "name": "Клопидогрель-Тева",
+        "descriptionKey": "",
+        "shortDescription": "Таблетки, покрытые пленочной оболочкой, 75 мг №28 для применения по назначению врача.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Кардио"
+      }
+    ]
+  }
+}
