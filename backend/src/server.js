@@ -12,7 +12,6 @@ const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertPro
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
-const adminRoot = path.resolve(__dirname, "..", "..", "admin");
 const productContentRoot = path.resolve(__dirname, "..", "content", "main");
 const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "").trim();
 const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
@@ -88,6 +87,16 @@ function isDefaultPublicCorsOrigin(origin) {
   }
 }
 
+function isLocalAdminDevCorsOrigin(origin) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    return ["http:", "https:"].includes(protocol)
+      && ["localhost", "127.0.0.1", "::1"].includes(hostname);
+  } catch (error) {
+    return false;
+  }
+}
+
 function applyRequestHeaders(request, response) {
   Object.entries(securityHeaders).forEach(([header, value]) => response.setHeader(header, value));
 
@@ -103,7 +112,9 @@ function applyRequestHeaders(request, response) {
 
   const allowedOrigin = allowAnyCorsOrigin
     ? "*"
-    : allowedCorsOrigins.includes(normalizedOrigin) || isDefaultPublicCorsOrigin(normalizedOrigin)
+    : allowedCorsOrigins.includes(normalizedOrigin)
+      || isDefaultPublicCorsOrigin(normalizedOrigin)
+      || isLocalAdminDevCorsOrigin(normalizedOrigin)
       ? normalizedOrigin
       : "";
   if (!allowedOrigin) return;
@@ -141,41 +152,6 @@ function sendFile(response, filePath) {
     "Cache-Control": "no-store",
   });
   response.end(fs.readFileSync(filePath));
-}
-
-function serveAdminFile(pathname, response) {
-  if (!pathname.startsWith("/admin")) return false;
-
-  let relativePath = pathname === "/admin" || pathname === "/admin/"
-    ? "index.html"
-    : decodeURIComponent(pathname.replace(/^\/admin\/?/, ""));
-  relativePath = relativePath.replace(/\\/g, "/");
-  if (!relativePath || relativePath.endsWith("/")) relativePath = `${relativePath}index.html`;
-
-  const filePath = path.resolve(adminRoot, relativePath);
-  const relativeToAdminRoot = path.relative(adminRoot, filePath);
-  if (relativeToAdminRoot.startsWith("..") || path.isAbsolute(relativeToAdminRoot)) {
-    sendJson(response, 403, {
-      error: {
-        code: "ADMIN_FILE_FORBIDDEN",
-        message: "Admin file path is not allowed.",
-      },
-    });
-    return true;
-  }
-
-  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-    sendJson(response, 404, {
-      error: {
-        code: "ADMIN_FILE_NOT_FOUND",
-        message: "Admin file not found.",
-      },
-    });
-    return true;
-  }
-
-  sendFile(response, filePath);
-  return true;
 }
 
 function readJsonBody(request) {
@@ -2141,11 +2117,6 @@ async function handleRequest(request, response) {
       return;
     }
 
-    if (request.method === "GET" && pathname.startsWith("/admin")) {
-      serveAdminFile(pathname, response);
-      return;
-    }
-
     if (request.method === "POST" && pathname === "/api/admin/login") {
       const body = await readJsonBody(request);
       const submittedLogin = body.login || body.username;
@@ -2415,7 +2386,6 @@ async function handleRequest(request, response) {
           "GET /api/products/coldrex?country=kazakhstan&lang=ru",
           "POST /api/homepage { country, lang }",
           "POST /api/page { country, lang, page }",
-          "GET /admin",
           "POST /api/admin/login { login, password }",
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",

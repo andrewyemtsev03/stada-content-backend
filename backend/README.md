@@ -13,7 +13,9 @@ npm start
 
 By default the API listens on `http://127.0.0.1:3001`. Override with `PORT=4000 npm start`.
 
-Open the admin panel at `http://127.0.0.1:3001/admin` after the backend is running. The panel edits dynamic homepage text and images for the selected country and language, then stores overrides in `backend/data/content-overrides.json`.
+This service is API-only. It does not host the admin UI. Run the separate `adminStada` frontend locally (or deploy it separately) and point it at this backend API.
+
+The admin frontend edits dynamic homepage text and images for the selected country and language, then stores overrides through this backend.
 
 Configure admin credentials before starting the backend:
 
@@ -30,6 +32,8 @@ CORS_ORIGINS=https://your-public-site.example,https://your-admin-site.example
 ADMIN_LOGIN_MAX_ATTEMPTS=8
 ADMIN_LOGIN_WINDOW_MS=900000
 ```
+
+Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed by default so the local `adminStada` app can call the deployed backend. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
 
 ## Cloudinary Uploads
 
