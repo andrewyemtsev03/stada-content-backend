@@ -779,8 +779,11 @@ function normalizeCatalogProductId(product, imageSrc) {
 
 function normalizeCatalogProductHref(product, productId) {
   const href = String(product?.href || "").trim();
-  if (!href || /(?:^|\/)product\.html(?:$|[?#])/i.test(href)) {
-    return productId ? `products/${productId}.html` : href;
+  if (!productId) return href;
+  if (!href
+    || /(?:^|\/)product\.html(?:$|[?#])/i.test(href)
+    || /^products\/(?!index\.html|product\.html)[^/]+\.html(?:$|[?#])/i.test(href)) {
+    return `products/product.html?slug=${encodeURIComponent(productId)}`;
   }
   return href;
 }
