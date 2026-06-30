@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STADA Admin Panel</title>
+  <link rel="stylesheet" href="css/admin.css?v=admin-shell-3">
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="login-panel" data-login-panel>
+      <div class="brand-row">
+        <span class="brand-mark">STADA</span>
+        <span class="brand-line"></span>
+      </div>
+      <div class="login-copy">
+        <p class="eyebrow">Content administration</p>
+        <h1>Sign in to edit website text</h1>
+        <p>Choose a country, update homepage content, and publish it through the backend content API.</p>
+      </div>
+      <form class="login-form" data-login-form>
+        <label>
+          Login
+          <input type="text" name="login" autocomplete="username" required>
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <button type="submit">Sign in</button>
+        <p class="form-message" data-login-message role="alert"></p>
+      </form>
+    </section>
+
+    <section class="panel is-hidden" data-editor-panel>
+      <header class="panel-header">
+        <div>
+          <div class="brand-row">
+            <span class="brand-mark">STADA</span>
+            <span class="brand-line"></span>
+          </div>
+          <p class="eyebrow">Admin panel</p>
+          <h1 data-admin-page-title>Main page</h1>
+          <p class="panel-intro" data-admin-page-intro>Edit dynamic homepage content used by the main frontend.</p>
+          <p data-api-label></p>
+        </div>
+        <button class="secondary-button" type="button" data-logout>Sign out</button>
+      </header>
+
+      <div class="admin-layout">
+        <div class="admin-workspace">
+          <section class="admin-page-view" data-admin-page-view="main">
+            <section class="control-panel" aria-label="Editor controls">
+              <div class="toolbar">
+                <label>
+                  Country
+                  <select data-country-select></select>
+                </label>
+                <label>
+                  Language
+                  <select data-language-select></select>
+                </label>
+                <label class="search-field">
+                  Search text
+                  <input type="search" data-search-input placeholder="Find by key or content">
+                </label>
+              </div>
+
+              <div class="filter-row" aria-label="Content filters" data-filter-row></div>
+            </section>
+
+            <div class="summary-row is-hidden" aria-hidden="true">
+              <strong data-total-count>0</strong>
+              <strong data-visible-count>0</strong>
+              <strong data-changed-count>0</strong>
+              <strong data-page-title>Main page</strong>
+            </div>
+
+            <div class="editor-grid" data-editor-list></div>
+
+            <div class="save-bar">
+              <p data-status>Choose a country to load editable homepage text.</p>
+              <div class="actions">
+                <button class="secondary-button" type="button" data-reset>Reset visible</button>
+                <button type="button" data-save>Save changes</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-page-view is-hidden" data-admin-page-view="culture">
+            <div class="empty-page">
+              <p class="eyebrow">Coming later</p>
+              <h2>Culture page</h2>
+              <p>This admin page is intentionally blank for now.</p>
+            </div>
+          </section>
+
+          <section class="admin-page-view is-hidden" data-admin-page-view="history">
+            <div class="empty-page">
+              <p class="eyebrow">Coming later</p>
+              <h2>History page</h2>
+              <p>This admin page is intentionally blank for now.</p>
+            </div>
+          </section>
+
+          <section class="admin-page-view is-hidden" data-admin-page-view="worldwide">
+            <div class="empty-page">
+              <p class="eyebrow">Coming later</p>
+              <h2>Worldwide page</h2>
+              <p>This admin page is intentionally blank for now.</p>
+            </div>
+          </section>
+
+          <section class="admin-page-view is-hidden" data-admin-page-view="product">
+            <section class="product-manager" aria-label="Product catalog manager">
+              <header class="product-manager__header">
+                <div>
+                  <p class="eyebrow">PostgreSQL catalog</p>
+                  <h2 data-product-manager-title>Products</h2>
+                  <p data-product-status>Load products to add, edit, or remove catalog entries.</p>
+                </div>
+                <div class="product-manager__actions">
+                  <button class="secondary-button" type="button" data-product-import>Import from site</button>
+                  <button class="secondary-button" type="button" data-product-sync-images>Sync Cloudinary images</button>
+                  <button class="secondary-button" type="button" data-product-refresh>Refresh</button>
+                  <button type="button" data-product-new>New product</button>
+                </div>
+              </header>
+
+              <div class="product-manager__body">
+                <aside class="product-list-panel" aria-label="Product list">
+                  <div class="product-list-panel__head">
+                    <div>
+                      <h3>Catalog</h3>
+                      <p data-product-count>No products loaded</p>
+                    </div>
+                  </div>
+                  <label class="product-search-field" aria-label="Search products">
+                    <input type="search" data-product-search placeholder="Search by name, slug, or area">
+                  </label>
+                  <div class="product-list" data-product-list></div>
+                </aside>
+
+                <form class="product-form" data-product-form>
+                  <input type="hidden" name="id" data-product-id-input>
+                  <input type="hidden" name="slug">
+
+                  <header class="product-editor-header">
+                    <div>
+                      <p class="eyebrow">Editor</p>
+                      <h3 data-product-editor-title>Select a product</h3>
+                    </div>
+                    <div class="product-editor-header__actions">
+                      <button class="secondary-button" type="button" data-product-sync-images>Sync Cloudinary images</button>
+                      <span data-product-editor-status>Ready</span>
+                    </div>
+                  </header>
+
+                  <section class="product-card-editor">
+                    <div class="product-card-editor__preview">
+                      <div class="product-card-editor__image">
+                        <img data-product-image-preview alt="">
+                      </div>
+                    </div>
+
+                    <div class="product-card-editor__fields">
+                      <div class="product-form__section" data-product-form-section="catalog">
+                        <h4>Shared product image</h4>
+                        <div class="product-form__grid">
+                          <input type="hidden" name="imageCloudinaryPublicId">
+                          <label class="product-form__wide">
+                            Image URL
+                            <input type="text" name="imageSrc" placeholder="assets/products/.../packshot.png" data-product-image-src>
+                          </label>
+                          <div class="product-image-upload product-form__wide">
+                            <div class="image-field__bar">
+                              <span data-product-image-status>Backend image</span>
+                              <input type="file" accept="image/png,image/jpeg,image/webp" data-product-image-file>
+                              <button class="secondary-button" type="button" data-product-image-change>Upload</button>
+                            </div>
+                          </div>
+                          <label class="product-form__wide">
+                            Image description
+                            <input type="text" name="imageAlt" placeholder="Shown as the image alt text">
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="product-form__section" data-product-form-section="catalog">
+                        <h4>Product card text</h4>
+                        <div class="product-form__grid">
+                          <label>
+                            Therapeutic direction
+                            <select name="therapeuticAreaId" data-therapeutic-area-select></select>
+                          </label>
+                          <label>
+                            Details link
+                            <input type="text" name="pagePath" placeholder="products/product-name.html">
+                          </label>
+                          <label>
+                            Status
+                            <select name="status">
+                              <option value="draft">Draft</option>
+                              <option value="published">Published</option>
+                              <option value="archived">Archived</option>
+                            </select>
+                          </label>
+                          <label>
+                            Sort order
+                            <input type="number" name="sortOrder" min="0" step="1">
+                          </label>
+                          <label>
+                            Accent color
+                            <input type="text" name="accentColor" placeholder="#00a3ad">
+                          </label>
+                          <label class="checkbox-field">
+                            <input type="checkbox" name="isFeatured">
+                            Featured on homepage
+                          </label>
+                          <label>
+                            Product title (RU)
+                            <input type="text" name="ruName" required>
+                          </label>
+                          <label>
+                            Product title (KZ)
+                            <input type="text" name="kzName">
+                          </label>
+                          <label class="product-form__wide">
+                            Short description (RU)
+                            <textarea name="ruShortDescription" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Short description (KZ)
+                            <textarea name="kzShortDescription" rows="3"></textarea>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div class="product-form__section" data-product-form-section="detail">
+                        <h4>Product page content</h4>
+                        <p class="product-form__hint">Repeated rows use the pipe character. Example: 5-10 | минут до начала действия.</p>
+                        <div class="product-form__grid">
+                          <label>
+                            Hero kicker (RU)
+                            <input type="text" name="ruHeroKicker">
+                          </label>
+                          <label>
+                            Hero kicker (KZ)
+                            <input type="text" name="kzHeroKicker">
+                          </label>
+                          <label class="product-form__wide">
+                            Hero description (RU)
+                            <textarea name="ruHeroLead" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Hero description (KZ)
+                            <textarea name="kzHeroLead" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Hero badges (RU, one per line)
+                            <textarea name="ruHeroBadges" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Hero badges (KZ, one per line)
+                            <textarea name="kzHeroBadges" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Hero metrics (RU: value | label)
+                            <textarea name="ruHeroMetrics" rows="4"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Hero metrics (KZ: value | label)
+                            <textarea name="kzHeroMetrics" rows="4"></textarea>
+                          </label>
+                          <label>
+                            Overview label (RU)
+                            <input type="text" name="ruOverviewLabel">
+                          </label>
+                          <label>
+                            Overview label (KZ)
+                            <input type="text" name="kzOverviewLabel">
+                          </label>
+                          <label class="product-form__wide">
+                            Overview heading (RU)
+                            <input type="text" name="ruOverviewHeading">
+                          </label>
+                          <label class="product-form__wide">
+                            Overview heading (KZ)
+                            <input type="text" name="kzOverviewHeading">
+                          </label>
+                          <label class="product-form__wide">
+                            Overview intro (RU)
+                            <textarea name="ruOverviewIntro" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Overview intro (KZ)
+                            <textarea name="kzOverviewIntro" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Overview cards (RU: value | title | text)
+                            <textarea name="ruOverviewFacts" rows="6"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Overview cards (KZ: value | title | text)
+                            <textarea name="kzOverviewFacts" rows="6"></textarea>
+                          </label>
+                          <label>
+                            Formula label (RU)
+                            <input type="text" name="ruFormulaLabel">
+                          </label>
+                          <label>
+                            Formula label (KZ)
+                            <input type="text" name="kzFormulaLabel">
+                          </label>
+                          <label class="product-form__wide">
+                            Formula heading (RU)
+                            <input type="text" name="ruFormulaHeading">
+                          </label>
+                          <label class="product-form__wide">
+                            Formula heading (KZ)
+                            <input type="text" name="kzFormulaHeading">
+                          </label>
+                          <label class="product-form__wide">
+                            Formula intro (RU)
+                            <textarea name="ruFormulaIntro" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Formula intro (KZ)
+                            <textarea name="kzFormulaIntro" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Formula point text (RU, one per line)
+                            <textarea name="ruFormulaPoints" rows="4"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Formula point text (KZ, one per line)
+                            <textarea name="kzFormulaPoints" rows="4"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Formula center image URL
+                            <input class="image-url-input" type="text" name="formulaCenterSrc">
+                          </label>
+                          <input type="hidden" name="formulaCenterCloudinaryPublicId">
+                          <div class="product-image-upload product-form__wide formula-image-field">
+                            <div class="formula-image-preview">
+                              <img data-formula-image-preview="formulaCenter" alt="">
+                            </div>
+                            <div class="image-field__bar">
+                              <span data-formula-image-status="formulaCenter">Formula center image</span>
+                              <input type="file" accept="image/png,image/jpeg,image/webp" data-formula-image-file="formulaCenter">
+                              <button class="secondary-button" type="button" data-formula-image-change="formulaCenter">Upload</button>
+                            </div>
+                          </div>
+                          <label class="formula-image-url-field">
+                            Formula point 1 image URL
+                            <input class="image-url-input" type="text" name="formulaPointActiveSrc">
+                          </label>
+                          <input type="hidden" name="formulaPointActiveCloudinaryPublicId">
+                          <div class="product-image-upload formula-image-field">
+                            <div class="formula-image-preview">
+                              <img data-formula-image-preview="formulaPointActive" alt="">
+                            </div>
+                            <div class="image-field__bar">
+                              <span data-formula-image-status="formulaPointActive">Point 1 image</span>
+                              <input type="file" accept="image/png,image/jpeg,image/webp" data-formula-image-file="formulaPointActive">
+                              <button class="secondary-button" type="button" data-formula-image-change="formulaPointActive">Upload</button>
+                            </div>
+                          </div>
+                          <label class="formula-image-url-field">
+                            Formula point 2 image URL
+                            <input class="image-url-input" type="text" name="formulaPointSeawaterSrc">
+                          </label>
+                          <input type="hidden" name="formulaPointSeawaterCloudinaryPublicId">
+                          <div class="product-image-upload formula-image-field">
+                            <div class="formula-image-preview">
+                              <img data-formula-image-preview="formulaPointSeawater" alt="">
+                            </div>
+                            <div class="image-field__bar">
+                              <span data-formula-image-status="formulaPointSeawater">Point 2 image</span>
+                              <input type="file" accept="image/png,image/jpeg,image/webp" data-formula-image-file="formulaPointSeawater">
+                              <button class="secondary-button" type="button" data-formula-image-change="formulaPointSeawater">Upload</button>
+                            </div>
+                          </div>
+                          <label class="formula-image-url-field">
+                            Formula point 3 image URL
+                            <input class="image-url-input" type="text" name="formulaPointFormatSrc">
+                          </label>
+                          <input type="hidden" name="formulaPointFormatCloudinaryPublicId">
+                          <div class="product-image-upload formula-image-field">
+                            <div class="formula-image-preview">
+                              <img data-formula-image-preview="formulaPointFormat" alt="">
+                            </div>
+                            <div class="image-field__bar">
+                              <span data-formula-image-status="formulaPointFormat">Point 3 image</span>
+                              <input type="file" accept="image/png,image/jpeg,image/webp" data-formula-image-file="formulaPointFormat">
+                              <button class="secondary-button" type="button" data-formula-image-change="formulaPointFormat">Upload</button>
+                            </div>
+                          </div>
+                          <label>
+                            Usage label (RU)
+                            <input type="text" name="ruUsageLabel">
+                          </label>
+                          <label>
+                            Usage label (KZ)
+                            <input type="text" name="kzUsageLabel">
+                          </label>
+                          <label>
+                            Usage heading (RU)
+                            <textarea name="ruUsageHeading" rows="2"></textarea>
+                          </label>
+                          <label>
+                            Usage heading (KZ)
+                            <textarea name="kzUsageHeading" rows="2"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Usage cards (RU: title | text)
+                            <textarea name="ruUsageItems" rows="5"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Usage cards (KZ: title | text)
+                            <textarea name="kzUsageItems" rows="5"></textarea>
+                          </label>
+                          <label>
+                            Safety note title (RU)
+                            <input type="text" name="ruNoteTitle">
+                          </label>
+                          <label>
+                            Safety note title (KZ)
+                            <input type="text" name="kzNoteTitle">
+                          </label>
+                          <label class="product-form__wide">
+                            Safety note (RU)
+                            <textarea name="ruNoteText" rows="3"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Safety note (KZ)
+                            <textarea name="kzNoteText" rows="3"></textarea>
+                          </label>
+                          <label>
+                            Buy intro (RU)
+                            <textarea name="ruBuyIntro" rows="2"></textarea>
+                          </label>
+                          <label>
+                            Buy intro (KZ)
+                            <textarea name="kzBuyIntro" rows="2"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Benefits (RU, one per line)
+                            <textarea name="ruBenefits" rows="6"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Benefits (KZ, one per line)
+                            <textarea name="kzBenefits" rows="6"></textarea>
+                          </label>
+                          <label class="product-form__wide">
+                            Purchase links (label | URL | logo URL | logo alt)
+                            <textarea name="purchaseLinks" rows="5"></textarea>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <div class="product-form__bar">
+                    <button class="secondary-button" type="button" data-product-delete>Delete</button>
+                    <button type="submit">Save product</button>
+                  </div>
+                </form>
+              </div>
+            </section>
+          </section>
+        </div>
+
+        <aside class="admin-sidebar" aria-label="Admin navigation">
+          <nav class="page-nav" aria-label="Admin pages">
+            <p>Pages</p>
+            <button class="page-nav__item is-active" type="button" data-admin-page="main">
+              <span>Main Page</span>
+              <small>Homepage editor</small>
+            </button>
+            <button class="page-nav__item" type="button" data-admin-page="culture">
+              <span>Culture Page</span>
+              <small>Blank</small>
+            </button>
+            <button class="page-nav__item" type="button" data-admin-page="history">
+              <span>History Page</span>
+              <small>Blank</small>
+            </button>
+            <button class="page-nav__item" type="button" data-admin-page="worldwide">
+              <span>Worldwide Page</span>
+              <small>Blank</small>
+            </button>
+            <button class="page-nav__item" type="button" data-admin-page="product">
+              <span>Product Page</span>
+              <small>Catalog CRUD</small>
+            </button>
+          </nav>
+
+          <nav class="product-page-nav" aria-label="Product pages">
+            <p>Product Pages</p>
+            <div class="product-page-nav__list" data-product-page-list>
+              <span class="product-page-nav__empty">Load products to show detail pages.</span>
+            </div>
+          </nav>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <template data-field-template>
+    <article class="field-card">
+      <div class="field-card__head">
+        <div>
+          <label></label>
+          <span></span>
+        </div>
+        <strong></strong>
+      </div>
+      <p class="field-card__section"></p>
+      <textarea rows="3" data-text-value></textarea>
+      <div class="image-field is-hidden" data-image-field>
+        <div class="image-field__preview">
+          <img alt="">
+        </div>
+        <div class="image-field__bar">
+          <span data-image-status></span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-image-file>
+          <button class="secondary-button" type="button" data-image-change>Upload</button>
+        </div>
+      </div>
+      <details>
+        <summary>Original value</summary>
+        <p></p>
+      </details>
+    </article>
+  </template>
+
+  <template data-section-template>
+    <section class="editor-section">
+      <header class="editor-section__header">
+        <div>
+          <p></p>
+          <h2></h2>
+        </div>
+        <span></span>
+      </header>
+      <div class="editor-section__fields"></div>
+    </section>
+  </template>
+
+  <script src="js/admin.js?v=admin-shell-3"></script>
+</body>
+</html>
