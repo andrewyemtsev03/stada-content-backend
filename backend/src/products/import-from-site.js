@@ -304,6 +304,7 @@ async function importProductsFromSite() {
 
     await upsertProduct({
       id: product.id,
+      countryId: "kazakhstan",
       slug: product.id,
       pagePath,
       status: "published",

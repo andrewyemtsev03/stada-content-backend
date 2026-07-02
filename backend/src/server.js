@@ -766,6 +766,28 @@ function normalizeProductSlug(value) {
     .slice(0, 120);
 }
 
+function productCountryId(countryId) {
+  return findCountryByInput(countryId)?.id || normalizeCountrySlug(countryId) || "kazakhstan";
+}
+
+function productCountryPrefix(countryId) {
+  const country = productCountryId(countryId);
+  return country && country !== "kazakhstan" ? `${country}-` : "";
+}
+
+function productPublicIdFromStorageId(value, countryId) {
+  const id = normalizeProductSlug(value);
+  const prefix = productCountryPrefix(countryId);
+  return prefix && id.startsWith(prefix) ? id.slice(prefix.length) : id;
+}
+
+function normalizeProductStorageId(countryId, value) {
+  const id = normalizeProductSlug(value);
+  const prefix = productCountryPrefix(countryId);
+  if (!id) return "";
+  return prefix && !id.startsWith(prefix) ? `${prefix}${id}` : id;
+}
+
 function normalizeProductImageSlot(value) {
   return String(value || "")
     .trim()
@@ -912,7 +934,7 @@ function normalizeProductSectionContent(value) {
 function normalizeProductSections(value) {
   const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const normalized = {};
-  for (const language of ["ru", "kz"]) {
+  for (const language of ["ru", "kz", "kg"]) {
     const sections = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
       ? submitted[language]
       : {};
@@ -930,12 +952,12 @@ function normalizeProductSections(value) {
 function normalizeProductTranslations(value, fallbackName) {
   const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const normalized = {};
-  for (const language of ["ru", "kz"]) {
+  for (const language of ["ru", "kz", "kg"]) {
     const translation = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
       ? submitted[language]
       : {};
     normalized[language] = {
-      name: String(translation.name || fallbackName || "").trim(),
+      name: String(translation.name || (language === "kg" ? "" : fallbackName) || "").trim(),
       shortDescription: String(translation.shortDescription || "").trim(),
       fullDescription: String(translation.fullDescription || "").trim(),
       composition: String(translation.composition || "").trim(),
@@ -1016,13 +1038,16 @@ function syncProductImageSlots(images = {}) {
   return synced;
 }
 
-function normalizeProductPayload(body, routeId = "") {
+function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
   const submitted = body && typeof body === "object" && !Array.isArray(body) ? body : {};
-  const slug = normalizeProductSlug(submitted.slug || submitted.id || routeId);
-  const id = normalizeProductSlug(routeId || submitted.id || slug);
+  const country = productCountryId(countryId);
+  const publicRouteId = productPublicIdFromStorageId(routeId, country);
+  const publicSubmittedId = productPublicIdFromStorageId(submitted.id, country);
+  const slug = normalizeProductSlug(submitted.slug || publicSubmittedId || publicRouteId);
+  const id = normalizeProductStorageId(country, routeId || submitted.id || slug);
   const statuses = new Set(["draft", "published", "archived"]);
   const status = statuses.has(String(submitted.status || "").trim()) ? String(submitted.status).trim() : "draft";
-  const fallbackName = submitted.translations?.ru?.name || submitted.translations?.kz?.name || slug;
+  const fallbackName = submitted.translations?.ru?.name || submitted.translations?.kg?.name || submitted.translations?.kz?.name || slug;
 
   if (!id || !slug) {
     throw Object.assign(new Error("Product slug is required."), {
@@ -1033,6 +1058,7 @@ function normalizeProductPayload(body, routeId = "") {
 
   return {
     id,
+    countryId: country,
     slug,
     pagePath: normalizeProductPagePath(submitted.pagePath, slug),
     status,
@@ -1049,7 +1075,7 @@ function normalizeProductPayload(body, routeId = "") {
 
 function localizedProductFallbacks(product, language) {
   return String(language || "").trim().toLowerCase() === "kg"
-    ? [product?.translations?.kg, product?.translations?.ru]
+    ? [product?.translations?.kg]
     : [product?.translations?.[language], product?.translations?.ru, product?.translations?.kz];
 }
 
@@ -1199,9 +1225,10 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
     title: `${index + 1}`,
     text,
   }))).slice(0, 3);
+  const defaultPurchaseLinks = country?.id === "kyrgyzstan" ? [] : makeDefaultProductPurchaseLinks(name);
   const purchaseLinks = (Array.isArray(product.purchaseLinks) && product.purchaseLinks.length
     ? product.purchaseLinks
-    : makeDefaultProductPurchaseLinks(name)
+    : defaultPurchaseLinks
   ).map((link, index) => ({
     slot: link.slot || `link-${index + 1}`,
     label: link.label || link.slot || "",
@@ -1263,8 +1290,8 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
 
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
-  const translation = String(language || "").trim().toLowerCase() === "kg"
-      ? area.translations?.kg || area.translations?.ru || {}
+    const translation = String(language || "").trim().toLowerCase() === "kg"
+      ? area.translations?.kg || {}
       : area.translations?.[language] || area.translations?.ru || area.translations?.kz || {};
     return [area.id, translation.name || area.id];
   }));
@@ -1379,7 +1406,7 @@ function getProductPayloadTranslation(product, language = "ru") {
 
 function getProductPayloadSections(product, language = "ru") {
   return String(language || "").trim().toLowerCase() === "kg"
-    ? product.sections?.kg || product.sections?.ru || {}
+    ? product.sections?.kg || {}
     : product.sections?.[language] || product.sections?.ru || product.sections?.kz || {};
 }
 
@@ -1503,6 +1530,10 @@ function isAbsoluteImageSource(src) {
 }
 
 function staticCatalogFallbacksByLanguage(country) {
+  if (productCountryId(country) === "kyrgyzstan") {
+    return { ru: new Map(), kz: new Map(), kg: new Map() };
+  }
+
   const languages = ["ru", "kz", "kg"];
   const fallbacks = {};
 
@@ -1939,6 +1970,13 @@ function isGenericProductPurchaseLinks(links = []) {
 }
 
 function applyStaticProductDetailFallbacks(products, country) {
+  if (productCountryId(country) === "kyrgyzstan") {
+    return (products || []).map(product => ({
+      ...product,
+      images: syncProductImageSlots({ ...(product.images || {}) }),
+    }));
+  }
+
   const languages = ["ru", "kz", "kg"];
   return (products || []).map(product => {
     const nextProduct = {
@@ -2049,8 +2087,9 @@ function applyStaticProductFallbacks(products, country, options = {}) {
 
 async function attachDatabaseProductsToPayload(payload) {
   try {
+    const country = payload.country?.id || "kazakhstan";
     const [products, therapeuticAreas] = await Promise.all([
-      listProducts(),
+      listProducts(country),
       listTherapeuticAreas(),
     ]);
     applyDatabaseProductsToPayload(payload, products, therapeuticAreas);
@@ -2062,8 +2101,9 @@ async function attachDatabaseProductsToPayload(payload) {
 
 async function attachEditableProductCatalog(editable) {
   try {
+    const country = editable.country?.id || "kazakhstan";
     const [products, therapeuticAreas] = await Promise.all([
-      listProducts(),
+      listProducts(country),
       listTherapeuticAreas(),
     ]);
     const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, editable.language);
@@ -2306,14 +2346,15 @@ async function handleRequest(request, response) {
       const session = requireAdmin(request);
       const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       sendJson(response, 200, {
-        products: applyStaticProductFallbacks(await listProducts(), country),
+        products: applyStaticProductFallbacks(await listProducts(country), country),
         therapeuticAreas: await listTherapeuticAreas(),
       });
       return;
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products/import-from-site") {
-      requireAdmin(request);
+      const session = requireAdmin(request);
+      requireAdminCountry(session, "kazakhstan");
       const result = await importProductsFromSite();
       sendJson(response, 200, {
         status: "imported",
@@ -2323,7 +2364,8 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products/sync-cloudinary-images") {
-      requireAdmin(request);
+      const session = requireAdmin(request);
+      requireAdminCountry(session, "kazakhstan");
       const result = await runProductImageCloudinarySync();
       sendJson(response, 200, {
         status: "synced",
@@ -2333,9 +2375,10 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products") {
-      requireAdmin(request);
+      const session = requireAdmin(request);
       const body = await readJsonBody(request);
-      const product = await upsertProduct(normalizeProductPayload(body));
+      const country = requireAdminCountry(session, body.country || body.countryId);
+      const product = await upsertProduct(normalizeProductPayload(body, "", country));
       sendJson(response, 201, {
         status: "saved",
         product,
@@ -2344,9 +2387,10 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "PUT" && pathname.startsWith("/api/admin/products/")) {
-      requireAdmin(request);
+      const session = requireAdmin(request);
       const body = await readJsonBody(request);
-      const product = await upsertProduct(normalizeProductPayload(body, routeProductSlugFromAdminPath(pathname)));
+      const country = requireAdminCountry(session, body.country || body.countryId);
+      const product = await upsertProduct(normalizeProductPayload(body, routeProductSlugFromAdminPath(pathname), country));
       sendJson(response, 200, {
         status: "saved",
         product,
@@ -2355,8 +2399,9 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "DELETE" && pathname.startsWith("/api/admin/products/")) {
-      requireAdmin(request);
-      const deleted = await deleteProduct(routeProductSlugFromAdminPath(pathname));
+      const session = requireAdmin(request);
+      const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
+      const deleted = await deleteProduct(routeProductSlugFromAdminPath(pathname), country);
       if (!deleted) {
         sendJson(response, 404, {
           error: {
@@ -2372,7 +2417,8 @@ async function handleRequest(request, response) {
 
     if (request.method === "GET" && pathname.startsWith("/api/admin/products/")) {
       const session = requireAdmin(request);
-      const product = await getProduct(routeProductSlugFromAdminPath(pathname));
+      const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
+      const product = await getProduct(routeProductSlugFromAdminPath(pathname), country);
       if (!product) {
         sendJson(response, 404, {
           error: {
@@ -2382,7 +2428,6 @@ async function handleRequest(request, response) {
         });
         return;
       }
-      const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       sendJson(response, 200, {
         product: applyStaticProductFallbacks([product], country, { includeDetailFallbacks: true })[0],
       });
@@ -2455,7 +2500,7 @@ async function handleRequest(request, response) {
       const slug = routeProductSlugFromPublicPath(pathname);
       const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId") || "kazakhstan";
       const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language") || "ru";
-      const product = await getProduct(slug);
+      const product = await getProduct(slug, country);
       if (!product || product.status === "archived") {
         sendJson(response, 404, {
           error: {

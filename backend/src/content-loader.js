@@ -860,6 +860,12 @@ function syncHomeProducts(payload) {
 }
 
 function attachProductCatalog(payload, countryConfig, homepageConfig) {
+  if (countryConfig.id === "kyrgyzstan") {
+    payload.content.productCatalog = [];
+    syncHomeProducts(payload);
+    return;
+  }
+
   const fallbackLanguage = countryConfig.defaultLanguage || payload.language;
   payload.content.productCatalog = loadProductCatalog({
     homepageConfig,

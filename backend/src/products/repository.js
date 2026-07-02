@@ -1,5 +1,9 @@
 const { query, withClient } = require("../db/client");
 
+function normalizeCountryId(value) {
+  return String(value || "").trim().toLowerCase() || "";
+}
+
 function mapProductRows(rows) {
   const productsById = new Map();
 
@@ -7,6 +11,7 @@ function mapProductRows(rows) {
     if (!productsById.has(row.id)) {
       productsById.set(row.id, {
         id: row.id,
+        countryId: row.country_id || "kazakhstan",
         slug: row.slug,
         pagePath: row.page_path,
         status: row.status,
@@ -138,7 +143,9 @@ async function attachProductDetails(products) {
   return products;
 }
 
-async function listProducts() {
+async function listProducts(countryId = "") {
+  const country = normalizeCountryId(countryId);
+  const params = country ? [country] : [];
   const result = await query(`
     select
       p.*,
@@ -156,8 +163,9 @@ async function listProducts() {
     from products p
     left join product_translations pt on pt.product_id = p.id
     left join product_images pi on pi.product_id = p.id
+    ${country ? "where p.country_id = $1" : ""}
     order by p.sort_order, p.slug, pt.language, pi.slot
-  `);
+  `, params);
 
   return attachProductDetails(mapProductRows(result.rows));
 }
@@ -194,7 +202,8 @@ async function listTherapeuticAreas() {
   return [...areasById.values()];
 }
 
-async function getProduct(slugOrId) {
+async function getProduct(slugOrId, countryId = "kazakhstan") {
+  const country = normalizeCountryId(countryId) || "kazakhstan";
   const result = await query(`
     select
       p.*,
@@ -212,9 +221,9 @@ async function getProduct(slugOrId) {
     from products p
     left join product_translations pt on pt.product_id = p.id
     left join product_images pi on pi.product_id = p.id
-    where p.id = $1 or p.slug = $1
+    where p.country_id = $2 and (p.id = $1 or p.slug = $1)
     order by pt.language, pi.slot
-  `, [slugOrId]);
+  `, [slugOrId, country]);
 
   const products = await attachProductDetails(mapProductRows(result.rows));
   return products[0] || null;
@@ -249,15 +258,17 @@ function normalizePurchaseLinks(value) {
 }
 
 async function upsertProduct(product) {
-  const id = await withClient(async client => {
+  const savedProduct = await withClient(async client => {
     await client.query("begin");
     try {
+      const countryId = normalizeCountryId(product.countryId || product.country_id) || "kazakhstan";
       const id = product.id || product.slug;
       const slug = product.slug || id;
 
       await client.query(`
         insert into products (
           id,
+          country_id,
           slug,
           page_path,
           status,
@@ -267,8 +278,9 @@ async function upsertProduct(product) {
           is_featured,
           updated_at
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, now())
+        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
         on conflict (id) do update set
+          country_id = excluded.country_id,
           slug = excluded.slug,
           page_path = excluded.page_path,
           status = excluded.status,
@@ -279,6 +291,7 @@ async function upsertProduct(product) {
           updated_at = now()
       `, [
         id,
+        countryId,
         slug,
         product.pagePath || `products/${slug}.html`,
         product.status || "draft",
@@ -410,22 +423,23 @@ async function upsertProduct(product) {
       }
 
       await client.query("commit");
-      return id;
+      return { id, countryId };
     } catch (error) {
       await client.query("rollback");
       throw error;
     }
   });
 
-  return getProduct(id);
+  return getProduct(savedProduct.id, savedProduct.countryId);
 }
 
-async function deleteProduct(slugOrId) {
+async function deleteProduct(slugOrId, countryId = "kazakhstan") {
+  const country = normalizeCountryId(countryId) || "kazakhstan";
   const result = await query(`
     delete from products
-    where id = $1 or slug = $1
+    where country_id = $2 and (id = $1 or slug = $1)
     returning id
-  `, [slugOrId]);
+  `, [slugOrId, country]);
 
   return result.rowCount > 0;
 }
