@@ -587,8 +587,9 @@ function isOptionalEmptyProductKey(key) {
 
 function languageFallbackOrder(language, fallbackLanguage) {
   const requested = String(language || "").trim().toLowerCase();
-  const regionalFallbacks = [];
+  const regionalFallbacks = requested === "ge" ? ["en"] : requested === "en" ? ["ge"] : [];
   if (requested === "kg") return unique([requested, fallbackLanguage, "ru", "en"]);
+  if (requested === "ge" || requested === "en") return unique([requested, ...regionalFallbacks, fallbackLanguage, "en"]);
   return unique([requested, ...regionalFallbacks, fallbackLanguage, "ru", "kz", "en"]);
 }
 
@@ -860,7 +861,7 @@ function syncHomeProducts(payload) {
 }
 
 function attachProductCatalog(payload, countryConfig, homepageConfig) {
-  if (countryConfig.id === "kyrgyzstan") {
+  if (countryConfig.id !== "kazakhstan") {
     payload.content.productCatalog = [];
     syncHomeProducts(payload);
     return;

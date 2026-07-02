@@ -16,8 +16,10 @@ const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME 
 const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "andrewyemtsevKZ").trim();
 const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "andrewyemtsevKG").trim();
+const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "andrewyemtsevGE").trim();
 const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
 const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
+const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || adminPassword).trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
@@ -27,6 +29,8 @@ const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
+const productLanguages = ["ru", "kz", "kg", "ge", "en"];
+const productNameFallbackLanguages = new Set(["ru", "kz", "en"]);
 const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 8 * 1024 * 1024);
 const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
@@ -128,6 +132,11 @@ function buildAdminAccounts() {
     countryIds: ["kyrgyzstan"],
   });
   addAdminAccount(accounts, {
+    login: adminGeLogin,
+    password: adminGePassword,
+    countryIds: ["georgia"],
+  });
+  addAdminAccount(accounts, {
     login: adminLogin,
     password: adminPassword,
     countryIds: allCountryIds(),
@@ -167,6 +176,8 @@ function isDefaultPublicCorsOrigin(origin) {
       || hostname.endsWith(".stada.kz")
       || hostname === "stada.kg"
       || hostname.endsWith(".stada.kg")
+      || hostname === "stada.ge"
+      || hostname.endsWith(".stada.ge")
     );
   } catch (error) {
     return false;
@@ -921,7 +932,7 @@ function normalizeProductSectionContent(value) {
 function normalizeProductSections(value) {
   const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const normalized = {};
-  for (const language of ["ru", "kz", "kg"]) {
+  for (const language of productLanguages) {
     const sections = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
       ? submitted[language]
       : {};
@@ -939,12 +950,12 @@ function normalizeProductSections(value) {
 function normalizeProductTranslations(value, fallbackName) {
   const submitted = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const normalized = {};
-  for (const language of ["ru", "kz", "kg"]) {
+  for (const language of productLanguages) {
     const translation = submitted[language] && typeof submitted[language] === "object" && !Array.isArray(submitted[language])
       ? submitted[language]
       : {};
     normalized[language] = {
-      name: String(translation.name || (language === "kg" ? "" : fallbackName) || "").trim(),
+      name: String(translation.name || (productNameFallbackLanguages.has(language) ? fallbackName : "") || "").trim(),
       shortDescription: String(translation.shortDescription || "").trim(),
       fullDescription: String(translation.fullDescription || "").trim(),
       composition: String(translation.composition || "").trim(),
@@ -1034,7 +1045,9 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
   const id = normalizeProductStorageId(country, routeId || submitted.id || slug);
   const statuses = new Set(["draft", "published", "archived"]);
   const status = statuses.has(String(submitted.status || "").trim()) ? String(submitted.status).trim() : "draft";
-  const fallbackName = submitted.translations?.ru?.name || submitted.translations?.kg?.name || submitted.translations?.kz?.name || slug;
+  const fallbackName = productLanguages
+    .map(language => submitted.translations?.[language]?.name)
+    .find(Boolean) || slug;
 
   if (!id || !slug) {
     throw Object.assign(new Error("Product slug is required."), {
@@ -1060,9 +1073,14 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
 }
 
 function localizedProductFallbacks(product, language) {
-  return String(language || "").trim().toLowerCase() === "kg"
-    ? [product?.translations?.kg]
-    : [product?.translations?.[language], product?.translations?.ru, product?.translations?.kz];
+  const requestedLanguage = String(language || "").trim().toLowerCase();
+  if (requestedLanguage === "kg" || requestedLanguage === "ge") {
+    return [product?.translations?.[requestedLanguage]];
+  }
+  if (requestedLanguage === "en") {
+    return [product?.translations?.en, product?.translations?.ge];
+  }
+  return productLanguages.map(candidateLanguage => product?.translations?.[candidateLanguage]);
 }
 
 function contentProductFromDatabaseProduct(product, language = "ru", areaLabels = new Map()) {
@@ -1211,7 +1229,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
     title: `${index + 1}`,
     text,
   }))).slice(0, 3);
-  const defaultPurchaseLinks = country?.id === "kyrgyzstan" ? [] : makeDefaultProductPurchaseLinks(name);
+  const defaultPurchaseLinks = country?.id === "kazakhstan" ? makeDefaultProductPurchaseLinks(name) : [];
   const purchaseLinks = (Array.isArray(product.purchaseLinks) && product.purchaseLinks.length
     ? product.purchaseLinks
     : defaultPurchaseLinks
@@ -1278,51 +1296,71 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     ru: "Аллергия",
     kz: "Аллергия",
     kg: "Аллергия",
+    ge: "ალერგია",
+    en: "Allergy",
   },
   cardio: {
     ru: "Кардио",
     kz: "Кардио",
     kg: "Жүрөк-кан тамыр",
+    ge: "გულ-სისხლძარღვთა",
+    en: "Cardio",
   },
   cold: {
     ru: "Простуда и дыхание",
     kz: "Суық тию және тыныс алу",
     kg: "Суук тийүү жана дем алуу жолдору",
+    ge: "გაციება და სასუნთქი გზები",
+    en: "Cold and breathing",
   },
   dermatology: {
     ru: "Дерматология",
     kz: "Дерматология",
     kg: "Дерматология",
+    ge: "დერმატოლოგია",
+    en: "Dermatology",
   },
   digestive: {
     ru: "Пищеварение",
     kz: "Ас қорыту",
     kg: "Тамак сиңирүү",
+    ge: "საჭმლის მონელება",
+    en: "Digestive health",
   },
   immunity: {
     ru: "Иммунитет",
     kz: "Иммунитет",
     kg: "Иммунитет",
+    ge: "იმუნიტეტი",
+    en: "Immunity",
   },
   kids: {
     ru: "Для детей",
     kz: "Балаларға арналған",
     kg: "Балдар үчүн",
+    ge: "ბავშვებისთვის",
+    en: "For children",
   },
   respiratory: {
     ru: "Дыхательные пути",
     kz: "Тыныс алу жолдары",
     kg: "Дем алуу жолдору",
+    ge: "სასუნთქი გზები",
+    en: "Respiratory",
   },
   urology: {
     ru: "Урология",
     kz: "Урология",
     kg: "Урология",
+    ge: "უროლოგია",
+    en: "Urology",
   },
   women: {
     ru: "Гинекология",
     kz: "Гинекология",
     kg: "Гинекология",
+    ge: "გინეკოლოგია",
+    en: "Gynecology",
   },
 };
 
@@ -1351,9 +1389,12 @@ function isEnglishTherapeuticAreaPlaceholder(value, areaId) {
 
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
-    const translation = String(language || "").trim().toLowerCase() === "kg"
-      ? area.translations?.kg || {}
-      : area.translations?.[language] || area.translations?.ru || area.translations?.kz || {};
+    const requestedLanguage = String(language || "").trim().toLowerCase();
+    const translation = requestedLanguage === "kg" || requestedLanguage === "ge"
+      ? area.translations?.[requestedLanguage] || {}
+      : requestedLanguage === "en"
+        ? area.translations?.en || area.translations?.ge || {}
+        : area.translations?.[requestedLanguage] || area.translations?.ru || area.translations?.kz || {};
     const fallbackLabel = knownTherapeuticAreaLabel(area.id, language);
     const translatedLabel = String(translation.name || "").trim();
     const label = fallbackLabel && isEnglishTherapeuticAreaPlaceholder(translatedLabel, area.id)
@@ -1471,9 +1512,14 @@ function getProductPayloadTranslation(product, language = "ru") {
 }
 
 function getProductPayloadSections(product, language = "ru") {
-  return String(language || "").trim().toLowerCase() === "kg"
-    ? product.sections?.kg || {}
-    : product.sections?.[language] || product.sections?.ru || product.sections?.kz || {};
+  const requestedLanguage = String(language || "").trim().toLowerCase();
+  if (requestedLanguage === "kg" || requestedLanguage === "ge") {
+    return product.sections?.[requestedLanguage] || {};
+  }
+  if (requestedLanguage === "en") {
+    return product.sections?.en || product.sections?.ge || {};
+  }
+  return product.sections?.[requestedLanguage] || product.sections?.ru || product.sections?.kz || {};
 }
 
 function findProductDetailKeyPrefix(payload) {
@@ -1596,11 +1642,11 @@ function isAbsoluteImageSource(src) {
 }
 
 function staticCatalogFallbacksByLanguage(country) {
-  if (productCountryId(country) === "kyrgyzstan") {
-    return { ru: new Map(), kz: new Map(), kg: new Map() };
+  if (productCountryId(country) !== "kazakhstan") {
+    return Object.fromEntries(productLanguages.map(language => [language, new Map()]));
   }
 
-  const languages = ["ru", "kz", "kg"];
+  const languages = ["ru", "kz"];
   const fallbacks = {};
 
   for (const language of languages) {
@@ -2036,23 +2082,21 @@ function isGenericProductPurchaseLinks(links = []) {
 }
 
 function applyStaticProductDetailFallbacks(products, country) {
-  if (productCountryId(country) === "kyrgyzstan") {
+  if (productCountryId(country) !== "kazakhstan") {
     return (products || []).map(product => ({
       ...product,
       images: syncProductImageSlots({ ...(product.images || {}) }),
     }));
   }
 
-  const languages = ["ru", "kz", "kg"];
+  const languages = ["ru", "kz"];
   return (products || []).map(product => {
     const nextProduct = {
       ...product,
       translations: { ...(product.translations || {}) },
       images: { ...(product.images || {}) },
       sections: {
-        ru: { ...(product.sections?.ru || {}) },
-        kz: { ...(product.sections?.kz || {}) },
-        kg: { ...(product.sections?.kg || {}) },
+        ...Object.fromEntries(productLanguages.map(language => [language, { ...(product.sections?.[language] || {}) }])),
       },
     };
 
@@ -2115,9 +2159,7 @@ function applyStaticProductFallbacks(products, country, options = {}) {
       translations: { ...(product.translations || {}) },
       images: { ...(product.images || {}) },
       sections: {
-        ru: { ...(product.sections?.ru || {}) },
-        kz: { ...(product.sections?.kz || {}) },
-        kg: { ...(product.sections?.kg || {}) },
+        ...Object.fromEntries(productLanguages.map(language => [language, { ...(product.sections?.[language] || {}) }])),
       },
     };
 

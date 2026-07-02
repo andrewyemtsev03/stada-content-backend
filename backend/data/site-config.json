@@ -31,6 +31,21 @@
         "worldwideCountriesPath": "data/worldwide-countries.json",
         "assetsBaseUrl": "https://stada.kg/"
       }
+    },
+    "georgia": {
+      "id": "georgia",
+      "name": "Georgia",
+      "siteName": "STADA Georgia",
+      "domain": "stada.ge",
+      "siteUrl": "https://stada.ge/",
+      "aliases": ["ge", "georgia", "stada.ge"],
+      "defaultLanguage": "ge",
+      "supportedLanguages": ["ge", "en"],
+      "homepage": {
+        "productCatalogPath": "data/product-catalog.json",
+        "worldwideCountriesPath": "data/worldwide-countries.json",
+        "assetsBaseUrl": "https://stada.ge/"
+      }
     }
   }
 }

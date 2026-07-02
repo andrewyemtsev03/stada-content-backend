@@ -62,6 +62,42 @@
       "flag": "https://flagcdn.com/w80/kg.png"
     },
     {
+      "id": "georgia",
+      "name": "Georgia",
+      "region": "Worldwide / Caucasus",
+      "labels": {
+        "en": {
+          "name": "Georgia",
+          "region": "Worldwide / Caucasus"
+        },
+        "ge": {
+          "name": "საქართველო",
+          "region": "მსოფლიო / კავკასია"
+        },
+        "ru": {
+          "name": "Грузия",
+          "region": "Мир / Кавказ"
+        },
+        "kz": {
+          "name": "Грузия",
+          "region": "Әлем / Кавказ"
+        },
+        "kg": {
+          "name": "Грузия",
+          "region": "Дүйнө / Кавказ"
+        }
+      },
+      "lat": 42.3154,
+      "lng": 43.3569,
+      "locationTitle": "STADA Georgia",
+      "address": "",
+      "website": "https://stada.ge/",
+      "websiteLabel": "Visit Website",
+      "email": "",
+      "phone": "",
+      "flag": "https://flagcdn.com/w80/ge.png"
+    },
+    {
       "id": "germany",
       "name": "Germany",
       "region": "Europe",
