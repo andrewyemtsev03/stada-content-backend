@@ -14,9 +14,14 @@ const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
 const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "").trim();
 const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
+const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "andrewyemtsevKZ").trim();
+const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "andrewyemtsevKG").trim();
+const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
+const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
+const adminAccounts = buildAdminAccounts();
 const adminSessions = new Map();
 const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
@@ -54,6 +59,83 @@ function positiveNumber(value, fallback) {
   return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
+function normalizeCountrySlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/[_.\s]+/g, "-")
+    .replace(/\/+$/, "");
+}
+
+function allCountryIds() {
+  return listCountries().map(country => country.id);
+}
+
+function findCountryByInput(countryInput) {
+  const requested = normalizeCountrySlug(countryInput);
+  if (!requested) return null;
+
+  return listCountries().find(country => {
+    const matchValues = [
+      country.id,
+      country.name,
+      country.siteName,
+      country.domain,
+      ...(country.aliases || []),
+    ].map(normalizeCountrySlug);
+    return matchValues.includes(requested);
+  }) || null;
+}
+
+function normalizeAdminCountryIds(countryIds) {
+  const submitted = Array.isArray(countryIds) ? countryIds : String(countryIds || "").split(",");
+  const normalized = submitted
+    .map(countryId => {
+      const raw = String(countryId || "").trim();
+      if (raw === "*" || raw.toLowerCase() === "all") return "*";
+      return findCountryByInput(raw)?.id || "";
+    })
+    .filter(Boolean);
+
+  if (normalized.includes("*")) return allCountryIds();
+  return [...new Set(normalized)];
+}
+
+function addAdminAccount(accounts, account) {
+  const login = String(account.login || "").trim();
+  const password = String(account.password || "").trim();
+  const countryIds = normalizeAdminCountryIds(account.countryIds || account.countries);
+
+  if (!login || !password || !countryIds.length) return;
+  if (accounts.some(candidate => candidate.login.toLowerCase() === login.toLowerCase())) return;
+
+  accounts.push({ login, password, countryIds });
+}
+
+function buildAdminAccounts() {
+  const accounts = [];
+
+  addAdminAccount(accounts, {
+    login: adminKzLogin,
+    password: adminKzPassword,
+    countryIds: ["kazakhstan"],
+  });
+  addAdminAccount(accounts, {
+    login: adminKgLogin,
+    password: adminKgPassword,
+    countryIds: ["kyrgyzstan"],
+  });
+  addAdminAccount(accounts, {
+    login: adminLogin,
+    password: adminPassword,
+    countryIds: allCountryIds(),
+  });
+
+  return accounts;
+}
+
 function parseOriginList(value) {
   return String(value || "")
     .split(",")
@@ -80,7 +162,12 @@ function appendVaryHeader(response, value) {
 function isDefaultPublicCorsOrigin(origin) {
   try {
     const { hostname, protocol } = new URL(origin);
-    return protocol === "https:" && (hostname === "stada.kz" || hostname.endsWith(".stada.kz"));
+    return protocol === "https:" && (
+      hostname === "stada.kz"
+      || hostname.endsWith(".stada.kz")
+      || hostname === "stada.kg"
+      || hostname.endsWith(".stada.kg")
+    );
   } catch (error) {
     return false;
   }
@@ -194,14 +281,26 @@ function cleanupAdminSessions() {
   }
 }
 
-function issueAdminToken() {
+function publicAdminAccount(account) {
+  const countryIds = account?.countryIds?.length ? account.countryIds : allCountryIds();
+  const countries = listCountries().filter(country => countryIds.includes(country.id));
+  return {
+    login: account?.login || "",
+    countryIds,
+    countries,
+  };
+}
+
+function issueAdminToken(account) {
   cleanupAdminSessions();
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = Date.now() + adminSessionTtlMs;
-  adminSessions.set(token, { expiresAt });
+  const publicAccount = publicAdminAccount(account);
+  adminSessions.set(token, { expiresAt, account: publicAccount });
   return {
     token,
     expiresAt: new Date(expiresAt).toISOString(),
+    account: publicAccount,
   };
 }
 
@@ -218,14 +317,57 @@ function requireAdmin(request) {
       code: "ADMIN_UNAUTHORIZED",
     });
   }
+
+  return session;
 }
 
 function assertAdminCredentialsConfigured() {
-  if (adminLogin && adminPassword) return;
+  if (adminAccounts.length) return;
   throw Object.assign(new Error("Admin credentials are not configured on the backend."), {
     statusCode: 500,
     code: "ADMIN_CREDENTIALS_NOT_CONFIGURED",
   });
+}
+
+function findMatchingAdminAccount(login, password) {
+  let matchedAccount = null;
+
+  for (const account of adminAccounts) {
+    const isValidLogin = timingSafeEqualText(login, account.login);
+    const isValidPassword = timingSafeEqualText(password, account.password);
+    if (isValidLogin && isValidPassword) matchedAccount = account;
+  }
+
+  return matchedAccount;
+}
+
+function requireAdminCountry(session, countryInput) {
+  const allowedCountryIds = session?.account?.countryIds?.length ? session.account.countryIds : allCountryIds();
+  const requestedCountry = countryInput
+    ? findCountryByInput(countryInput)
+    : findCountryByInput(allowedCountryIds[0]);
+
+  if (!requestedCountry) {
+    throw Object.assign(new Error(`Country "${countryInput}" is not configured for this backend yet.`), {
+      statusCode: 404,
+      code: "COUNTRY_NOT_CONFIGURED",
+      knownCountries: allCountryIds(),
+    });
+  }
+
+  if (!allowedCountryIds.includes(requestedCountry.id)) {
+    throw Object.assign(new Error("This admin account cannot edit the requested country."), {
+      statusCode: 403,
+      code: "ADMIN_COUNTRY_FORBIDDEN",
+    });
+  }
+
+  return requestedCountry.id;
+}
+
+function adminCountriesForSession(session) {
+  const allowedCountryIds = session?.account?.countryIds?.length ? session.account.countryIds : allCountryIds();
+  return listCountries().filter(country => allowedCountryIds.includes(country.id));
 }
 
 function requestIp(request) {
@@ -2108,10 +2250,9 @@ async function handleRequest(request, response) {
       assertAdminCredentialsConfigured();
       assertAdminLoginAllowed(request, submittedLogin);
 
-      const isValidLogin = timingSafeEqualText(submittedLogin, adminLogin);
-      const isValidPassword = timingSafeEqualText(body.password, adminPassword);
+      const account = findMatchingAdminAccount(submittedLogin, body.password);
 
-      if (!isValidLogin || !isValidPassword) {
+      if (!account) {
         recordAdminLoginFailure(request, submittedLogin);
         sendJson(response, 401, {
           error: {
@@ -2125,14 +2266,23 @@ async function handleRequest(request, response) {
       clearAdminLoginFailures(request, submittedLogin);
       sendJson(response, 200, {
         status: "ok",
-        session: issueAdminToken(),
+        session: issueAdminToken(account),
+      });
+      return;
+    }
+
+    if (request.method === "GET" && pathname === "/api/admin/countries") {
+      const session = requireAdmin(request);
+      sendJson(response, 200, {
+        countries: adminCountriesForSession(session),
+        account: session.account,
       });
       return;
     }
 
     if (request.method === "GET" && pathname === "/api/admin/content") {
-      requireAdmin(request);
-      const country = requestUrl.searchParams.get("country");
+      const session = requireAdmin(request);
+      const country = requireAdminCountry(session, requestUrl.searchParams.get("country"));
       const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language");
       const page = adminEditablePagePath;
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
@@ -2145,15 +2295,16 @@ async function handleRequest(request, response) {
       await attachEditableProductCatalog(editable);
 
       sendJson(response, 200, {
-        countries: listCountries(),
+        countries: adminCountriesForSession(session),
+        account: session.account,
         editable,
       });
       return;
     }
 
     if (request.method === "GET" && pathname === "/api/admin/products") {
-      requireAdmin(request);
-      const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId");
+      const session = requireAdmin(request);
+      const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       sendJson(response, 200, {
         products: applyStaticProductFallbacks(await listProducts(), country),
         therapeuticAreas: await listTherapeuticAreas(),
@@ -2220,7 +2371,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "GET" && pathname.startsWith("/api/admin/products/")) {
-      requireAdmin(request);
+      const session = requireAdmin(request);
       const product = await getProduct(routeProductSlugFromAdminPath(pathname));
       if (!product) {
         sendJson(response, 404, {
@@ -2231,7 +2382,7 @@ async function handleRequest(request, response) {
         });
         return;
       }
-      const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId");
+      const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       sendJson(response, 200, {
         product: applyStaticProductFallbacks([product], country, { includeDetailFallbacks: true })[0],
       });
@@ -2239,13 +2390,14 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/upload-image") {
-      requireAdmin(request);
+      const session = requireAdmin(request);
       const body = await readJsonBody(request);
+      const country = requireAdminCountry(session, body.country || body.countryId);
       const image = await uploadImageToCloudinary({
         dataUrl: body.dataUrl,
         fileName: body.fileName,
         imageId: body.imageId,
-        country: body.country || body.countryId,
+        country,
         page: body.page,
         preferredFormat: body.preferredFormat,
         context: body.context,
@@ -2261,11 +2413,12 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/content") {
-      requireAdmin(request);
+      const session = requireAdmin(request);
       const body = await readJsonBody(request);
       const page = adminEditablePagePath;
+      const country = requireAdminCountry(session, body.country || body.countryId);
       const basePayload = getPagePayload({
-        country: body.country || body.countryId,
+        country,
         lang: body.lang || body.language,
         page,
         applyOverrides: false,
@@ -2378,6 +2531,7 @@ async function handleRequest(request, response) {
           "POST /api/homepage { country, lang }",
           "POST /api/page { country, lang, page }",
           "POST /api/admin/login { login, password }",
+          "GET /api/admin/countries",
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",
           "GET /api/admin/products",
