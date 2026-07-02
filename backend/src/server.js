@@ -1047,11 +1047,14 @@ function normalizeProductPayload(body, routeId = "") {
   };
 }
 
+function localizedProductFallbacks(product, language) {
+  return String(language || "").trim().toLowerCase() === "kg"
+    ? [product?.translations?.kg, product?.translations?.kz, product?.translations?.ru]
+    : [product?.translations?.[language], product?.translations?.ru, product?.translations?.kz];
+}
+
 function contentProductFromDatabaseProduct(product, language = "ru", areaLabels = new Map()) {
-  const translation = product.translations?.[language]
-    || product.translations?.ru
-    || product.translations?.kz
-    || {};
+  const translation = localizedProductFallbacks(product, language).find(Boolean) || {};
   const cardImage = getCanonicalProductImageFromSlots(product.images || {});
   const cardImageSrc = normalizeImageSource(cardImage.src);
   const category = product.therapeuticAreaId || "";
@@ -1260,10 +1263,9 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
 
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
-    const translation = area.translations?.[language]
-      || area.translations?.ru
-      || area.translations?.kz
-      || {};
+    const translation = String(language || "").trim().toLowerCase() === "kg"
+      ? area.translations?.kg || area.translations?.kz || area.translations?.ru || {}
+      : area.translations?.[language] || area.translations?.ru || area.translations?.kz || {};
     return [area.id, translation.name || area.id];
   }));
 }
@@ -1372,17 +1374,13 @@ function findProductForPayloadPage(payload, products) {
 }
 
 function getProductPayloadTranslation(product, language = "ru") {
-  return product.translations?.[language]
-    || product.translations?.ru
-    || product.translations?.kz
-    || {};
+  return localizedProductFallbacks(product, language).find(Boolean) || {};
 }
 
 function getProductPayloadSections(product, language = "ru") {
-  return product.sections?.[language]
-    || product.sections?.ru
-    || product.sections?.kz
-    || {};
+  return String(language || "").trim().toLowerCase() === "kg"
+    ? product.sections?.kg || product.sections?.kz || product.sections?.ru || {}
+    : product.sections?.[language] || product.sections?.ru || product.sections?.kz || {};
 }
 
 function findProductDetailKeyPrefix(payload) {

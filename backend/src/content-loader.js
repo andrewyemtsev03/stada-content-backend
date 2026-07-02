@@ -585,8 +585,14 @@ function isOptionalEmptyProductKey(key) {
   return /^product_[a-z0-9_]+_benefit\d+$/i.test(key);
 }
 
+function languageFallbackOrder(language, fallbackLanguage) {
+  const requested = String(language || "").trim().toLowerCase();
+  const regionalFallbacks = requested === "kg" ? ["kz"] : [];
+  return unique([requested, ...regionalFallbacks, fallbackLanguage, "ru", "kz", "en"]);
+}
+
 function resolveTranslation(translations, productFallbackTools, language, fallbackLanguage, key) {
-  const languageOrder = unique([language, fallbackLanguage, "ru", "kz", "en"]);
+  const languageOrder = languageFallbackOrder(language, fallbackLanguage);
   for (const candidateLanguage of languageOrder) {
     const value = translations[candidateLanguage]?.[key];
     if (value) {
@@ -663,7 +669,7 @@ function chooseContentSourceLanguage(countryConfig, pageText, languageInput) {
 }
 
 function resolveContentSourceText(pageSource, language, fallbackLanguage, key) {
-  const languageOrder = unique([language, fallbackLanguage, "ru", "kz", "en"]);
+  const languageOrder = languageFallbackOrder(language, fallbackLanguage);
   for (const candidateLanguage of languageOrder) {
     const value = pageSource.text?.[candidateLanguage]?.[key];
     if (value !== null && value !== undefined && value !== "") {
@@ -821,7 +827,9 @@ function loadProductCatalog({ homepageConfig, language, fallbackLanguage, assets
 
   const source = readJson(catalogPath);
   const catalogs = source.products && typeof source.products === "object" ? source.products : {};
-  const catalog = catalogs[language] || catalogs[fallbackLanguage] || catalogs.ru || [];
+  const catalog = languageFallbackOrder(language, fallbackLanguage)
+    .map(candidateLanguage => catalogs[candidateLanguage])
+    .find(candidateCatalog => Array.isArray(candidateCatalog)) || [];
   return Array.isArray(catalog)
     ? catalog.map(product => normalizeCatalogProduct(product, assetsBaseUrl)).filter(product => product.id)
     : [];
@@ -892,9 +900,7 @@ function buildContentSourcePayload({
   });
   const allKeys = unique([
     ...sections.flatMap(section => section.translatedTexts.map(item => item.key)),
-    ...Object.keys(pageSource.text?.[language] || {}),
-    ...Object.keys(pageSource.text?.[fallbackLanguage] || {}),
-    ...Object.keys(pageSource.text?.ru || {}),
+    ...languageFallbackOrder(language, fallbackLanguage).flatMap(candidateLanguage => Object.keys(pageSource.text?.[candidateLanguage] || {})),
   ]);
   const text = Object.fromEntries(
     allKeys.map(key => {
@@ -920,7 +926,9 @@ function buildContentSourcePayload({
       path: pagePath,
     },
     content: {
-      pageTitle: pageSource.title?.[language] || pageSource.title?.[fallbackLanguage] || pageSource.title?.ru || "",
+      pageTitle: languageFallbackOrder(language, fallbackLanguage)
+        .map(candidateLanguage => pageSource.title?.[candidateLanguage])
+        .find(Boolean) || "",
       text,
       missingTranslationKeys: allKeys.filter(key => text[key] === null),
       staticTexts: [],
