@@ -1049,7 +1049,7 @@ function normalizeProductPayload(body, routeId = "") {
 
 function localizedProductFallbacks(product, language) {
   return String(language || "").trim().toLowerCase() === "kg"
-    ? [product?.translations?.kg, product?.translations?.kz, product?.translations?.ru]
+    ? [product?.translations?.kg, product?.translations?.ru]
     : [product?.translations?.[language], product?.translations?.ru, product?.translations?.kz];
 }
 
@@ -1263,8 +1263,8 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
 
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
-    const translation = String(language || "").trim().toLowerCase() === "kg"
-      ? area.translations?.kg || area.translations?.kz || area.translations?.ru || {}
+  const translation = String(language || "").trim().toLowerCase() === "kg"
+      ? area.translations?.kg || area.translations?.ru || {}
       : area.translations?.[language] || area.translations?.ru || area.translations?.kz || {};
     return [area.id, translation.name || area.id];
   }));
@@ -1379,7 +1379,7 @@ function getProductPayloadTranslation(product, language = "ru") {
 
 function getProductPayloadSections(product, language = "ru") {
   return String(language || "").trim().toLowerCase() === "kg"
-    ? product.sections?.kg || product.sections?.kz || product.sections?.ru || {}
+    ? product.sections?.kg || product.sections?.ru || {}
     : product.sections?.[language] || product.sections?.ru || product.sections?.kz || {};
 }
 
@@ -1503,7 +1503,7 @@ function isAbsoluteImageSource(src) {
 }
 
 function staticCatalogFallbacksByLanguage(country) {
-  const languages = ["ru", "kz"];
+  const languages = ["ru", "kz", "kg"];
   const fallbacks = {};
 
   for (const language of languages) {
@@ -1939,7 +1939,7 @@ function isGenericProductPurchaseLinks(links = []) {
 }
 
 function applyStaticProductDetailFallbacks(products, country) {
-  const languages = ["ru", "kz"];
+  const languages = ["ru", "kz", "kg"];
   return (products || []).map(product => {
     const nextProduct = {
       ...product,
@@ -1948,6 +1948,7 @@ function applyStaticProductDetailFallbacks(products, country) {
       sections: {
         ru: { ...(product.sections?.ru || {}) },
         kz: { ...(product.sections?.kz || {}) },
+        kg: { ...(product.sections?.kg || {}) },
       },
     };
 
@@ -2012,6 +2013,7 @@ function applyStaticProductFallbacks(products, country, options = {}) {
       sections: {
         ru: { ...(product.sections?.ru || {}) },
         kz: { ...(product.sections?.kz || {}) },
+        kg: { ...(product.sections?.kg || {}) },
       },
     };
 

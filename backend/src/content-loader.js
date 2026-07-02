@@ -587,7 +587,8 @@ function isOptionalEmptyProductKey(key) {
 
 function languageFallbackOrder(language, fallbackLanguage) {
   const requested = String(language || "").trim().toLowerCase();
-  const regionalFallbacks = requested === "kg" ? ["kz"] : [];
+  const regionalFallbacks = [];
+  if (requested === "kg") return unique([requested, fallbackLanguage, "ru", "en"]);
   return unique([requested, ...regionalFallbacks, fallbackLanguage, "ru", "kz", "en"]);
 }
 
