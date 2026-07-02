@@ -863,19 +863,6 @@ function normalizeLoadingValue(value) {
   return ["lazy", "eager"].includes(loading) ? loading : "";
 }
 
-function normalizeProductPagePath(value, slug) {
-  const fallback = `products/${slug}.html`;
-  const raw = String(value || fallback)
-    .split(/[?#]/)[0]
-    .replace(/\\/g, "/")
-    .replace(/^\/+/, "")
-    .trim();
-  const withExtension = path.posix.extname(raw) ? raw : `${raw}.html`;
-  if (!withExtension || withExtension.split("/").includes("..")) return fallback;
-  if (path.posix.extname(withExtension).toLowerCase() !== ".html") return fallback;
-  return withExtension.slice(0, 240);
-}
-
 function normalizeCssColor(value) {
   const color = String(value || "").trim();
   return /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(color) ? color : null;
@@ -1060,7 +1047,6 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
     id,
     countryId: country,
     slug,
-    pagePath: normalizeProductPagePath(submitted.pagePath, slug),
     status,
     sortOrder: Number.isFinite(Number(submitted.sortOrder)) ? Number(submitted.sortOrder) : 0,
     therapeuticAreaId: normalizeProductSlug(submitted.therapeuticAreaId) || null,
@@ -1084,7 +1070,7 @@ function contentProductFromDatabaseProduct(product, language = "ru", areaLabels 
   const cardImage = getCanonicalProductImageFromSlots(product.images || {});
   const cardImageSrc = normalizeImageSource(cardImage.src);
   const category = product.therapeuticAreaId || "";
-  const therapeuticArea = areaLabels.get(category) || category;
+  const therapeuticArea = getTherapeuticAreaLabel(category, language, areaLabels);
 
   return {
     id: product.id,
@@ -1195,7 +1181,7 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   const benefits = coerceProductTextList(translation.benefits);
   const badges = coerceProductTextList(sections.hero?.badges, sections.overview?.badges).slice(0, 3);
   const category = product.therapeuticAreaId || "";
-  const therapeuticArea = areaLabels.get(category) || category;
+  const therapeuticArea = getTherapeuticAreaLabel(category, language, areaLabels);
   const overviewIntro = sections.overview?.intro || translation.fullDescription || translation.shortDescription || "";
   const heroLead = sections.hero?.lead || translation.fullDescription || translation.shortDescription || overviewIntro;
   const formulaIntro = sections.formula?.intro || translation.composition || "";
@@ -1246,7 +1232,6 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
       id: product.id,
       slug: product.slug || product.id,
       status: product.status,
-      pagePath: product.pagePath,
       category,
       therapeuticArea,
       accent: product.accentColor || "",
@@ -1288,12 +1273,93 @@ function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, coun
   };
 }
 
+const DEFAULT_THERAPEUTIC_AREA_LABELS = {
+  allergy: {
+    ru: "Аллергия",
+    kz: "Аллергия",
+    kg: "Аллергия",
+  },
+  cardio: {
+    ru: "Кардио",
+    kz: "Кардио",
+    kg: "Кардио",
+  },
+  cold: {
+    ru: "Простуда и дыхание",
+    kz: "Суық тию және тыныс алу",
+    kg: "Суук тийүү жана дем алуу",
+  },
+  dermatology: {
+    ru: "Дерматология",
+    kz: "Дерматология",
+    kg: "Дерматология",
+  },
+  digestive: {
+    ru: "Пищеварение",
+    kz: "Ас қорыту",
+    kg: "Тамак сиңирүү",
+  },
+  immunity: {
+    ru: "Иммунитет",
+    kz: "Иммунитет",
+    kg: "Иммунитет",
+  },
+  kids: {
+    ru: "Для детей",
+    kz: "Балаларға арналған",
+    kg: "Балдар үчүн",
+  },
+  respiratory: {
+    ru: "Дыхательные пути",
+    kz: "Тыныс алу жолдары",
+    kg: "Дем алуу жолдору",
+  },
+  urology: {
+    ru: "Урология",
+    kz: "Урология",
+    kg: "Урология",
+  },
+  women: {
+    ru: "Гинекология",
+    kz: "Гинекология",
+    kg: "Гинекология",
+  },
+};
+
+function knownTherapeuticAreaLabel(areaId, language = "ru") {
+  const normalizedLanguage = String(language || "").trim().toLowerCase();
+  const labels = DEFAULT_THERAPEUTIC_AREA_LABELS[String(areaId || "").trim().toLowerCase()];
+  if (!labels) return "";
+  return labels[normalizedLanguage] || labels.ru || "";
+}
+
+function getTherapeuticAreaLabel(areaId, language = "ru", areaLabels = new Map()) {
+  const category = String(areaId || "").trim();
+  const mappedLabel = String(areaLabels.get(category) || "").trim();
+  const fallbackLabel = knownTherapeuticAreaLabel(category, language);
+  if (fallbackLabel && isEnglishTherapeuticAreaPlaceholder(mappedLabel, category)) return fallbackLabel;
+  return mappedLabel || fallbackLabel || category;
+}
+
+function isEnglishTherapeuticAreaPlaceholder(value, areaId) {
+  const text = String(value || "").trim();
+  if (!text) return true;
+  const normalizedText = text.toLowerCase().replace(/[\s_]+/g, "-");
+  const normalizedAreaId = String(areaId || "").trim().toLowerCase();
+  return normalizedText === normalizedAreaId || /^[a-z][a-z\s-]*$/i.test(text);
+}
+
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
     const translation = String(language || "").trim().toLowerCase() === "kg"
       ? area.translations?.kg || {}
       : area.translations?.[language] || area.translations?.ru || area.translations?.kz || {};
-    return [area.id, translation.name || area.id];
+    const fallbackLabel = knownTherapeuticAreaLabel(area.id, language);
+    const translatedLabel = String(translation.name || "").trim();
+    const label = fallbackLabel && isEnglishTherapeuticAreaPlaceholder(translatedLabel, area.id)
+      ? fallbackLabel
+      : translatedLabel || fallbackLabel || area.id;
+    return [area.id, label];
   }));
 }
 
@@ -1394,7 +1460,7 @@ function findProductForPayloadPage(payload, products) {
   const pageSlug = productSlugFromPagePath(pagePath);
   return (products || []).find(product => {
     if (product.status === "archived") return false;
-    return normalizeComparableProductPath(product.pagePath || `products/${product.slug || product.id}.html`) === pagePath
+    return normalizeComparableProductPath(`products/${product.slug || product.id}.html`) === pagePath
       || normalizeProductSlug(product.slug) === pageSlug
       || normalizeProductSlug(product.id) === pageSlug;
   }) || null;
@@ -1996,7 +2062,7 @@ function applyStaticProductDetailFallbacks(products, country) {
         fallback = getProductDetailFallbackFromPayload(getPagePayload({
           country,
           lang: language,
-          page: product.pagePath || `products/${product.slug || product.id}.html`,
+          page: `products/${product.slug || product.id}.html`,
           applyOverrides: false,
         }));
       } catch (error) {

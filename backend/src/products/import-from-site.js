@@ -306,7 +306,6 @@ async function importProductsFromSite() {
       id: product.id,
       countryId: "kazakhstan",
       slug: product.id,
-      pagePath,
       status: "published",
       sortOrder: index + 1,
       therapeuticAreaId: areaId,

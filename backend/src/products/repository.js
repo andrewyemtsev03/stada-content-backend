@@ -13,7 +13,6 @@ function mapProductRows(rows) {
         id: row.id,
         countryId: row.country_id || "kazakhstan",
         slug: row.slug,
-        pagePath: row.page_path,
         status: row.status,
         sortOrder: row.sort_order,
         therapeuticAreaId: row.therapeutic_area_id,
@@ -270,7 +269,6 @@ async function upsertProduct(product) {
           id,
           country_id,
           slug,
-          page_path,
           status,
           sort_order,
           therapeutic_area_id,
@@ -278,11 +276,10 @@ async function upsertProduct(product) {
           is_featured,
           updated_at
         )
-        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, now())
+        values ($1, $2, $3, $4, $5, $6, $7, $8, now())
         on conflict (id) do update set
           country_id = excluded.country_id,
           slug = excluded.slug,
-          page_path = excluded.page_path,
           status = excluded.status,
           sort_order = excluded.sort_order,
           therapeutic_area_id = excluded.therapeutic_area_id,
@@ -293,7 +290,6 @@ async function upsertProduct(product) {
         id,
         countryId,
         slug,
-        product.pagePath || `products/${slug}.html`,
         product.status || "draft",
         Number(product.sortOrder || 0),
         product.therapeuticAreaId || null,
