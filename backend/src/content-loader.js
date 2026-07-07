@@ -692,6 +692,17 @@ function resolveContentSourceText(pageSource, language, fallbackLanguage, key) {
   };
 }
 
+function resolveContentSourceDomText(pageSource, language, fallbackLanguage, item) {
+  const id = String(item?.id || "");
+  for (const candidateLanguage of languageFallbackOrder(language, fallbackLanguage)) {
+    const value = pageSource.domTextTranslations?.[candidateLanguage]?.[id];
+    if (value !== null && value !== undefined && value !== "") {
+      return String(value);
+    }
+  }
+  return String(item?.value || "");
+}
+
 function normalizeContentSourceImage(image, sectionId, assetsBaseUrl) {
   const src = String(image?.src || "");
   return {
@@ -945,7 +956,7 @@ function buildContentSourcePayload({
         text: (pageSource.domText || []).map(item => ({
           id: String(item.id || ""),
           tag: String(item.tag || "span").toLowerCase(),
-          value: String(item.value || ""),
+          value: resolveContentSourceDomText(pageSource, language, fallbackLanguage, item),
         })),
         images: (pageSource.images || []).map(image => normalizeContentSourceImage(image, "", assetsBaseUrl)),
       },
