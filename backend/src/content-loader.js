@@ -1247,79 +1247,6 @@ function extractCardAccent(style) {
   return match ? match[1].trim() : "";
 }
 
-function categoryTokenToClass(category) {
-  const firstCategory = String(category || "").split(/\s+/).filter(Boolean)[0] || "products";
-  return firstCategory.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
-}
-
-function normalizeCatalogProductId(product, imageSrc) {
-  const rawId = String(product?.id || "").trim();
-  if (rawId && rawId !== "product") return rawId;
-
-  const imageProductMatch = String(imageSrc || "")
-    .replace(/\\/g, "/")
-    .match(/(?:^|\/)products\/([^/?#]+)/i);
-  const keyProductMatch = String(product?.nameKey || product?.descriptionKey || "")
-    .match(/^product_(.+?)_(?:name|page_desc|page_title)$/i);
-  const inferred = imageProductMatch?.[1] || keyProductMatch?.[1]?.replace(/_/g, "-") || rawId;
-
-  return normalizeSlug(inferred)
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function normalizeCatalogProductHref(product, productId) {
-  const href = String(product?.href || "").trim();
-  if (!productId) return href;
-  if (!href
-    || /(?:^|\/)product\.html(?:$|[?#])/i.test(href)
-    || /^products\/(?!index\.html|product\.html)[^/]+\.html(?:$|[?#])/i.test(href)) {
-    return `products/product.html?slug=${encodeURIComponent(productId)}`;
-  }
-  return href;
-}
-
-function normalizeCatalogProduct(product, assetsBaseUrl) {
-  const image = product.image || {};
-  const imageSrc = normalizeHomepageRelativePath(image.src || image.url || "");
-  const id = normalizeCatalogProductId(product, imageSrc);
-
-  return {
-    id,
-    href: normalizeCatalogProductHref(product, id),
-    className: String(product.className || ""),
-    category: String(product.category || ""),
-    categoryClass: String(product.categoryClass || categoryTokenToClass(product.category)),
-    accent: String(product.accent || ""),
-    image: {
-      id: String(image.id || ""),
-      src: imageSrc,
-      url: makeAssetUrl(imageSrc, assetsBaseUrl),
-      alt: String(image.alt || ""),
-    },
-    nameKey: String(product.nameKey || ""),
-    name: String(product.name || ""),
-    descriptionKey: String(product.descriptionKey || ""),
-    shortDescription: String(product.shortDescription || ""),
-    categoryKey: String(product.categoryKey || ""),
-    therapeuticArea: String(product.therapeuticArea || ""),
-  };
-}
-
-function loadProductCatalog({ homepageConfig, language, fallbackLanguage, assetsBaseUrl }) {
-  const catalogPath = resolveBackendPath(homepageConfig.productCatalogPath || "data/product-catalog.json");
-  if (!fs.existsSync(catalogPath)) return [];
-
-  const source = readJson(catalogPath);
-  const catalogs = source.products && typeof source.products === "object" ? source.products : {};
-  const catalog = languageFallbackOrder(language, fallbackLanguage)
-    .map(candidateLanguage => catalogs[candidateLanguage])
-    .find(candidateCatalog => Array.isArray(candidateCatalog)) || [];
-  return Array.isArray(catalog)
-    ? catalog.map(product => normalizeCatalogProduct(product, assetsBaseUrl)).filter(product => product.id)
-    : [];
-}
-
 function normalizeProductIds(value) {
   const ids = Array.isArray(value) ? value : String(value || "").split(",");
   return unique(ids.map(item => String(item || "").trim()).filter(Boolean));
@@ -1343,20 +1270,8 @@ function syncHomeProducts(payload) {
   payload.content.homeProducts = selectedIds.map(id => catalogById.get(id)).filter(Boolean);
 }
 
-function attachProductCatalog(payload, countryConfig, homepageConfig) {
-  if (!["kazakhstan", "georgia", "azerbaijan"].includes(countryConfig.id)) {
-    payload.content.productCatalog = [];
-    syncHomeProducts(payload);
-    return;
-  }
-
-  const fallbackLanguage = countryConfig.defaultLanguage || payload.language;
-  payload.content.productCatalog = loadProductCatalog({
-    homepageConfig,
-    language: payload.language,
-    fallbackLanguage,
-    assetsBaseUrl: homepageConfig.assetsBaseUrl,
-  });
+function attachProductCatalog(payload) {
+  payload.content.productCatalog = [];
   syncHomeProducts(payload);
 }
 
