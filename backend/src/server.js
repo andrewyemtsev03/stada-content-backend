@@ -17,9 +17,11 @@ const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
 const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "andrewyemtsevKZ").trim();
 const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "andrewyemtsevKG").trim();
 const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "andrewyemtsevGE").trim();
+const adminAzLogin = String(process.env.ADMIN_AZ_LOGIN || "andrewyemtsevAZ").trim();
 const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
 const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
 const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || adminPassword).trim();
+const adminAzPassword = String(process.env.ADMIN_AZ_PASSWORD || adminPassword).trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
@@ -29,8 +31,8 @@ const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
-const productLanguages = ["ru", "kz", "kg", "ge", "en"];
-const productNameFallbackLanguages = new Set(["ru", "kz", "en"]);
+const productLanguages = ["ru", "kz", "kg", "ge", "en", "az"];
+const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az"]);
 const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 8 * 1024 * 1024);
 const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
@@ -137,6 +139,11 @@ function buildAdminAccounts() {
     countryIds: ["georgia"],
   });
   addAdminAccount(accounts, {
+    login: adminAzLogin,
+    password: adminAzPassword,
+    countryIds: ["azerbaijan"],
+  });
+  addAdminAccount(accounts, {
     login: adminLogin,
     password: adminPassword,
     countryIds: allCountryIds(),
@@ -178,6 +185,8 @@ function isDefaultPublicCorsOrigin(origin) {
       || hostname.endsWith(".stada.kg")
       || hostname === "stada.ge"
       || hostname.endsWith(".stada.ge")
+      || hostname === "stada.az"
+      || hostname.endsWith(".stada.az")
     );
   } catch (error) {
     return false;
@@ -1074,6 +1083,9 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
 
 function localizedProductFallbacks(product, language) {
   const requestedLanguage = String(language || "").trim().toLowerCase();
+  if (requestedLanguage === "az") {
+    return [product?.translations?.az, product?.translations?.ru, product?.translations?.en, product?.translations?.kz, product?.translations?.kg, product?.translations?.ge];
+  }
   if (requestedLanguage === "kg") {
     return [product?.translations?.kg, product?.translations?.ru, product?.translations?.en];
   }
@@ -1301,6 +1313,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Аллергия",
     ge: "ალერგია",
     en: "Allergy",
+    az: "Allergiya",
   },
   cardio: {
     ru: "Кардио",
@@ -1308,6 +1321,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Жүрөк-кан тамыр",
     ge: "გულ-სისხლძარღვთა",
     en: "Cardio",
+    az: "Kardio",
   },
   cold: {
     ru: "Простуда и дыхание",
@@ -1315,6 +1329,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Суук тийүү жана дем алуу жолдору",
     ge: "გაციება და სასუნთქი გზები",
     en: "Cold and breathing",
+    az: "Soyuqdəymə və tənəffüs",
   },
   dermatology: {
     ru: "Дерматология",
@@ -1322,6 +1337,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Дерматология",
     ge: "დერმატოლოგია",
     en: "Dermatology",
+    az: "Dermatologiya",
   },
   digestive: {
     ru: "Пищеварение",
@@ -1329,6 +1345,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Тамак сиңирүү",
     ge: "საჭმლის მონელება",
     en: "Digestive health",
+    az: "Həzm",
   },
   immunity: {
     ru: "Иммунитет",
@@ -1336,6 +1353,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Иммунитет",
     ge: "იმუნიტეტი",
     en: "Immunity",
+    az: "İmmunitet",
   },
   kids: {
     ru: "Для детей",
@@ -1343,6 +1361,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Балдар үчүн",
     ge: "ბავშვებისთვის",
     en: "For children",
+    az: "Uşaqlar üçün",
   },
   respiratory: {
     ru: "Дыхательные пути",
@@ -1350,6 +1369,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Дем алуу жолдору",
     ge: "სასუნთქი გზები",
     en: "Respiratory",
+    az: "Tənəffüs yolları",
   },
   urology: {
     ru: "Урология",
@@ -1357,6 +1377,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Урология",
     ge: "უროლოგია",
     en: "Urology",
+    az: "Urologiya",
   },
   women: {
     ru: "Гинекология",
@@ -1364,6 +1385,7 @@ const DEFAULT_THERAPEUTIC_AREA_LABELS = {
     kg: "Гинекология",
     ge: "გინეკოლოგია",
     en: "Gynecology",
+    az: "Ginekologiya",
   },
 };
 
@@ -1393,7 +1415,9 @@ function isEnglishTherapeuticAreaPlaceholder(value, areaId) {
 function buildTherapeuticAreaLabelMap(areas, language = "ru") {
   return new Map((areas || []).map(area => {
     const requestedLanguage = String(language || "").trim().toLowerCase();
-    const translation = requestedLanguage === "kg" || requestedLanguage === "ge"
+    const translation = requestedLanguage === "az"
+      ? area.translations?.az || area.translations?.ru || {}
+      : requestedLanguage === "kg" || requestedLanguage === "ge"
       ? area.translations?.[requestedLanguage] || {}
       : requestedLanguage === "en"
         ? area.translations?.en || area.translations?.ge || {}
@@ -1516,6 +1540,9 @@ function getProductPayloadTranslation(product, language = "ru") {
 
 function getProductPayloadSections(product, language = "ru") {
   const requestedLanguage = String(language || "").trim().toLowerCase();
+  if (requestedLanguage === "az") {
+    return product.sections?.az || product.sections?.ru || product.sections?.en || product.sections?.kz || {};
+  }
   if (requestedLanguage === "kg") {
     return product.sections?.kg || product.sections?.ru || product.sections?.en || {};
   }
@@ -2802,6 +2829,7 @@ async function handleRequest(request, response) {
           "GET /api/homepage?country=kazakhstan&lang=ru",
           "GET /api/homepage/kazakhstan?lang=kz",
           "GET /api/homepage/kyrgyzstan?lang=kg",
+          "GET /api/homepage/azerbaijan?lang=az",
           "GET /api/page/kg?lang=kg&page=products/coldrex.html",
           "GET /api/products/coldrex?country=kazakhstan&lang=ru",
           "POST /api/homepage { country, lang }",

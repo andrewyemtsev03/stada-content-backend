@@ -6,6 +6,126 @@ const { getPageOverrides } = require("./content-overrides");
 const backendRoot = path.resolve(__dirname, "..");
 const configPath = path.join(backendRoot, "data", "site-config.json");
 const defaultHomeProductIds = ["coldrex", "enterogermina", "sinulan-duo", "vitrum-immunaktiv"];
+const countryContentProfiles = {
+  azerbaijan: {
+    replacements: {
+      default: [
+        ["STADA Kazakhstan", "STADA Azerbaijan"],
+        ["Казахстане", "Азербайджане"],
+        ["Казахстан", "Азербайджан"],
+        ["Kazakhstan", "Azerbaijan"],
+      ],
+    },
+    pageTitles: {
+      az: {
+        "index.html": "STADA - Şirkət haqqında",
+        "culture.html": "STADA - Korporativ mədəniyyət",
+        "history.html": "STADA - Şirkətin tarixi",
+        "products/index.html": "STADA - Məhsullarımız",
+        "worldwide.html": "STADA - Filiallarımız",
+      },
+    },
+    text: {
+      ru: {
+        site_name: "STADA Azerbaijan",
+        hero_kicker: "STADA Azerbaijan",
+        hero_sub3: "Развиваем доступные решения для семей в Азербайджане.",
+        hero_text3: "В Азербайджане доверие к врачам остается важной основой заботы о здоровье",
+        news_3_text: "Профилактика, доступная информация и доверительный диалог со специалистами помогают поддерживать здоровье каждый день.",
+        footer_brand_text: "Мы объединяем международный опыт STADA и локальную близость к пациентам, специалистам и партнерам в Азербайджане.",
+      },
+      az: {
+        about_heading: "STADA haqqında",
+        benefits_heading: "Üstünlüklər",
+        button_products: "Məhsullar",
+        career_button: "Vakansiyalara baxın",
+        career_heading: "STADA-da karyera",
+        cta_more: "Daha ətraflı",
+        culture_career_cta: "Vakansiyalara baxın",
+        culture_change_title: "Dəyişiklik",
+        culture_challenge_title: "Çağırış",
+        culture_eyebrow: "STADA mədəniyyəti",
+        culture_heading: "Etimad mədəniyyəti",
+        culture_hero_lead: "Sürətli, açıq və məsuliyyətli hərəkət edirik.",
+        culture_page_title: "STADA - Korporativ mədəniyyət",
+        culture_purpose_eyebrow: "İnsanların sağlamlığının qayğısına qalmaq",
+        culture_purpose_heading: "Aptek köklərindən etimad mədəniyyətinə",
+        culture_urgency_title: "Çeviklik",
+        culture_values_cta: "Dəyərlərə baxın",
+        footer_access_title: "Əlçatanlıq",
+        footer_back_top: "Yuxarı",
+        footer_brand_text: "STADA-nın beynəlxalq təcrübəsini Azərbaycanda pasiyentlərə, mütəxəssislərə və tərəfdaşlara yaxınlıqla birləşdiririk.",
+        footer_company_title: "Şirkət",
+        footer_global_link: "STADA Global",
+        footer_products_title: "Məhsullar",
+        footer_rights: "Bütün hüquqlar qorunur.",
+        footer_trust_countries: "100+ ölkə",
+        footer_trust_years: "130+ il təcrübə",
+        footer_warning_text: "Saytdakı məlumat mütəxəssis məsləhətini əvəz etmir. Dərman vasitələrindən istifadə etməzdən əvvəl təlimatı oxuyun.",
+        footer_warning_title: "Vacibdir",
+        hero_kicker: "STADA Azerbaijan",
+        hero_products_description: "Müxtəlif terapevtik sahələrdə yüksək keyfiyyətli generiklər və istehlakçı sağlamlığı məhsulları təqdim edirik.",
+        hero_products_heading: "Daha yaxşı həyat üçün keyfiyyətli dərmanlar",
+        hero_products_label: "MƏHSULLARIMIZ",
+        hero_sub1: "Hər gün etibar edilən keyfiyyətli dərmanlar.",
+        hero_sub2: "STADA-nın təcrübəsi milyonlarla insanın sağlamlığını dəstəkləməyə kömək edir.",
+        hero_sub3: "Azərbaycandakı ailələr üçün əlçatan həllər inkişaf etdiririk.",
+        hero_text3: "Azərbaycanda sağlamlıqla bağlı etibarlı dialoq gündəlik qayğının vacib hissəsidir",
+        hero_title1: "Sağlamlığın qayğısına qalırıq",
+        hero_title2: "Güzəştsiz keyfiyyət",
+        hero_title3: "Pasiyentlərə yaxın",
+        nav_about: "Şirkət haqqında",
+        nav_career: "Karyera",
+        nav_categories: "Kateqoriyalar",
+        nav_company: "Şirkət",
+        nav_culture: "Mədəniyyət",
+        nav_history: "Şirkətin tarixi",
+        nav_news: "Xəbərlər və media",
+        nav_products: "Məhsullar",
+        nav_worldwide: "Filiallarımız",
+        news_3_text: "Profilaktika, əlçatan məlumat və mütəxəssislərlə açıq ünsiyyət gündəlik sağlamlığın əsasını təşkil edir.",
+        news_section_lead: "STADA xəbərləri, media materialları və məhsul yenilikləri bir bölmədə.",
+        product_back: "Məhsullara qayıt",
+        product_related_heading: "Oxşar məhsullar",
+        product_related_intro: "Həcm, format və istifadə sahəsinə görə uyğun variantı seçin.",
+        product_related_label: "Oxşar məhsullar",
+        products_browse_catalog: "Kataloqa baxın",
+        products_catalog_label: "STADA kataloqu",
+        products_category_allergy: "Allergiya",
+        products_category_cardio: "Kardio",
+        products_category_cold: "Soyuqdəymə və tənəffüs",
+        products_category_digestive: "Həzm",
+        products_category_immunity: "İmmunitet",
+        products_category_kids: "Uşaqlar üçün",
+        products_category_respiratory: "Tənəffüs yolları",
+        products_category_urology: "Urologiya",
+        products_filter_all: "Bütün məhsullar",
+        products_heading: "Məhsullarımız",
+        products_metric_areas: "terapevtik istiqamət",
+        products_metric_portfolio: "kataloqda məhsul",
+        products_partners_heading: "Apteklərdə və onlayn servislərdə mövcuddur",
+        site_name: "STADA Azerbaijan",
+        where_to_buy_heading: "Haradan almaq olar",
+        worldwide_country_label: "Ölkələrə baxış",
+        worldwide_country_search: "Ölkə axtarın",
+        worldwide_eyebrow: "STADA-nın qlobal iştirakı",
+        worldwide_globe_fallback_title: "Qlobal xəritə",
+        worldwide_globe_topline: "COBE WebGL qlobusu",
+        worldwide_heading: "Filiallarımız",
+        worldwide_page_title: "STADA - Filiallarımız",
+        worldwide_subtitle: "Qlobal iştirak. Yerli təcrübə.",
+      },
+    },
+    domText: {
+      ru: {
+        worldwide_text_001: "Azerbaijan",
+      },
+      az: {
+        worldwide_text_001: "Azərbaycan",
+      },
+    },
+  },
+};
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -589,8 +709,91 @@ function languageFallbackOrder(language, fallbackLanguage) {
   const requested = String(language || "").trim().toLowerCase();
   const regionalFallbacks = requested === "ge" ? ["en"] : requested === "en" ? ["ge"] : [];
   if (requested === "kg") return unique([requested, fallbackLanguage, "ru", "en"]);
+  if (requested === "az") return unique([requested, fallbackLanguage, "ru", "en"]);
   if (requested === "ge" || requested === "en") return unique([requested, ...regionalFallbacks, fallbackLanguage, "ru", "kz", "kg", "en"]);
   return unique([requested, ...regionalFallbacks, fallbackLanguage, "ru", "kz", "en"]);
+}
+
+function applyReplacementRules(value, rules = []) {
+  return rules.reduce((text, [from, to]) => {
+    return text.split(from).join(to);
+  }, String(value ?? ""));
+}
+
+function countryContentProfile(countryId) {
+  return countryContentProfiles[String(countryId || "").trim().toLowerCase()] || null;
+}
+
+function countryProfileLanguageBlock(profile, blockName, language) {
+  const block = profile?.[blockName] || {};
+  return {
+    ...(block.default || {}),
+    ...(block[language] || {}),
+  };
+}
+
+function applyCountrySpecificContent(payload, countryConfig) {
+  const profile = countryContentProfile(countryConfig.id);
+  if (!profile || !payload?.content) return payload;
+
+  const language = String(payload.language || countryConfig.defaultLanguage || "").trim().toLowerCase();
+  const replacements = profile.replacements?.[language] || profile.replacements?.default || [];
+  const textOverrides = countryProfileLanguageBlock(profile, "text", language);
+  const domTextOverrides = countryProfileLanguageBlock(profile, "domText", language);
+  const pageTitle = profile.pageTitles?.[language]?.[payload.page?.path];
+
+  const resolveProfileText = (key, value) => {
+    if (Object.prototype.hasOwnProperty.call(textOverrides, key)) {
+      return textOverrides[key];
+    }
+    return applyReplacementRules(value, replacements);
+  };
+
+  payload.content.pageTitle = pageTitle || applyReplacementRules(payload.content.pageTitle || "", replacements);
+
+  for (const [key, value] of Object.entries(payload.content.text || {})) {
+    payload.content.text[key] = resolveProfileText(key, value);
+  }
+
+  for (const section of payload.content.sections || []) {
+    for (const item of section.translatedTexts || []) {
+      if (!item?.key) continue;
+      item.value = resolveProfileText(item.key, item.value);
+    }
+  }
+
+  for (const product of payload.content.productCatalog || []) {
+    if (product.nameKey && payload.content.text?.[product.nameKey]) {
+      product.name = payload.content.text[product.nameKey];
+    } else {
+      product.name = applyReplacementRules(product.name || "", replacements);
+    }
+
+    if (product.descriptionKey && payload.content.text?.[product.descriptionKey]) {
+      product.shortDescription = payload.content.text[product.descriptionKey];
+    } else {
+      product.shortDescription = applyReplacementRules(product.shortDescription || "", replacements);
+    }
+
+    if (product.categoryKey && payload.content.text?.[product.categoryKey]) {
+      product.therapeuticArea = payload.content.text[product.categoryKey];
+    } else {
+      product.therapeuticArea = applyReplacementRules(product.therapeuticArea || "", replacements);
+    }
+  }
+
+  payload.content.dom.text = (payload.content.dom.text || []).map(item => {
+    const id = String(item.id || "");
+    const value = Object.prototype.hasOwnProperty.call(domTextOverrides, id)
+      ? domTextOverrides[id]
+      : applyReplacementRules(item.value || "", replacements);
+    return {
+      ...item,
+      value,
+    };
+  });
+
+  return payload;
 }
 
 function resolveTranslation(translations, productFallbackTools, language, fallbackLanguage, key) {
@@ -872,7 +1075,7 @@ function syncHomeProducts(payload) {
 }
 
 function attachProductCatalog(payload, countryConfig, homepageConfig) {
-  if (!["kazakhstan", "georgia"].includes(countryConfig.id)) {
+  if (!["kazakhstan", "georgia", "azerbaijan"].includes(countryConfig.id)) {
     payload.content.productCatalog = [];
     syncHomeProducts(payload);
     return;
@@ -1069,6 +1272,7 @@ function getPagePayload(options = {}) {
       worldwideCountry,
     });
     attachProductCatalog(payload, countryConfig, homepageConfig);
+    applyCountrySpecificContent(payload, countryConfig);
 
     if (options.applyOverrides !== false) {
       applyContentOverrides(
@@ -1139,6 +1343,8 @@ function getPagePayload(options = {}) {
       sections,
     },
   };
+
+  applyCountrySpecificContent(payload, countryConfig);
 
   if (options.applyOverrides !== false) {
     applyContentOverrides(payload, countryConfig.id, language, pagePath, homepageConfig.assetsBaseUrl);

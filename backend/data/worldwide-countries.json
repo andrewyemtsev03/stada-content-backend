@@ -98,6 +98,42 @@
       "flag": "https://flagcdn.com/w80/ge.png"
     },
     {
+      "id": "azerbaijan",
+      "name": "Azerbaijan",
+      "region": "Worldwide / Caucasus",
+      "labels": {
+        "en": {
+          "name": "Azerbaijan",
+          "region": "Worldwide / Caucasus"
+        },
+        "ru": {
+          "name": "Азербайджан",
+          "region": "Мир / Кавказ"
+        },
+        "az": {
+          "name": "Azərbaycan",
+          "region": "Dünya / Qafqaz"
+        },
+        "kz": {
+          "name": "Әзербайжан",
+          "region": "Әлем / Кавказ"
+        },
+        "kg": {
+          "name": "Азербайжан",
+          "region": "Дүйнө / Кавказ"
+        }
+      },
+      "lat": 40.1431,
+      "lng": 47.5769,
+      "locationTitle": "STADA Azerbaijan",
+      "address": "",
+      "website": "https://stada.az/",
+      "websiteLabel": "Visit Website",
+      "email": "",
+      "phone": "",
+      "flag": "https://flagcdn.com/w80/az.png"
+    },
+    {
       "id": "germany",
       "name": "Germany",
       "region": "Europe",

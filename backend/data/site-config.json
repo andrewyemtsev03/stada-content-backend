@@ -46,6 +46,21 @@
         "worldwideCountriesPath": "data/worldwide-countries.json",
         "assetsBaseUrl": "https://stada.ge/"
       }
+    },
+    "azerbaijan": {
+      "id": "azerbaijan",
+      "name": "Azerbaijan",
+      "siteName": "STADA Azerbaijan",
+      "domain": "stada.az",
+      "siteUrl": "https://stada.az/",
+      "aliases": ["az", "azerbaijan", "stada.az"],
+      "defaultLanguage": "az",
+      "supportedLanguages": ["az", "ru"],
+      "homepage": {
+        "productCatalogPath": "data/product-catalog.json",
+        "worldwideCountriesPath": "data/worldwide-countries.json",
+        "assetsBaseUrl": "https://stada.az/"
+      }
     }
   }
 }
