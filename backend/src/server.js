@@ -2235,6 +2235,126 @@ function imageSlotFromCatalogProduct(product, fallbackName) {
   };
 }
 
+function isAzerbaijanAzRequest(country, language) {
+  return productCountryId(country) === "azerbaijan" && String(language || "").trim().toLowerCase() === "az";
+}
+
+function makeAzerbaijanStaticProductTranslation({ name, shortDescription, therapeuticArea }) {
+  const intro = shortDescription || `${name} haqqında məlumat STADA Azerbaijan məhsul kataloqunda təqdim olunur.`;
+  return {
+    name,
+    shortDescription: intro,
+    fullDescription: intro,
+    composition: "Məhsulun tərkibi, istifadə qaydası və məhdudiyyətləri üçün təlimatı oxuyun.",
+    usageText: "İstifadə etməzdən əvvəl təlimatı oxuyun və sual yarandıqda mütəxəssislə məsləhətləşin.",
+    benefits: [
+      `${name} STADA məhsul portfelinin bir hissəsidir.`,
+      therapeuticArea ? `Məhsul ${therapeuticArea.toLowerCase()} istiqamətində təqdim olunur.` : "Məhsul haqqında məlumat tanışlıq məqsədi daşıyır.",
+      "İstifadə qaydası, doza və məhdudiyyətlər üçün rəsmi təlimata əsaslanın.",
+      "Sualınız olduqda həkim və ya əczaçı ilə məsləhətləşin.",
+    ],
+  };
+}
+
+function makeAzerbaijanStaticProductSections({ name, shortDescription, therapeuticArea }) {
+  const area = therapeuticArea || "Məhsul";
+  const intro = shortDescription || `${name} haqqında əsas məlumat.`;
+  return {
+    hero: {
+      kicker: area,
+      lead: intro,
+      badges: [area, "Təlimata uyğun istifadə", "STADA Azerbaijan"],
+      metrics: [
+        {
+          value: "STADA",
+          title: "məhsul portfeli",
+          text: "Məhsul haqqında məlumat Azərbaycan versiyası üçün lokallaşdırılıb.",
+        },
+        {
+          value: "AZ",
+          title: "yerli versiya",
+          text: "Məlumat pasiyentlər və mütəxəssislər üçün Azərbaycan dilində təqdim olunur.",
+        },
+        {
+          value: "!",
+          title: "təlimatı oxuyun",
+          text: "İstifadə etməzdən əvvəl rəsmi təlimatla tanış olun.",
+        },
+      ],
+    },
+    overview: {
+      label: area,
+      heading: `${name} haqqında`,
+      intro,
+      facts: [
+        {
+          value: "01",
+          title: "Məhsul",
+          text: intro,
+        },
+        {
+          value: "02",
+          title: "İstifadə qaydası",
+          text: "Doza, istifadə üsulu və məhdudiyyətlər üçün təlimata əsaslanın.",
+        },
+        {
+          value: "03",
+          title: "Mütəxəssis məsləhəti",
+          text: "Xroniki xəstəliklər, digər preparatlarla birlikdə qəbul və ya şübhə olduqda mütəxəssislə məsləhətləşin.",
+        },
+      ],
+    },
+    formula: {
+      label: "Tərkib və format",
+      heading: `${name}: əsas məlumat`,
+      intro: "Bu bölmə məhsulun əsas məlumatlarını qısa şəkildə göstərir; tam məlumat üçün təlimatı oxuyun.",
+      points: [
+        {
+          value: "01",
+          title: "Məhsul məlumatı",
+          text: intro,
+        },
+        {
+          value: "02",
+          title: "Məsuliyyətli istifadə",
+          text: "Preparatı və ya sağlamlıq məhsulunu yalnız təlimata və mütəxəssis tövsiyəsinə uyğun istifadə edin.",
+        },
+        {
+          value: "03",
+          title: "Təhlükəsizlik",
+          text: "Əks göstərişlər, yaş məhdudiyyətləri və mümkün qarşılıqlı təsirlər üçün təlimatı yoxlayın.",
+        },
+      ],
+    },
+    usage: {
+      label: "Nə vaxt istifadə olunur",
+      heading: "Təlimata uyğun istifadə",
+      items: [
+        {
+          title: "Təlimata əsasən",
+          text: "Məhsul yalnız təlimatda göstərilən qaydada istifadə olunmalıdır.",
+          isActive: true,
+        },
+        {
+          title: "Fərdi vəziyyət",
+          text: "Səhhətiniz, yaşınız və qəbul etdiyiniz digər vasitələr nəzərə alınmalıdır.",
+        },
+        {
+          title: "Məsləhət",
+          text: "Sualınız olduqda həkimə və ya əczaçıya müraciət edin.",
+        },
+      ],
+    },
+    note: {
+      title: "Vacibdir",
+      text: "Saytdakı məlumat mütəxəssis məsləhətini və rəsmi təlimatı əvəz etmir. İstifadə etməzdən əvvəl təlimatı oxuyun.",
+    },
+    buy: {
+      intro: `${name} məhsulunu STADA-nın Azərbaycandakı tərəfdaş kanallarında axtarın.`,
+    },
+  };
+}
+
 function staticProductDetailPayload(slug, country, language, therapeuticAreas = []) {
   let catalogPayload;
   try {
@@ -2272,11 +2392,22 @@ function staticProductDetailPayload(slug, country, language, therapeuticAreas = 
   const name = catalogProduct.name || fallbackTranslation.name || productSlug;
   const shortDescription = catalogProduct.shortDescription || fallbackTranslation.shortDescription || fallbackTranslation.fullDescription || "";
   const fullDescription = fallbackTranslation.fullDescription || shortDescription;
+  const therapeuticArea = catalogProduct.therapeuticArea || "";
+  const azStaticFallback = isAzerbaijanAzRequest(country, resolvedLanguage);
+  const localizedTranslation = azStaticFallback
+    ? makeAzerbaijanStaticProductTranslation({ name, shortDescription, therapeuticArea })
+    : {
+        ...fallbackTranslation,
+        name,
+        shortDescription,
+        fullDescription,
+        benefits: Array.isArray(fallbackTranslation.benefits) ? fallbackTranslation.benefits : [],
+      };
   const cardImage = imageSlotFromCatalogProduct(catalogProduct, name);
   const heroImage = detailFallback?.detailHeroImage
     ? {
         src: normalizeImageSource(detailFallback.detailHeroImage.url || detailFallback.detailHeroImage.src),
-        alt: detailFallback.detailHeroImage.alt || cardImage.alt || name,
+        alt: azStaticFallback ? (cardImage.alt || name) : detailFallback.detailHeroImage.alt || cardImage.alt || name,
       }
     : cardImage;
   const sections = detailFallback?.sections || {
@@ -2287,6 +2418,9 @@ function staticProductDetailPayload(slug, country, language, therapeuticAreas = 
       intro: fullDescription,
     },
   };
+  const localizedSections = azStaticFallback
+    ? makeAzerbaijanStaticProductSections({ name, shortDescription, therapeuticArea })
+    : sections;
 
   const product = {
     id: catalogProduct.id || productSlug,
@@ -2297,20 +2431,14 @@ function staticProductDetailPayload(slug, country, language, therapeuticAreas = 
     accentColor: catalogProduct.accent || "",
     isFeatured: false,
     translations: {
-      [resolvedLanguage]: {
-        ...fallbackTranslation,
-        name,
-        shortDescription,
-        fullDescription,
-        benefits: Array.isArray(fallbackTranslation.benefits) ? fallbackTranslation.benefits : [],
-      },
+      [resolvedLanguage]: localizedTranslation,
     },
     images: syncProductImageSlots({
       card: cardImage,
       detailHero: heroImage,
     }),
     sections: {
-      [resolvedLanguage]: sections,
+      [resolvedLanguage]: localizedSections,
     },
     purchaseLinks: productCountryId(country) === "kazakhstan" && Array.isArray(detailFallback?.purchaseLinks)
       ? detailFallback.purchaseLinks
