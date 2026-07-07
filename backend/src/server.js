@@ -1074,11 +1074,14 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
 
 function localizedProductFallbacks(product, language) {
   const requestedLanguage = String(language || "").trim().toLowerCase();
-  if (requestedLanguage === "kg" || requestedLanguage === "ge") {
-    return [product?.translations?.[requestedLanguage]];
+  if (requestedLanguage === "kg") {
+    return [product?.translations?.kg, product?.translations?.ru, product?.translations?.en];
+  }
+  if (requestedLanguage === "ge") {
+    return [product?.translations?.ge, product?.translations?.en, product?.translations?.ru, product?.translations?.kz, product?.translations?.kg];
   }
   if (requestedLanguage === "en") {
-    return [product?.translations?.en, product?.translations?.ge];
+    return [product?.translations?.en, product?.translations?.ge, product?.translations?.ru, product?.translations?.kz, product?.translations?.kg];
   }
   return productLanguages.map(candidateLanguage => product?.translations?.[candidateLanguage]);
 }
@@ -1513,11 +1516,14 @@ function getProductPayloadTranslation(product, language = "ru") {
 
 function getProductPayloadSections(product, language = "ru") {
   const requestedLanguage = String(language || "").trim().toLowerCase();
-  if (requestedLanguage === "kg" || requestedLanguage === "ge") {
-    return product.sections?.[requestedLanguage] || {};
+  if (requestedLanguage === "kg") {
+    return product.sections?.kg || product.sections?.ru || product.sections?.en || {};
+  }
+  if (requestedLanguage === "ge") {
+    return product.sections?.ge || product.sections?.en || product.sections?.ru || product.sections?.kz || product.sections?.kg || {};
   }
   if (requestedLanguage === "en") {
-    return product.sections?.en || product.sections?.ge || {};
+    return product.sections?.en || product.sections?.ge || product.sections?.ru || product.sections?.kz || product.sections?.kg || {};
   }
   return product.sections?.[requestedLanguage] || product.sections?.ru || product.sections?.kz || {};
 }
@@ -1642,19 +1648,14 @@ function isAbsoluteImageSource(src) {
 }
 
 function staticCatalogFallbacksByLanguage(country) {
-  if (productCountryId(country) !== "kazakhstan") {
-    return Object.fromEntries(productLanguages.map(language => [language, new Map()]));
-  }
-
-  const languages = ["ru", "kz"];
   const fallbacks = {};
 
-  for (const language of languages) {
+  for (const language of productLanguages) {
     try {
       const payload = getPagePayload({
         country,
         lang: language,
-        page: adminEditablePagePath,
+        page: "products/index.html",
         applyOverrides: false,
       });
       fallbacks[language] = new Map(
@@ -2082,14 +2083,6 @@ function isGenericProductPurchaseLinks(links = []) {
 }
 
 function applyStaticProductDetailFallbacks(products, country) {
-  if (productCountryId(country) !== "kazakhstan") {
-    return (products || []).map(product => ({
-      ...product,
-      images: syncProductImageSlots({ ...(product.images || {}) }),
-    }));
-  }
-
-  const languages = ["ru", "kz"];
   return (products || []).map(product => {
     const nextProduct = {
       ...product,
@@ -2100,7 +2093,7 @@ function applyStaticProductDetailFallbacks(products, country) {
       },
     };
 
-    for (const language of languages) {
+    for (const language of productLanguages) {
       let fallback;
       try {
         fallback = getProductDetailFallbackFromPayload(getPagePayload({
@@ -2133,7 +2126,7 @@ function applyStaticProductDetailFallbacks(products, country) {
         );
       }
 
-      if (language === "ru" && fallback.detailHeroImage && !nextProduct.images.detailHero?.src) {
+      if (fallback.detailHeroImage && !nextProduct.images.detailHero?.src) {
         nextProduct.images.detailHero = {
           ...(nextProduct.images.detailHero || {}),
           src: fallback.detailHeroImage.url || fallback.detailHeroImage.src || "",
@@ -2141,7 +2134,7 @@ function applyStaticProductDetailFallbacks(products, country) {
         };
       }
 
-      if (language === "ru" && Array.isArray(fallback.purchaseLinks) && fallback.purchaseLinks.length && isGenericProductPurchaseLinks(nextProduct.purchaseLinks)) {
+      if (productCountryId(country) === "kazakhstan" && language === "ru" && Array.isArray(fallback.purchaseLinks) && fallback.purchaseLinks.length && isGenericProductPurchaseLinks(nextProduct.purchaseLinks)) {
         nextProduct.purchaseLinks = fallback.purchaseLinks;
       }
     }
@@ -2191,6 +2184,122 @@ function applyStaticProductFallbacks(products, country, options = {}) {
   return options.includeDetailFallbacks
     ? applyStaticProductDetailFallbacks(catalogProducts, country)
     : catalogProducts;
+}
+
+function findStaticCatalogProduct(products, slug) {
+  const normalizedSlug = normalizeProductSlug(slug);
+  return (products || []).find(product => {
+    const candidates = [
+      product.slug,
+      product.id,
+      productSlugFromPagePath(product.href),
+      productSlugFromPagePath(product.image?.src),
+      productSlugFromPagePath(product.image?.url),
+    ].map(normalizeProductSlug);
+    return candidates.includes(normalizedSlug);
+  }) || null;
+}
+
+function imageSlotFromCatalogProduct(product, fallbackName) {
+  const src = normalizeImageSource(product?.image?.url || product?.image?.src);
+  return {
+    src,
+    alt: product?.image?.alt || fallbackName || product?.id || "",
+  };
+}
+
+function staticProductDetailPayload(slug, country, language, therapeuticAreas = []) {
+  let catalogPayload;
+  try {
+    catalogPayload = getPagePayload({
+      country,
+      lang: language,
+      page: "products/index.html",
+      applyOverrides: false,
+    });
+  } catch (error) {
+    return null;
+  }
+
+  const catalogProduct = findStaticCatalogProduct(catalogPayload.content?.productCatalog || [], slug);
+  if (!catalogProduct) return null;
+
+  const productSlug = normalizeProductSlug(catalogProduct.slug || catalogProduct.id || productSlugFromPagePath(catalogProduct.href) || slug);
+  let detailPayload = null;
+  let detailFallback = null;
+  try {
+    detailPayload = getPagePayload({
+      country,
+      lang: language,
+      page: `products/${productSlug}.html`,
+      applyOverrides: false,
+    });
+    detailFallback = getProductDetailFallbackFromPayload(detailPayload);
+  } catch (error) {
+    detailPayload = null;
+    detailFallback = null;
+  }
+
+  const resolvedLanguage = detailPayload?.language || catalogPayload.language || language || "ru";
+  const fallbackTranslation = detailFallback?.translation || {};
+  const name = catalogProduct.name || fallbackTranslation.name || productSlug;
+  const shortDescription = catalogProduct.shortDescription || fallbackTranslation.shortDescription || fallbackTranslation.fullDescription || "";
+  const fullDescription = fallbackTranslation.fullDescription || shortDescription;
+  const cardImage = imageSlotFromCatalogProduct(catalogProduct, name);
+  const heroImage = detailFallback?.detailHeroImage
+    ? {
+        src: normalizeImageSource(detailFallback.detailHeroImage.url || detailFallback.detailHeroImage.src),
+        alt: detailFallback.detailHeroImage.alt || cardImage.alt || name,
+      }
+    : cardImage;
+  const sections = detailFallback?.sections || {
+    hero: { lead: fullDescription },
+    overview: {
+      label: catalogProduct.therapeuticArea || "",
+      heading: name,
+      intro: fullDescription,
+    },
+  };
+
+  const product = {
+    id: catalogProduct.id || productSlug,
+    slug: productSlug,
+    status: "published",
+    sortOrder: 0,
+    therapeuticAreaId: catalogProduct.category || catalogProduct.categoryClass || "",
+    accentColor: catalogProduct.accent || "",
+    isFeatured: false,
+    translations: {
+      [resolvedLanguage]: {
+        ...fallbackTranslation,
+        name,
+        shortDescription,
+        fullDescription,
+        benefits: Array.isArray(fallbackTranslation.benefits) ? fallbackTranslation.benefits : [],
+      },
+    },
+    images: syncProductImageSlots({
+      card: cardImage,
+      detailHero: heroImage,
+    }),
+    sections: {
+      [resolvedLanguage]: sections,
+    },
+    purchaseLinks: productCountryId(country) === "kazakhstan" && Array.isArray(detailFallback?.purchaseLinks)
+      ? detailFallback.purchaseLinks
+      : [],
+  };
+
+  return productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, catalogPayload.country, resolvedLanguage);
+}
+
+async function listTherapeuticAreasOrEmpty() {
+  try {
+    return await listTherapeuticAreas();
+  } catch (error) {
+    if (error.code !== "DATABASE_URL_MISSING") throw error;
+    return [];
+  }
 }
 
 async function attachDatabaseProductsToPayload(payload) {
@@ -2608,8 +2717,22 @@ async function handleRequest(request, response) {
       const slug = routeProductSlugFromPublicPath(pathname);
       const country = requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId") || "kazakhstan";
       const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language") || "ru";
-      const product = await getProduct(slug, country);
+      let product = null;
+      let productLookupError = null;
+      try {
+        product = await getProduct(slug, country);
+      } catch (error) {
+        productLookupError = error;
+        if (error.code !== "DATABASE_URL_MISSING") throw error;
+      }
+
       if (!product || product.status === "archived") {
+        const staticPayload = staticProductDetailPayload(slug, country, lang, await listTherapeuticAreasOrEmpty());
+        if (staticPayload) {
+          sendJson(response, 200, staticPayload);
+          return;
+        }
+        if (productLookupError && productLookupError.code !== "DATABASE_URL_MISSING") throw productLookupError;
         sendJson(response, 404, {
           error: {
             code: "PRODUCT_NOT_FOUND",
@@ -2622,7 +2745,7 @@ async function handleRequest(request, response) {
       const enrichedProduct = applyStaticProductFallbacks([product], country, { includeDetailFallbacks: true })[0];
       sendJson(response, 200, productDetailPayloadFromDatabaseProduct(
         enrichedProduct,
-        await listTherapeuticAreas(),
+        await listTherapeuticAreasOrEmpty(),
         getPagePayload({ country, lang, page: "index.html" }).country,
         lang
       ));

@@ -1296,6 +1296,1302 @@
         "categoryKey": "products_category_cardio",
         "therapeuticArea": "Кардио"
       }
+    ],
+    "ge": [
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_003",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
+          "alt": "კოლდრექსი"
+        },
+        "nameKey": "product_coldrex_name",
+        "name": "კოლდრექსი",
+        "descriptionKey": "product_coldrex_page_desc",
+        "shortDescription": "კოლდრექსი — კომბინირებული პრეპარატი გაციებისა და გრიპის სიმპტომების შესამსუბუქებლად.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--vitrum",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#008a72",
+        "image": {
+          "id": "products_index_image_004",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
+          "alt": "ვიტრუმ იმუნაქტივი"
+        },
+        "nameKey": "product_vitrum_immunaktiv_name",
+        "name": "ვიტრუმ იმუნაქტივი",
+        "descriptionKey": "product_vitrum_immunaktiv_page_desc",
+        "shortDescription": "ვიტრუმ იმუნაქტივი — ვიტამინებისა და მინერალების კომპლექსი იმუნიტეტის ყოველდღიური მხარდაჭერისთვის.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "იმუნიტეტი"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-fizzy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#00a878",
+        "image": {
+          "id": "products_index_image_005",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
+          "alt": "ვიტრუმ იმუნაქტივი შუშხუნა ტაბლეტები"
+        },
+        "nameKey": "product_vitrum_fizzy_name",
+        "name": "ვიტრუმ იმუნაქტივი შუშხუნა ტაბლეტები",
+        "descriptionKey": "product_vitrum_fizzy_page_desc",
+        "shortDescription": "შუშხუნა ვიტამინ-მინერალური კომპლექსი იმუნიტეტის მხარდასაჭერად მოზრდილებისთვის.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "იმუნიტეტი"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-energy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_006",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
+          "alt": "ვიტრუმ ენერჯი"
+        },
+        "nameKey": "product_vitrum_energy_name",
+        "name": "ვიტრუმ ენერჯი",
+        "descriptionKey": "product_vitrum_energy_page_desc",
+        "shortDescription": "შუშხუნა ვიტამინ-მინერალური კომპლექსი ენერგიის, აქტიურობისა და ყოველდღიური ტონუსის მხარდასაჭერად.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "იმუნიტეტი"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-vitaminc",
+        "category": "immunity cold",
+        "categoryClass": "immunity",
+        "accent": "#ff8a00",
+        "image": {
+          "id": "products_index_image_007",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitamin-c-fizzy/card.png",
+          "alt": "ვიტრუმ ვიტამინი C 900 მგ"
+        },
+        "nameKey": "product_vitrum_vitaminc_name",
+        "name": "ვიტრუმ ვიტამინი C 900 მგ",
+        "descriptionKey": "product_vitrum_vitaminc_page_desc",
+        "shortDescription": "შუშხუნა ტაბლეტები C ვიტამინით 900 მგ იმუნიტეტის მხარდაჭერისა და C ვიტამინის საჭიროების შესავსებად.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "იმუნიტეტი"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-magneb6",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#6f54c7",
+        "image": {
+          "id": "products_index_image_008",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
+          "alt": "ვიტრუმ მაგნიუმი B6"
+        },
+        "nameKey": "product_vitrum_magneb6_name",
+        "name": "ვიტრუმ მაგნიუმი B6",
+        "descriptionKey": "product_vitrum_magneb6_page_desc",
+        "shortDescription": "მაგნიუმისა და ვიტამინი B6-ის კომპლექსი ნერვული სისტემისა და ენერგეტიკული მეტაბოლიზმის მხარდასაჭერად.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "იმუნიტეტი"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#f2b400",
+        "image": {
+          "id": "products_index_image_009",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/card.png",
+          "alt": "მაგნე B6 Kids"
+        },
+        "nameKey": "product_magneb6kids_name",
+        "name": "მაგნე B6 Kids",
+        "descriptionKey": "product_magneb6kids_page_desc",
+        "shortDescription": "მაგნე B6 Kids — საღეჭი ტაბლეტები მაგნიუმითა და ვიტამინი B6-ით ბავშვებისთვის 4 წლიდან.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "ბავშვებისთვის"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-syrop",
+        "category": "kids immunity",
+        "categoryClass": "kids",
+        "accent": "#2fb56f",
+        "image": {
+          "id": "products_index_image_010",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-kids-proimmun/card.png",
+          "alt": "ვიტრუმ Kids Proimmun"
+        },
+        "nameKey": "product_vitrum_syrop_name",
+        "name": "ვიტრუმ Kids Proimmun",
+        "descriptionKey": "product_vitrum_syrop_page_desc",
+        "shortDescription": "საბავშვო პროდუქტი იმუნიტეტის მხარდასაჭერად C ვიტამინით, ბეტა-გლუკანითა და მცენარეული კომპონენტებით.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "ბავშვებისთვის"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--kamistad-baby",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_011",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
+          "alt": "კამისტად ბეიბი"
+        },
+        "nameKey": "",
+        "name": "კამისტად ბეიბი",
+        "descriptionKey": "",
+        "shortDescription": "გელი კბილების ამოჭრის პერიოდში ბავშვებისთვის, ღრძილებზე გამოსაყენებლად ინსტრუქციის მიხედვით.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "ბავშვებისთვის"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#0071ce",
+        "image": {
+          "id": "products_index_image_012",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
+          "alt": "ენტეროჟერმინა"
+        },
+        "nameKey": "product_enterogermina_name",
+        "name": "ენტეროჟერმინა",
+        "descriptionKey": "product_enterogermina_page_desc",
+        "shortDescription": "ენტეროჟერმინა — პრობიოტიკი Bacillus clausii-ის სპორებით ნაწლავის მიკროფლორის აღდგენის მხარდასაჭერად.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--enterogermina-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#1f9d45",
+        "image": {
+          "id": "products_index_image_013",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
+          "alt": "ენტეროჟერმინა ფორტე"
+        },
+        "nameKey": "product_enterogermina_forte_name",
+        "name": "ენტეროჟერმინა ფორტე",
+        "descriptionKey": "product_enterogermina_forte_page_desc",
+        "shortDescription": "ენტეროჟერმინა ფორტე — პრობიოტიკი Bacillus clausii-ის სპორებით, მიღებისთვის ინსტრუქციის მიხედვით.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#00a651",
+        "image": {
+          "id": "products_index_image_014",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
+          "alt": "ენტეროჟერმინა კაფსულები"
+        },
+        "nameKey": "product_enterogermina_capsules_name",
+        "name": "ენტეროჟერმინა კაფსულები",
+        "descriptionKey": "product_enterogermina_capsules_page_desc",
+        "shortDescription": "ენტეროჟერმინა კაფსულები — პრობიოტიკი Bacillus clausii-ის სპორებით მოზრდილებისა და 6 წელზე უფროსი ბავშვებისთვის.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--noshpa",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#d71920",
+        "image": {
+          "id": "products_index_image_015",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
+          "alt": "ნო-შპა"
+        },
+        "nameKey": "product_noshpa_name",
+        "name": "ნო-შპა",
+        "descriptionKey": "product_noshpa_page_desc",
+        "shortDescription": "ნო-შპა 40 მგ — ტაბლეტები დროტავერინის ჰიდროქლორიდით გლუვი კუნთების სპაზმის შესამსუბუქებლად.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--noshpa-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#b8241a",
+        "image": {
+          "id": "products_index_image_016",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
+          "alt": "ნო-შპა ფორტე"
+        },
+        "nameKey": "",
+        "name": "ნო-შპა ფორტე",
+        "descriptionKey": "",
+        "shortDescription": "ტაბლეტები 80 მგ დროტავერინით გლუვი კუნთების სპაზმის შესამსუბუქებლად ინსტრუქციის მიხედვით.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--essentiale",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_017",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
+          "alt": "ესენციალე"
+        },
+        "nameKey": "product_essentiale_name",
+        "name": "ესენციალე",
+        "descriptionKey": "product_essentiale_page_desc",
+        "shortDescription": "ესენციალე ფორტე N — კაფსულები ესენციური ფოსფოლიპიდებით ღვიძლის ფუნქციის მხარდასაჭერად.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--femilex",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#e1007a",
+        "image": {
+          "id": "products_index_image_018",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
+          "alt": "ფემილექსი"
+        },
+        "nameKey": "",
+        "name": "ფემილექსი",
+        "descriptionKey": "",
+        "shortDescription": "ვაგინალური სუპოზიტორიები 100 მგ რძემჟავით მიკროფლორისა და pH-ის ნორმალიზებისთვის.",
+        "categoryKey": "",
+        "therapeuticArea": "გინეკოლოგია"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_019",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
+          "alt": "ნიზორალი"
+        },
+        "nameKey": "",
+        "name": "ნიზორალი",
+        "descriptionKey": "",
+        "shortDescription": "კრემი 2% კეტოკონაზოლით გარე გამოყენებისთვის ინსტრუქციის მიხედვით.",
+        "categoryKey": "",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral catalog-card--nizoral-shampoo",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_020",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
+          "alt": "ნიზორალი შამპუნი"
+        },
+        "nameKey": "",
+        "name": "ნიზორალი შამპუნი",
+        "descriptionKey": "",
+        "shortDescription": "სამკურნალო შამპუნი 2% კეტოკონაზოლით, გამოსაყენებლად ინსტრუქციის მიხედვით.",
+        "categoryKey": "",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--psilo-balsam",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#005bb9",
+        "image": {
+          "id": "products_index_image_021",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
+          "alt": "ფსილო-ბალზამი"
+        },
+        "nameKey": "",
+        "name": "ფსილო-ბალზამი",
+        "descriptionKey": "",
+        "shortDescription": "გელი 1% დიფენჰიდრამინის ჰიდროქლორიდით გარე გამოყენებისთვის ინსტრუქციის მიხედვით.",
+        "categoryKey": "",
+        "therapeuticArea": "საჭმლის მონელება"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--gecsikon",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#005ea8",
+        "image": {
+          "id": "products_index_image_022",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
+          "alt": "ჰექსიკონი"
+        },
+        "nameKey": "",
+        "name": "ჰექსიკონი",
+        "descriptionKey": "",
+        "shortDescription": "ვაგინალური სუპოზიტორიები 16 მგ ქლორჰექსიდინით ადგილობრივი გამოყენებისთვის.",
+        "categoryKey": "",
+        "therapeuticArea": "გინეკოლოგია"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_023",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
+          "alt": "აკვალორი"
+        },
+        "nameKey": "product_aqualor_name",
+        "name": "აკვალორი",
+        "descriptionKey": "product_aqualor_page_desc",
+        "shortDescription": "აკვალორ ექსტრა ფორტე — სტერილური ზღვის წყლის ხსნარი ცხვირის ღრუს მოვლისთვის ინსტრუქციის მიხედვით.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-forte",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_024",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-forte/card.png",
+          "alt": "აკვალორ აქტივ ფორტე"
+        },
+        "nameKey": "product_aqualor_forte_name",
+        "name": "აკვალორ აქტივ ფორტე",
+        "descriptionKey": "product_aqualor_forte_page_desc",
+        "shortDescription": "აკვალორ აქტივ ფორტე — ზღვის წყლის სპრეი CO2-ით ცხვირის ღრუს მოვლისა და გამორეცხვისთვის.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-baby",
+        "category": "cold kids",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_025",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-baby/card.png",
+          "alt": "აკვალორ ბეიბი"
+        },
+        "nameKey": "product_aqualor_baby_name",
+        "name": "აკვალორ ბეიბი",
+        "descriptionKey": "product_aqualor_baby_page_desc",
+        "shortDescription": "აკვალორ ბეიბი — ზღვის წყლის წვეთები ბავშვის ცხვირის ყოველდღიური მოვლისთვის.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-gorlo",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_026",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-gorlo/card.png",
+          "alt": "აკვალორ ყელი"
+        },
+        "nameKey": "product_aqualor_gorlo_name",
+        "name": "აკვალორ ყელი",
+        "descriptionKey": "product_aqualor_gorlo_page_desc",
+        "shortDescription": "აკვალორ ყელი — სტერილური ჰიპერტონული ზღვის წყლის სპრეი ყელის მოვლისა და გამორეცხვისთვის.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_027",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft/card.png",
+          "alt": "აკვალორ სოფტი"
+        },
+        "nameKey": "product_aqualor_soft_name",
+        "name": "აკვალორ სოფტი",
+        "descriptionKey": "product_aqualor_soft_page_desc",
+        "shortDescription": "აკვალორ სოფტი — სტერილური იზოტონური ზღვის წყლის ხსნარი ცხვირის ღრუს დასატენიანებლად და გამოსარეცხად.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft-mini",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_028",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft-mini/card.png",
+          "alt": "აკვალორ სოფტი მინი"
+        },
+        "nameKey": "product_aqualor_soft_mini_name",
+        "name": "აკვალორ სოფტი მინი",
+        "descriptionKey": "product_aqualor_soft_mini_page_desc",
+        "shortDescription": "აკვალორ სოფტი მინი — კომპაქტური სტერილური იზოტონური ზღვის წყლის სპრეი ცხვირის მოვლისთვის.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold immunity",
+        "categoryClass": "cold",
+        "accent": "#4d8f38",
+        "image": {
+          "id": "products_index_image_029",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
+          "alt": "სინულან დუო"
+        },
+        "nameKey": "product_sinulan_duo_name",
+        "name": "სინულან დუო",
+        "descriptionKey": "product_sinulan_duo_page_desc",
+        "shortDescription": "სინულან დუო — მცენარეული ექსტრაქტების კომპლექსი სუნთქვისა და სასუნთქი გზების ჯანმრთელობის მხარდასაჭერად.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a3ad",
+        "image": {
+          "id": "products_index_image_030",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
+          "alt": "სნუპი"
+        },
+        "nameKey": "product_snup_name",
+        "name": "სნუპი",
+        "descriptionKey": "product_snup_page_desc",
+        "shortDescription": "სნუპი — დოზირებული ცხვირის სპრეი ქსილომეტაზოლინითა და ზღვის წყლით ცხვირით სუნთქვის შესამსუბუქებლად.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "გაციება და სასუნთქი გზები"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak",
+        "category": "allergy",
+        "categoryClass": "allergy",
+        "accent": "#2366b8",
+        "image": {
+          "id": "products_index_image_031",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
+          "alt": "ზოდაკი"
+        },
+        "nameKey": "product_zodak_name",
+        "name": "ზოდაკი",
+        "descriptionKey": "product_zodak_page_desc",
+        "shortDescription": "ანტიჰისტამინური პრეპარატი ცეტირიზინით ალერგიული რინიტისა და ჭინჭრის ციების სიმპტომების შესამსუბუქებლად.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "ალერგია"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak-drops",
+        "category": "allergy kids",
+        "categoryClass": "allergy",
+        "accent": "#2698d6",
+        "image": {
+          "id": "products_index_image_032",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
+          "alt": "ზოდაკი წვეთები"
+        },
+        "nameKey": "product_zodak_drops_name",
+        "name": "ზოდაკი წვეთები",
+        "descriptionKey": "product_zodak_drops_page_desc",
+        "shortDescription": "წვეთები ცეტირიზინით ალერგიის სიმპტომების შესამსუბუქებლად მოზრდილებსა და ბავშვებში ინსტრუქციის მიხედვით.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "ალერგია"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#5f6f89",
+        "image": {
+          "id": "products_index_image_033",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
+          "alt": "ედარბი კლო"
+        },
+        "nameKey": "product_edarbi_klo_name",
+        "name": "ედარბი კლო",
+        "descriptionKey": "product_edarbi_klo_page_desc",
+        "shortDescription": "ედარბი კლო — კომბინირებული პრეპარატი არტერიული წნევის შესამცირებლად ექიმის დანიშნულებით.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "გულ-სისხლძარღვთა"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitaprost",
+        "category": "urology",
+        "categoryClass": "urology",
+        "accent": "#1f7a62",
+        "image": {
+          "id": "products_index_image_034",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
+          "alt": "ვიტაპროსტი"
+        },
+        "nameKey": "product_vitaprost_name",
+        "name": "ვიტაპროსტი",
+        "descriptionKey": "product_vitaprost_page_desc",
+        "shortDescription": "უროლოგიური პრეპარატი ტაბლეტების ფორმით, გამოსაყენებლად ინსტრუქციისა და სპეციალისტის დანიშნულების მიხედვით.",
+        "categoryKey": "products_category_urology",
+        "therapeuticArea": "უროლოგია"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--cardiomagnil",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#b41523",
+        "image": {
+          "id": "products_index_image_035",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
+          "alt": "კარდიომაგნილი"
+        },
+        "nameKey": "product_cardiomagnil_name",
+        "name": "კარდიომაგნილი",
+        "descriptionKey": "product_cardiomagnil_page_desc",
+        "shortDescription": "კარდიომაგნილი 150 მგ — აცეტილსალიცილის მჟავისა და მაგნიუმის ჰიდროქსიდის პრეპარატი ექიმის დანიშნულებით.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "გულ-სისხლძარღვთა"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--klopidogrel-teva",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#cf1730",
+        "image": {
+          "id": "products_index_image_036",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
+          "alt": "კლოპიდოგრელი-ტევა"
+        },
+        "nameKey": "",
+        "name": "კლოპიდოგრელი-ტევა",
+        "descriptionKey": "",
+        "shortDescription": "გარსით დაფარული ტაბლეტები 75 მგ, გამოსაყენებლად ექიმის დანიშნულებით.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "გულ-სისხლძარღვთა"
+      }
+    ],
+    "en": [
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_003",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/coldrex/card.png",
+          "alt": "Coldrex"
+        },
+        "nameKey": "product_coldrex_name",
+        "name": "Coldrex",
+        "descriptionKey": "product_coldrex_page_desc",
+        "shortDescription": "Coldrex is a combination medicine for relief of cold and flu symptoms.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--vitrum",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#008a72",
+        "image": {
+          "id": "products_index_image_004",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunaktiv/card.png",
+          "alt": "Vitrum Immunaktiv"
+        },
+        "nameKey": "product_vitrum_immunaktiv_name",
+        "name": "Vitrum Immunaktiv",
+        "descriptionKey": "product_vitrum_immunaktiv_page_desc",
+        "shortDescription": "Vitrum Immunaktiv is a vitamin and mineral complex with beta-glucan for immune support.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Immunity"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-fizzy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#00a878",
+        "image": {
+          "id": "products_index_image_005",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-immunactive-fizzy/card.png",
+          "alt": "Vitrum Immunaktiv effervescent tablets"
+        },
+        "nameKey": "product_vitrum_fizzy_name",
+        "name": "Vitrum Immunaktiv effervescent tablets",
+        "descriptionKey": "product_vitrum_fizzy_page_desc",
+        "shortDescription": "An effervescent vitamin and mineral complex for immune support in adults.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Immunity"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-energy",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_006",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-energy/card.png",
+          "alt": "Vitrum Energy"
+        },
+        "nameKey": "product_vitrum_energy_name",
+        "name": "Vitrum Energy",
+        "descriptionKey": "product_vitrum_energy_page_desc",
+        "shortDescription": "An effervescent vitamin and mineral complex for energy, activity, and daily tone.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Immunity"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-vitaminc",
+        "category": "immunity cold",
+        "categoryClass": "immunity",
+        "accent": "#ff8a00",
+        "image": {
+          "id": "products_index_image_007",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-vitamin-c-fizzy/card.png",
+          "alt": "Vitrum Vitamin C 900 mg"
+        },
+        "nameKey": "product_vitrum_vitaminc_name",
+        "name": "Vitrum Vitamin C 900 mg",
+        "descriptionKey": "product_vitrum_vitaminc_page_desc",
+        "shortDescription": "Effervescent tablets with vitamin C 900 mg for immune support and vitamin C intake.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Immunity"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-magneb6",
+        "category": "immunity",
+        "categoryClass": "immunity",
+        "accent": "#6f54c7",
+        "image": {
+          "id": "products_index_image_008",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-magneb6/card.png",
+          "alt": "Vitrum Magnesium B6"
+        },
+        "nameKey": "product_vitrum_magneb6_name",
+        "name": "Vitrum Magnesium B6",
+        "descriptionKey": "product_vitrum_magneb6_page_desc",
+        "shortDescription": "A magnesium and vitamin B6 complex for nervous system and energy metabolism support.",
+        "categoryKey": "products_category_immunity",
+        "therapeuticArea": "Immunity"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#f2b400",
+        "image": {
+          "id": "products_index_image_009",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/magneb6kids/card.png",
+          "alt": "Magne B6 Kids"
+        },
+        "nameKey": "product_magneb6kids_name",
+        "name": "Magne B6 Kids",
+        "descriptionKey": "product_magneb6kids_page_desc",
+        "shortDescription": "Magne B6 Kids are chewable tablets with magnesium and vitamin B6 for children from 4 years old.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "For children"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitrum-syrop",
+        "category": "kids immunity",
+        "categoryClass": "kids",
+        "accent": "#2fb56f",
+        "image": {
+          "id": "products_index_image_010",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitrum-kids-proimmun/card.png",
+          "alt": "Vitrum Kids Proimmun"
+        },
+        "nameKey": "product_vitrum_syrop_name",
+        "name": "Vitrum Kids Proimmun",
+        "descriptionKey": "product_vitrum_syrop_page_desc",
+        "shortDescription": "A children's immune-support product with vitamin C, beta-glucan, and plant components.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "For children"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--kamistad-baby",
+        "category": "kids",
+        "categoryClass": "kids",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_011",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/kamistad-baby/card.png",
+          "alt": "Kamistad Baby"
+        },
+        "nameKey": "",
+        "name": "Kamistad Baby",
+        "descriptionKey": "",
+        "shortDescription": "A teething gel for children, applied to the gums according to the leaflet.",
+        "categoryKey": "products_category_kids",
+        "therapeuticArea": "For children"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#0071ce",
+        "image": {
+          "id": "products_index_image_012",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina/card.png",
+          "alt": "Enterogermina"
+        },
+        "nameKey": "product_enterogermina_name",
+        "name": "Enterogermina",
+        "descriptionKey": "product_enterogermina_page_desc",
+        "shortDescription": "Enterogermina is a probiotic with Bacillus clausii spores to help restore intestinal microflora.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--enterogermina-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#1f9d45",
+        "image": {
+          "id": "products_index_image_013",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-forte/card.png",
+          "alt": "Enterogermina Forte"
+        },
+        "nameKey": "product_enterogermina_forte_name",
+        "name": "Enterogermina Forte",
+        "descriptionKey": "product_enterogermina_forte_page_desc",
+        "shortDescription": "Enterogermina Forte is a probiotic with Bacillus clausii spores in a convenient suspension format.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#00a651",
+        "image": {
+          "id": "products_index_image_014",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/enterogermina-capsules/card.png",
+          "alt": "Enterogermina capsules"
+        },
+        "nameKey": "product_enterogermina_capsules_name",
+        "name": "Enterogermina capsules",
+        "descriptionKey": "product_enterogermina_capsules_page_desc",
+        "shortDescription": "Enterogermina capsules are a probiotic with Bacillus clausii spores for adults and children over 6.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--noshpa",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#d71920",
+        "image": {
+          "id": "products_index_image_015",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa/card.png",
+          "alt": "NO-SPA"
+        },
+        "nameKey": "product_noshpa_name",
+        "name": "NO-SPA",
+        "descriptionKey": "product_noshpa_page_desc",
+        "shortDescription": "NO-SPA 40 mg tablets contain drotaverine hydrochloride for relief of smooth muscle spasms.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--noshpa-forte",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#b8241a",
+        "image": {
+          "id": "products_index_image_016",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/no-shpa-forte/card.png",
+          "alt": "NO-SPA Forte"
+        },
+        "nameKey": "",
+        "name": "NO-SPA Forte",
+        "descriptionKey": "",
+        "shortDescription": "80 mg drotaverine tablets for relief of smooth muscle spasms according to the leaflet.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--essentiale",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f4a300",
+        "image": {
+          "id": "products_index_image_017",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/essentiale/card.png",
+          "alt": "Essentiale"
+        },
+        "nameKey": "product_essentiale_name",
+        "name": "Essentiale",
+        "descriptionKey": "product_essentiale_page_desc",
+        "shortDescription": "Essentiale Forte N capsules contain essential phospholipids for liver function support.",
+        "categoryKey": "products_category_digestive",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--femilex",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#e1007a",
+        "image": {
+          "id": "products_index_image_018",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/femilex/card.png",
+          "alt": "Femilex"
+        },
+        "nameKey": "",
+        "name": "Femilex",
+        "descriptionKey": "",
+        "shortDescription": "Vaginal suppositories 100 mg with lactic acid for microflora and pH normalization.",
+        "categoryKey": "",
+        "therapeuticArea": "Gynecology"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_019",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral/card.png",
+          "alt": "Nizoral"
+        },
+        "nameKey": "",
+        "name": "Nizoral",
+        "descriptionKey": "",
+        "shortDescription": "A 2% ketoconazole cream for external use according to the leaflet.",
+        "categoryKey": "",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--nizoral catalog-card--nizoral-shampoo",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#f5c400",
+        "image": {
+          "id": "products_index_image_020",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/nizoral-shampoo/card.png",
+          "alt": "Nizoral shampoo"
+        },
+        "nameKey": "",
+        "name": "Nizoral shampoo",
+        "descriptionKey": "",
+        "shortDescription": "A 2% ketoconazole medicated shampoo for use according to the leaflet.",
+        "categoryKey": "",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--psilo-balsam",
+        "category": "digestive",
+        "categoryClass": "digestive",
+        "accent": "#005bb9",
+        "image": {
+          "id": "products_index_image_021",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/psilo-balsam/card.png",
+          "alt": "Psilo-Balsam"
+        },
+        "nameKey": "",
+        "name": "Psilo-Balsam",
+        "descriptionKey": "",
+        "shortDescription": "A 1% diphenhydramine hydrochloride gel for external use according to the leaflet.",
+        "categoryKey": "",
+        "therapeuticArea": "Digestive health"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--gecsikon",
+        "category": "women",
+        "categoryClass": "women",
+        "accent": "#005ea8",
+        "image": {
+          "id": "products_index_image_022",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/gecsikon/card.png",
+          "alt": "Hexicon"
+        },
+        "nameKey": "",
+        "name": "Hexicon",
+        "descriptionKey": "",
+        "shortDescription": "Vaginal suppositories 16 mg with chlorhexidine for local use.",
+        "categoryKey": "",
+        "therapeuticArea": "Gynecology"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_023",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor/card.png",
+          "alt": "Aqualor"
+        },
+        "nameKey": "product_aqualor_name",
+        "name": "Aqualor",
+        "descriptionKey": "product_aqualor_page_desc",
+        "shortDescription": "Aqualor Extra Forte is a sterile seawater solution for nasal care according to the leaflet.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-forte",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_024",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-forte/card.png",
+          "alt": "Aqualor Active Forte"
+        },
+        "nameKey": "product_aqualor_forte_name",
+        "name": "Aqualor Active Forte",
+        "descriptionKey": "product_aqualor_forte_page_desc",
+        "shortDescription": "Aqualor Active Forte is a seawater spray with CO2 for nasal care and rinsing.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-baby",
+        "category": "cold kids",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_025",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-baby/card.png",
+          "alt": "Aqualor Baby"
+        },
+        "nameKey": "product_aqualor_baby_name",
+        "name": "Aqualor Baby",
+        "descriptionKey": "product_aqualor_baby_page_desc",
+        "shortDescription": "Aqualor Baby is a seawater drop format for daily care of a baby's nose.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-gorlo",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#d50058",
+        "image": {
+          "id": "products_index_image_026",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-gorlo/card.png",
+          "alt": "Aqualor Throat"
+        },
+        "nameKey": "product_aqualor_gorlo_name",
+        "name": "Aqualor Throat",
+        "descriptionKey": "product_aqualor_gorlo_page_desc",
+        "shortDescription": "Aqualor Throat is a sterile hypertonic seawater spray for throat irrigation and rinsing.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_027",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft/card.png",
+          "alt": "Aqualor Soft"
+        },
+        "nameKey": "product_aqualor_soft_name",
+        "name": "Aqualor Soft",
+        "descriptionKey": "product_aqualor_soft_page_desc",
+        "shortDescription": "Aqualor Soft is a sterile isotonic seawater solution for nasal irrigation and rinsing.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--aqualor catalog-card--aqualor-soft-mini",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a6c8",
+        "image": {
+          "id": "products_index_image_028",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/aqualor-soft-mini/card.png",
+          "alt": "Aqualor Soft mini"
+        },
+        "nameKey": "product_aqualor_soft_mini_name",
+        "name": "Aqualor Soft mini",
+        "descriptionKey": "product_aqualor_soft_mini_page_desc",
+        "shortDescription": "Aqualor Soft mini is a compact sterile isotonic seawater spray for nasal care.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold immunity",
+        "categoryClass": "cold",
+        "accent": "#4d8f38",
+        "image": {
+          "id": "products_index_image_029",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/sinulan-duo/card.png",
+          "alt": "Sinulan Duo"
+        },
+        "nameKey": "product_sinulan_duo_name",
+        "name": "Sinulan Duo",
+        "descriptionKey": "product_sinulan_duo_page_desc",
+        "shortDescription": "Sinulan Duo is a complex of plant extracts for breathing comfort and respiratory health support.",
+        "categoryKey": "products_category_respiratory",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cold",
+        "categoryClass": "cold",
+        "accent": "#00a3ad",
+        "image": {
+          "id": "products_index_image_030",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/snup/card.png",
+          "alt": "Snup"
+        },
+        "nameKey": "product_snup_name",
+        "name": "Snup",
+        "descriptionKey": "product_snup_page_desc",
+        "shortDescription": "Snup is a metered nasal spray with xylometazoline and seawater for relief of nasal congestion.",
+        "categoryKey": "products_category_cold",
+        "therapeuticArea": "Cold and breathing"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak",
+        "category": "allergy",
+        "categoryClass": "allergy",
+        "accent": "#2366b8",
+        "image": {
+          "id": "products_index_image_031",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak/card.png",
+          "alt": "Zodak"
+        },
+        "nameKey": "product_zodak_name",
+        "name": "Zodak",
+        "descriptionKey": "product_zodak_page_desc",
+        "shortDescription": "An antihistamine with cetirizine for relief of allergic rhinitis and urticaria symptoms.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Allergy"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--zodak-drops",
+        "category": "allergy kids",
+        "categoryClass": "allergy",
+        "accent": "#2698d6",
+        "image": {
+          "id": "products_index_image_032",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/zodak-kapli/card.png",
+          "alt": "Zodak drops"
+        },
+        "nameKey": "product_zodak_drops_name",
+        "name": "Zodak drops",
+        "descriptionKey": "product_zodak_drops_page_desc",
+        "shortDescription": "Cetirizine drops for relief of allergy symptoms in adults and children according to the leaflet.",
+        "categoryKey": "products_category_allergy",
+        "therapeuticArea": "Allergy"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#5f6f89",
+        "image": {
+          "id": "products_index_image_033",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/edarbi-klo/card.png",
+          "alt": "Edarbi Klo"
+        },
+        "nameKey": "product_edarbi_klo_name",
+        "name": "Edarbi Klo",
+        "descriptionKey": "product_edarbi_klo_page_desc",
+        "shortDescription": "Edarbi Klo is a combination medicine for lowering blood pressure as prescribed by a doctor.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Cardio"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--vitaprost",
+        "category": "urology",
+        "categoryClass": "urology",
+        "accent": "#1f7a62",
+        "image": {
+          "id": "products_index_image_034",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/vitaprost/card.png",
+          "alt": "Vitaprost"
+        },
+        "nameKey": "product_vitaprost_name",
+        "name": "Vitaprost",
+        "descriptionKey": "product_vitaprost_page_desc",
+        "shortDescription": "A urological medicine in tablet form for use according to the leaflet and specialist advice.",
+        "categoryKey": "products_category_urology",
+        "therapeuticArea": "Urology"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--cardiomagnil",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#b41523",
+        "image": {
+          "id": "products_index_image_035",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/cardiomagnil/card.jpg",
+          "alt": "Cardiomagnyl"
+        },
+        "nameKey": "product_cardiomagnil_name",
+        "name": "Cardiomagnyl",
+        "descriptionKey": "product_cardiomagnil_page_desc",
+        "shortDescription": "Cardiomagnyl 150 mg contains acetylsalicylic acid with magnesium hydroxide for use as prescribed.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Cardio"
+      },
+      {
+        "id": "product",
+        "href": "products/product.html",
+        "className": "catalog-card--wide catalog-card--klopidogrel-teva",
+        "category": "cardio",
+        "categoryClass": "cardio",
+        "accent": "#cf1730",
+        "image": {
+          "id": "products_index_image_036",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/products/klopidogrel-teva/card.png",
+          "alt": "Clopidogrel-Teva"
+        },
+        "nameKey": "",
+        "name": "Clopidogrel-Teva",
+        "descriptionKey": "",
+        "shortDescription": "Film-coated tablets 75 mg for use as prescribed by a doctor.",
+        "categoryKey": "products_category_cardio",
+        "therapeuticArea": "Cardio"
+      }
     ]
   }
 }

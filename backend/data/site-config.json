@@ -38,7 +38,7 @@
       "siteName": "STADA Georgia",
       "domain": "stada.ge",
       "siteUrl": "https://stada.ge/",
-      "aliases": ["ge", "georgia", "stada.ge"],
+      "aliases": ["ge", "georgia", "stada.ge", "new.stada.ge"],
       "defaultLanguage": "ge",
       "supportedLanguages": ["ge", "en"],
       "homepage": {
