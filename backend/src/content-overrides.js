@@ -15,7 +15,15 @@ function emptyOverrides() {
 function readContentOverrides() {
   if (!fs.existsSync(overridesPath)) return emptyOverrides();
 
-  const parsed = JSON.parse(fs.readFileSync(overridesPath, "utf8"));
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(overridesPath, "utf8"));
+  } catch (error) {
+    throw Object.assign(new Error(`Invalid backend JSON file ${path.relative(backendRoot, overridesPath)}: ${error.message}`), {
+      statusCode: 500,
+      code: "INVALID_BACKEND_JSON",
+    });
+  }
   if (!parsed || typeof parsed !== "object") return emptyOverrides();
 
   return {

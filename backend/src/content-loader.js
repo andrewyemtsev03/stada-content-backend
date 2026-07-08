@@ -21,7 +21,14 @@ function loadCountryContentProfiles() {
 }
 
 function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (error) {
+    throw Object.assign(new Error(`Invalid backend JSON file ${path.relative(backendRoot, filePath)}: ${error.message}`), {
+      statusCode: 500,
+      code: "INVALID_BACKEND_JSON",
+    });
+  }
 }
 
 function loadConfig() {

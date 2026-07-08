@@ -312,12 +312,12 @@
           "therapeuticArea": "Ginekologiya",
           "imageAlt": "Geksikon"
         },
-        "aqualor": { imageAlt: "Aqualor" },
-        "aqualor-forte": { imageAlt: "Aqualor Active Forte" },
-        "aqualor-baby": { imageAlt: "Aqualor Baby" },
-        "aqualor-gorlo": { imageAlt: "Aqualor Throat sprey" },
-        "aqualor-soft": { imageAlt: "Aqualor Soft" },
-        "aqualor-soft-mini": { imageAlt: "Aqualor Soft mini" },
+        "aqualor": { "imageAlt": "Aqualor" },
+        "aqualor-forte": { "imageAlt": "Aqualor Active Forte" },
+        "aqualor-baby": { "imageAlt": "Aqualor Baby" },
+        "aqualor-gorlo": { "imageAlt": "Aqualor Throat sprey" },
+        "aqualor-soft": { "imageAlt": "Aqualor Soft" },
+        "aqualor-soft-mini": { "imageAlt": "Aqualor Soft mini" },
         "edarbi-klo": {
           "therapeuticArea": "Kardio"
         },
