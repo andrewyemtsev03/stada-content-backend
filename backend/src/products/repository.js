@@ -4,12 +4,35 @@ function normalizeCountryId(value) {
   return String(value || "").trim().toLowerCase() || "";
 }
 
+function productKey(countryId, productId) {
+  return `${normalizeCountryId(countryId) || "kazakhstan"}\0${String(productId || "")}`;
+}
+
+function productRefs(products) {
+  return products
+    .map(product => ({
+      countryId: normalizeCountryId(product.countryId) || "kazakhstan",
+      id: String(product.id || ""),
+    }))
+    .filter(ref => ref.id);
+}
+
+function normalizeProductLookup(value, countryId) {
+  const raw = String(value || "").trim();
+  const country = normalizeCountryId(countryId);
+  const legacyPrefix = country && country !== "kazakhstan" ? `${country}-` : "";
+  return legacyPrefix && raw.toLowerCase().startsWith(legacyPrefix)
+    ? raw.slice(legacyPrefix.length)
+    : raw;
+}
+
 function mapProductRows(rows) {
   const productsById = new Map();
 
   for (const row of rows) {
-    if (!productsById.has(row.id)) {
-      productsById.set(row.id, {
+    const key = productKey(row.country_id, row.id);
+    if (!productsById.has(key)) {
+      productsById.set(key, {
         id: row.id,
         countryId: row.country_id || "kazakhstan",
         slug: row.slug,
@@ -27,7 +50,7 @@ function mapProductRows(rows) {
       });
     }
 
-    const product = productsById.get(row.id);
+    const product = productsById.get(key);
 
     if (row.translation_language) {
       product.translations[row.translation_language] = {
@@ -56,11 +79,12 @@ function mapPurchaseLinkRows(rows) {
   const linksByProductId = new Map();
 
   for (const row of rows) {
-    if (!linksByProductId.has(row.product_id)) {
-      linksByProductId.set(row.product_id, []);
+    const key = productKey(row.product_country_id, row.product_id);
+    if (!linksByProductId.has(key)) {
+      linksByProductId.set(key, []);
     }
 
-    linksByProductId.get(row.product_id).push({
+    linksByProductId.get(key).push({
       slot: row.slot,
       label: row.label,
       url: row.url,
@@ -77,11 +101,12 @@ function mapSectionRows(rows) {
   const sectionsByProductId = new Map();
 
   for (const row of rows) {
-    if (!sectionsByProductId.has(row.product_id)) {
-      sectionsByProductId.set(row.product_id, {});
+    const key = productKey(row.product_country_id, row.product_id);
+    if (!sectionsByProductId.has(key)) {
+      sectionsByProductId.set(key, {});
     }
 
-    const productSections = sectionsByProductId.get(row.product_id);
+    const productSections = sectionsByProductId.get(key);
     productSections[row.language] ||= {};
     productSections[row.language][row.section_type] = row.content || {};
   }
@@ -91,21 +116,24 @@ function mapSectionRows(rows) {
 
 async function attachProductSections(products) {
   if (!products.length) return products;
-  const ids = products.map(product => product.id);
+  const refs = productRefs(products);
   const result = await query(`
     select
-      product_id,
+      ps.product_country_id,
+      ps.product_id,
       language,
       section_type,
       content
-    from product_sections
-    where product_id = any($1::text[])
-    order by product_id, language, sort_order, section_type
-  `, [ids]);
+    from product_sections ps
+    join unnest($1::text[], $2::text[]) as requested(country_id, product_id)
+      on ps.product_country_id = requested.country_id
+      and ps.product_id = requested.product_id
+    order by ps.product_country_id, ps.product_id, language, sort_order, section_type
+  `, [refs.map(ref => ref.countryId), refs.map(ref => ref.id)]);
   const sectionsByProductId = mapSectionRows(result.rows);
 
   products.forEach(product => {
-    product.sections = sectionsByProductId.get(product.id) || {};
+    product.sections = sectionsByProductId.get(productKey(product.countryId, product.id)) || {};
   });
 
   return products;
@@ -113,24 +141,27 @@ async function attachProductSections(products) {
 
 async function attachProductPurchaseLinks(products) {
   if (!products.length) return products;
-  const ids = products.map(product => product.id);
+  const refs = productRefs(products);
   const result = await query(`
     select
-      product_id,
+      ppl.product_country_id,
+      ppl.product_id,
       slot,
       label,
       url,
       logo_src,
       logo_alt,
       sort_order
-    from product_purchase_links
-    where product_id = any($1::text[])
-    order by product_id, sort_order, slot
-  `, [ids]);
+    from product_purchase_links ppl
+    join unnest($1::text[], $2::text[]) as requested(country_id, product_id)
+      on ppl.product_country_id = requested.country_id
+      and ppl.product_id = requested.product_id
+    order by ppl.product_country_id, ppl.product_id, sort_order, slot
+  `, [refs.map(ref => ref.countryId), refs.map(ref => ref.id)]);
   const linksByProductId = mapPurchaseLinkRows(result.rows);
 
   products.forEach(product => {
-    product.purchaseLinks = linksByProductId.get(product.id) || [];
+    product.purchaseLinks = linksByProductId.get(productKey(product.countryId, product.id)) || [];
   });
 
   return products;
@@ -160,8 +191,12 @@ async function listProducts(countryId = "") {
       pi.cloudinary_public_id,
       pi.alt as image_alt
     from products p
-    left join product_translations pt on pt.product_id = p.id
-    left join product_images pi on pi.product_id = p.id
+    left join product_translations pt
+      on pt.product_country_id = p.country_id
+      and pt.product_id = p.id
+    left join product_images pi
+      on pi.product_country_id = p.country_id
+      and pi.product_id = p.id
     ${country ? "where p.country_id = $1" : ""}
     order by p.sort_order, p.slug, pt.language, pi.slot
   `, params);
@@ -203,6 +238,7 @@ async function listTherapeuticAreas() {
 
 async function getProduct(slugOrId, countryId = "kazakhstan") {
   const country = normalizeCountryId(countryId) || "kazakhstan";
+  const lookup = normalizeProductLookup(slugOrId, country);
   const result = await query(`
     select
       p.*,
@@ -218,11 +254,15 @@ async function getProduct(slugOrId, countryId = "kazakhstan") {
       pi.cloudinary_public_id,
       pi.alt as image_alt
     from products p
-    left join product_translations pt on pt.product_id = p.id
-    left join product_images pi on pi.product_id = p.id
-    where p.country_id = $2 and (p.id = $1 or p.slug = $1)
+    left join product_translations pt
+      on pt.product_country_id = p.country_id
+      and pt.product_id = p.id
+    left join product_images pi
+      on pi.product_country_id = p.country_id
+      and pi.product_id = p.id
+    where p.country_id = $2 and (p.id = $1 or p.slug = $1 or p.id = $3 or p.slug = $3)
     order by pt.language, pi.slot
-  `, [slugOrId, country]);
+  `, [slugOrId, country, lookup]);
 
   const products = await attachProductDetails(mapProductRows(result.rows));
   return products[0] || null;
@@ -261,8 +301,8 @@ async function upsertProduct(product) {
     await client.query("begin");
     try {
       const countryId = normalizeCountryId(product.countryId || product.country_id) || "kazakhstan";
-      const id = product.id || product.slug;
-      const slug = product.slug || id;
+      const id = normalizeProductLookup(product.id || product.slug, countryId);
+      const slug = normalizeProductLookup(product.slug || id, countryId);
 
       await client.query(`
         insert into products (
@@ -277,8 +317,7 @@ async function upsertProduct(product) {
           updated_at
         )
         values ($1, $2, $3, $4, $5, $6, $7, $8, now())
-        on conflict (id) do update set
-          country_id = excluded.country_id,
+        on conflict (country_id, id) do update set
           slug = excluded.slug,
           status = excluded.status,
           sort_order = excluded.sort_order,
@@ -300,6 +339,7 @@ async function upsertProduct(product) {
       for (const [language, translation] of Object.entries(product.translations || {})) {
         await client.query(`
           insert into product_translations (
+            product_country_id,
             product_id,
             language,
             name,
@@ -310,8 +350,8 @@ async function upsertProduct(product) {
             benefits,
             updated_at
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, now())
-          on conflict (product_id, language) do update set
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, now())
+          on conflict (product_country_id, product_id, language) do update set
             name = excluded.name,
             short_description = excluded.short_description,
             full_description = excluded.full_description,
@@ -320,6 +360,7 @@ async function upsertProduct(product) {
             benefits = excluded.benefits,
             updated_at = now()
         `, [
+          countryId,
           id,
           language,
           translation.name || slug,
@@ -334,6 +375,7 @@ async function upsertProduct(product) {
       for (const [slot, image] of Object.entries(product.images || {})) {
         await client.query(`
           insert into product_images (
+            product_country_id,
             product_id,
             slot,
             src,
@@ -341,13 +383,14 @@ async function upsertProduct(product) {
             alt,
             updated_at
           )
-          values ($1, $2, $3, $4, $5, now())
-          on conflict (product_id, slot) do update set
+          values ($1, $2, $3, $4, $5, $6, now())
+          on conflict (product_country_id, product_id, slot) do update set
             src = excluded.src,
             cloudinary_public_id = excluded.cloudinary_public_id,
             alt = excluded.alt,
             updated_at = now()
         `, [
+          countryId,
           id,
           slot,
           image.src || "",
@@ -357,13 +400,17 @@ async function upsertProduct(product) {
       }
 
       if (Object.prototype.hasOwnProperty.call(product, "sections")) {
-        await client.query("delete from product_sections where product_id = $1", [id]);
+        await client.query(
+          "delete from product_sections where product_country_id = $1 and product_id = $2",
+          [countryId, id]
+        );
         for (const [language, sections] of Object.entries(product.sections || {})) {
           let sortOrder = 0;
           for (const [sectionType, content] of Object.entries(sections || {})) {
             if (!hasSectionContent(content)) continue;
             await client.query(`
               insert into product_sections (
+                product_country_id,
                 product_id,
                 language,
                 section_type,
@@ -371,8 +418,9 @@ async function upsertProduct(product) {
                 content,
                 updated_at
               )
-              values ($1, $2, $3, $4, $5::jsonb, now())
+              values ($1, $2, $3, $4, $5, $6::jsonb, now())
             `, [
+              countryId,
               id,
               language,
               sectionType,
@@ -385,10 +433,14 @@ async function upsertProduct(product) {
       }
 
       if (Object.prototype.hasOwnProperty.call(product, "purchaseLinks")) {
-        await client.query("delete from product_purchase_links where product_id = $1", [id]);
+        await client.query(
+          "delete from product_purchase_links where product_country_id = $1 and product_id = $2",
+          [countryId, id]
+        );
         for (const link of normalizePurchaseLinks(product.purchaseLinks)) {
           await client.query(`
             insert into product_purchase_links (
+              product_country_id,
               product_id,
               slot,
               label,
@@ -398,8 +450,8 @@ async function upsertProduct(product) {
               sort_order,
               updated_at
             )
-            values ($1, $2, $3, $4, $5, $6, $7, now())
-            on conflict (product_id, slot) do update set
+            values ($1, $2, $3, $4, $5, $6, $7, $8, now())
+            on conflict (product_country_id, product_id, slot) do update set
               label = excluded.label,
               url = excluded.url,
               logo_src = excluded.logo_src,
@@ -407,6 +459,7 @@ async function upsertProduct(product) {
               sort_order = excluded.sort_order,
               updated_at = now()
           `, [
+            countryId,
             id,
             link.slot,
             link.label,
@@ -431,11 +484,12 @@ async function upsertProduct(product) {
 
 async function deleteProduct(slugOrId, countryId = "kazakhstan") {
   const country = normalizeCountryId(countryId) || "kazakhstan";
+  const lookup = normalizeProductLookup(slugOrId, country);
   const result = await query(`
     delete from products
-    where country_id = $2 and (id = $1 or slug = $1)
+    where country_id = $2 and (id = $1 or slug = $1 or id = $3 or slug = $3)
     returning id
-  `, [slugOrId, country]);
+  `, [slugOrId, country, lookup]);
 
   return result.rowCount > 0;
 }

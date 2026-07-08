@@ -479,12 +479,13 @@ function makeStableCloudinaryPublicId({ country, page, imageId }) {
   return [countryPart, pagePart, slot].filter(Boolean).join("/");
 }
 
-function makeStableProductCloudinaryPublicId({ productId, slot, imageId }) {
+function makeStableProductCloudinaryPublicId({ country, productId, slot, imageId }) {
   const productPart = sanitizeCloudinaryPathPart(productId);
   if (!productPart) return "";
 
+  const countryPart = sanitizeCloudinaryPathPart(country, "site");
   const slotPart = sanitizeCloudinaryPathPart(slot || imageId, "card");
-  return [productPart, slotPart].filter(Boolean).join("/");
+  return [countryPart, productPart, slotPart].filter(Boolean).join("/");
 }
 
 function makeStableCloudinaryDeliveryUrl(publicId, format) {
@@ -520,7 +521,7 @@ async function uploadImageToCloudinary({ dataUrl, fileName, imageId, country, pa
   const timestamp = Math.floor(Date.now() / 1000);
   const isProductImage = String(context || "").trim().toLowerCase() === "product";
   const stablePublicId = isProductImage
-    ? makeStableProductCloudinaryPublicId({ productId, slot, imageId })
+    ? makeStableProductCloudinaryPublicId({ country, productId, slot, imageId })
     : makeStableCloudinaryPublicId({ country, page, imageId });
   const publicId = stablePublicId || `${sanitizePublicId(fileName)}-${timestamp}`;
   const folder = isProductImage ? cloudinaryProductUploadFolder : cloudinaryUploadFolder;
@@ -767,12 +768,21 @@ function normalizeSubmittedImageMap(value) {
   );
 }
 
-function normalizeProductIdList(value, productCatalog) {
+function normalizeCatalogProductId(value, countryId) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  const country = productCountryId(countryId);
+  const prefix = productCountryPrefix(country);
+  return prefix && raw.toLowerCase().startsWith(prefix) ? raw.slice(prefix.length) : raw;
+}
+
+function normalizeProductIdList(value, productCatalog, countryId = "") {
   const availableProductIds = new Set((productCatalog || []).map(product => product.id));
   const ids = Array.isArray(value) ? value : String(value || "").split(",");
   return [...new Set(
     ids
       .map(id => String(id || "").trim())
+      .map(id => availableProductIds.has(id) ? id : normalizeCatalogProductId(id, countryId))
       .filter(id => availableProductIds.has(id))
   )].slice(0, 4);
 }
@@ -802,10 +812,7 @@ function productPublicIdFromStorageId(value, countryId) {
 }
 
 function normalizeProductStorageId(countryId, value) {
-  const id = normalizeProductSlug(value);
-  const prefix = productCountryPrefix(countryId);
-  if (!id) return "";
-  return prefix && !id.startsWith(prefix) ? `${prefix}${id}` : id;
+  return productPublicIdFromStorageId(value, countryId);
 }
 
 function normalizeProductImageSlot(value) {
@@ -1050,7 +1057,8 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
   const country = productCountryId(countryId);
   const publicRouteId = productPublicIdFromStorageId(routeId, country);
   const publicSubmittedId = productPublicIdFromStorageId(submitted.id, country);
-  const slug = normalizeProductSlug(submitted.slug || publicSubmittedId || publicRouteId);
+  const publicSubmittedSlug = productPublicIdFromStorageId(submitted.slug, country);
+  const slug = normalizeProductSlug(publicSubmittedSlug || publicSubmittedId || publicRouteId);
   const id = normalizeProductStorageId(country, routeId || submitted.id || slug);
   const statuses = new Set(["draft", "published", "archived"]);
   const status = statuses.has(String(submitted.status || "").trim()) ? String(submitted.status).trim() : "draft";
@@ -1451,12 +1459,13 @@ function mergeContentProduct(staticProduct, databaseProduct) {
   };
 }
 
-function normalizePayloadProductIds(value, productCatalog) {
+function normalizePayloadProductIds(value, productCatalog, countryId = "") {
   const availableProductIds = new Set((productCatalog || []).map(product => product.id));
   const ids = Array.isArray(value) ? value : String(value || "").split(",");
   return [...new Set(
     ids
       .map(id => String(id || "").trim())
+      .map(id => availableProductIds.has(id) ? id : normalizeCatalogProductId(id, countryId))
       .filter(id => availableProductIds.has(id))
   )];
 }
@@ -1464,7 +1473,7 @@ function normalizePayloadProductIds(value, productCatalog) {
 function syncPayloadHomeProducts(payload) {
   const catalog = payload.content?.productCatalog || [];
   payload.content.settings ||= {};
-  const selectedIds = normalizePayloadProductIds(payload.content.settings.homeProducts, catalog);
+  const selectedIds = normalizePayloadProductIds(payload.content.settings.homeProducts, catalog, payload.country?.id);
   const fallbackIds = [...new Set(catalog.map(product => product.id).filter(Boolean))];
   payload.content.settings.homeProducts = [
     ...selectedIds,
@@ -1763,8 +1772,8 @@ function buildChangedOverrides(basePayload, body) {
 
   if (Object.prototype.hasOwnProperty.call(submittedSettings, "homeProducts")) {
     const productCatalog = basePayload.content?.productCatalog || [];
-    const value = normalizeProductIdList(submittedSettings.homeProducts, productCatalog);
-    const baseValue = normalizeProductIdList(basePayload.content?.settings?.homeProducts || [], productCatalog);
+    const value = normalizeProductIdList(submittedSettings.homeProducts, productCatalog, basePayload.country?.id);
+    const baseValue = normalizeProductIdList(basePayload.content?.settings?.homeProducts || [], productCatalog, basePayload.country?.id);
     submittedSettingKeys.push("homeProducts");
     if (!sameStringArray(value, baseValue)) {
       settings.homeProducts = value;

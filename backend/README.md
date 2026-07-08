@@ -53,6 +53,8 @@ Keep `CLOUDINARY_API_SECRET` backend-only. Do not expose it in frontend JavaScri
 
 Admin homepage image uploads use a stable Cloudinary public ID based on country, page, and backend image ID, for example `stada/hero/kazakhstan/index/index_image_003`. Re-uploading that image slot overwrites the same Cloudinary asset instead of creating a timestamped asset name. The backend asks Cloudinary to invalidate the old CDN copy and saves the same stable delivery URL for that slot, so redeploying falls back to the latest image in Cloudinary instead of an older local/default image.
 
+Product image uploads use the product country as part of the stable Cloudinary path, for example `stada/products/kazakhstan/coldrex/card` or `stada/products/kyrgyzstan/coldrex/card`. The product image sync script defaults to Kazakhstan; set `PRODUCT_IMAGE_SYNC_COUNTRY=kyrgyzstan` or another configured country ID when syncing a different market.
+
 ## Content Source
 
 The backend-owned content source lives in `backend/data/content-source.json`. It defines the default page text, image slots, admin sections, and structured product-page fallback content. Admin changes are stored separately in `backend/data/content-overrides.json`.
@@ -60,6 +62,8 @@ The backend-owned content source lives in `backend/data/content-source.json`. It
 Country-specific replacement profiles, page-title overrides, and market-specific copy live in `backend/data/country-content-profiles.json`.
 
 Product catalog defaults live in `backend/data/product-catalog.json`, and worldwide country metadata lives in `backend/data/worldwide-countries.json`. The backend no longer carries a copied frontend snapshot folder.
+
+Database-backed products are country-native: the stable identity is `(country_id, id)`, so different markets can use the same clean product ID such as `coldrex` without storing country prefixes in `products.id`. Legacy prefixed lookups such as `kyrgyzstan-coldrex` are still accepted at the API edge for existing URLs or saved selections.
 
 The Kazakhstan product import flow (`npm run db:import-products` or `/api/admin/products/import-from-site`) reads card-level defaults from `backend/data/product-catalog.json`, derives stable product slugs from the catalog image paths, and enriches each product from matching detail pages in `backend/data/content-source.json`.
 

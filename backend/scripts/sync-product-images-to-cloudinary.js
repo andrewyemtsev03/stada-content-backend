@@ -14,6 +14,7 @@ const cloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const apiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const apiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
 const uploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
+const productCountryId = String(process.env.PRODUCT_IMAGE_SYNC_COUNTRY || "kazakhstan").trim().toLowerCase();
 const dryRun = ["1", "true", "yes"].includes(
   String(process.env.PRODUCT_IMAGE_SYNC_DRY_RUN || process.env.DRY_RUN || "").trim().toLowerCase()
 );
@@ -102,7 +103,7 @@ function mimeTypeForFile(filePath) {
 
 async function uploadImage({ filePath, productId, slot }) {
   const timestamp = Math.floor(Date.now() / 1000);
-  const publicId = `${normalizeSlug(productId)}/${normalizeSlug(slot)}`;
+  const publicId = `${normalizeSlug(productCountryId)}/${normalizeSlug(productId)}/${normalizeSlug(slot)}`;
   const signedParams = {
     folder: uploadFolder,
     public_id: publicId,
@@ -189,6 +190,7 @@ function listProductPages() {
 async function upsertProductImage({ productId, slot, uploaded, alt }) {
   await getDbQuery()(`
     insert into product_images (
+      product_country_id,
       product_id,
       slot,
       src,
@@ -196,13 +198,14 @@ async function upsertProductImage({ productId, slot, uploaded, alt }) {
       alt,
       updated_at
     )
-    values ($1, $2, $3, $4, $5, now())
-    on conflict (product_id, slot) do update set
+    values ($1, $2, $3, $4, $5, $6, now())
+    on conflict (product_country_id, product_id, slot) do update set
       src = excluded.src,
       cloudinary_public_id = excluded.cloudinary_public_id,
       alt = excluded.alt,
       updated_at = now()
   `, [
+    productCountryId,
     productId,
     slot,
     uploaded.secure_url,
@@ -215,10 +218,11 @@ async function listExistingProductImages(productIds) {
   if (!productIds.length) return new Map();
 
   const result = await getDbQuery()(`
-    select product_id, slot, src, cloudinary_public_id
+    select product_country_id, product_id, slot, src, cloudinary_public_id
     from product_images
-    where product_id = any($1::text[])
-  `, [productIds]);
+    where product_country_id = $1
+      and product_id = any($2::text[])
+  `, [productCountryId, productIds]);
 
   return new Map(
     result.rows.map(row => [existingImageKey(row.product_id, row.slot), row])
@@ -231,8 +235,9 @@ async function listExistingProductIds(productIds) {
   const result = await getDbQuery()(`
     select id
     from products
-    where id = any($1::text[])
-  `, [productIds]);
+    where country_id = $1
+      and id = any($2::text[])
+  `, [productCountryId, productIds]);
 
   return new Set(result.rows.map(row => row.id));
 }
@@ -270,6 +275,7 @@ async function main() {
     return true;
   });
 
+  console.log(`Using product country: ${productCountryId}`);
   console.log(`Using product asset root(s): ${assetsRoots.join(", ")}`);
   if (!overwriteExistingCloudinary) {
     console.log("Existing Cloudinary images will be kept. Set PRODUCT_IMAGE_SYNC_OVERWRITE_CLOUDINARY=true to replace them.");
