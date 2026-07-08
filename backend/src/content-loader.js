@@ -72,10 +72,27 @@ function unique(values) {
   return [...new Set(values.filter(value => value !== null && value !== undefined && value !== ""))];
 }
 
+function countryCodeFromConfig(country) {
+  const aliases = Array.isArray(country.aliases) ? country.aliases : [];
+  const aliasCode = aliases
+    .map(alias => String(alias || "").trim().toLowerCase())
+    .find(alias => /^[a-z]{2}$/.test(alias));
+  const domainCode = String(country.domain || "")
+    .trim()
+    .toLowerCase()
+    .split(".")
+    .pop();
+
+  return aliasCode
+    || (/^[a-z]{2}$/.test(domainCode) ? domainCode : "")
+    || String(country.id || "").slice(0, 2).toLowerCase();
+}
+
 function listCountries() {
   const config = loadConfig();
   return Object.values(config.countries).map(country => ({
     id: country.id,
+    code: country.code || countryCodeFromConfig(country),
     name: country.name,
     siteName: country.siteName,
     domain: country.domain,

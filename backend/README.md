@@ -65,6 +65,12 @@ Product catalog defaults live in `backend/data/product-catalog.json`, and worldw
 
 Database-backed products are country-native: the stable identity is `(country_id, id)`, so different markets can use the same clean product ID such as `coldrex` without storing country prefixes in `products.id`. Legacy prefixed lookups such as `kyrgyzstan-coldrex` are still accepted at the API edge for existing URLs or saved selections.
 
+The public frontend and admin read configured site countries from backend endpoints (`/api/countries` and `/api/admin/countries`) instead of keeping separate country registries. The Worldwide page's static country module is generated from `backend/data/worldwide-countries.json`; after changing that JSON, run:
+
+```bash
+npm run frontend:generate-worldwide-countries
+```
+
 The Kazakhstan product import flow (`npm run db:import-products` or `/api/admin/products/import-from-site`) reads card-level defaults from `backend/data/product-catalog.json`, derives stable product slugs from the catalog image paths, and enriches each product from matching detail pages in `backend/data/content-source.json`.
 
 ## Endpoints
