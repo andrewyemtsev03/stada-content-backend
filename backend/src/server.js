@@ -33,6 +33,44 @@ const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
 const productLanguages = ["ru", "kz", "kg", "ge", "en", "az"];
 const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az"]);
+const productSlugTransliteration = {
+  "\u0430": "a",
+  "\u0431": "b",
+  "\u0432": "v",
+  "\u0433": "g",
+  "\u0434": "d",
+  "\u0435": "e",
+  "\u0451": "e",
+  "\u0436": "zh",
+  "\u0437": "z",
+  "\u0438": "i",
+  "\u0439": "y",
+  "\u043a": "k",
+  "\u043b": "l",
+  "\u043c": "m",
+  "\u043d": "n",
+  "\u043e": "o",
+  "\u043f": "p",
+  "\u0440": "r",
+  "\u0441": "s",
+  "\u0442": "t",
+  "\u0443": "u",
+  "\u0444": "f",
+  "\u0445": "h",
+  "\u0446": "ts",
+  "\u0447": "ch",
+  "\u0448": "sh",
+  "\u0449": "sch",
+  "\u044a": "",
+  "\u044b": "y",
+  "\u044c": "",
+  "\u044d": "e",
+  "\u044e": "yu",
+  "\u044f": "ya",
+  "\u04a3": "n",
+  "\u04e9": "o",
+  "\u04af": "u",
+};
 const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 8 * 1024 * 1024);
 const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
@@ -450,21 +488,26 @@ function assertCloudinaryConfigured() {
   });
 }
 
+function transliterateSlugText(value) {
+  return Array.from(String(value || "").normalize("NFKD").toLowerCase())
+    .map(char => productSlugTransliteration[char] ?? char)
+    .join("")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 function sanitizePublicId(value) {
-  return String(value || "hero-image")
+  return transliterateSlugText(value || "hero-image")
     .replace(/\.[^.]+$/, "")
     .trim()
-    .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80) || "hero-image";
 }
 
 function sanitizeCloudinaryPathPart(value, fallback) {
-  return String(value || fallback || "")
+  return transliterateSlugText(value || fallback || "")
     .replace(/\.[^.]+$/, "")
     .trim()
-    .toLowerCase()
     .replace(/[^a-z0-9_-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
@@ -788,9 +831,8 @@ function normalizeProductIdList(value, productCatalog, countryId = "") {
 }
 
 function normalizeProductSlug(value) {
-  return String(value || "")
+  return transliterateSlugText(value)
     .trim()
-    .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 120);
@@ -1058,13 +1100,16 @@ function normalizeProductPayload(body, routeId = "", countryId = "kazakhstan") {
   const publicRouteId = productPublicIdFromStorageId(routeId, country);
   const publicSubmittedId = productPublicIdFromStorageId(submitted.id, country);
   const publicSubmittedSlug = productPublicIdFromStorageId(submitted.slug, country);
-  const slug = normalizeProductSlug(publicSubmittedSlug || publicSubmittedId || publicRouteId);
+  const submittedNames = productLanguages
+    .map(language => submitted.translations?.[language]?.name)
+    .map(name => String(name || "").trim())
+    .filter(Boolean);
+  const nameSlug = submittedNames.map(normalizeProductSlug).find(Boolean) || "";
+  const slug = normalizeProductSlug(publicSubmittedSlug || publicSubmittedId || publicRouteId) || nameSlug;
   const id = normalizeProductStorageId(country, routeId || submitted.id || slug);
   const statuses = new Set(["draft", "published", "archived"]);
   const status = statuses.has(String(submitted.status || "").trim()) ? String(submitted.status).trim() : "draft";
-  const fallbackName = productLanguages
-    .map(language => submitted.translations?.[language]?.name)
-    .find(Boolean) || slug;
+  const fallbackName = submittedNames.find(Boolean) || slug;
 
   if (!id || !slug) {
     throw Object.assign(new Error("Product slug is required."), {
