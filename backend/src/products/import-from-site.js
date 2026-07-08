@@ -1,6 +1,10 @@
+const fs = require("node:fs");
+const path = require("node:path");
 const { runMigrations } = require("../db/migrate");
 const { getPagePayload } = require("../content-loader");
 const { upsertProduct, upsertTherapeuticArea } = require("./repository");
+
+const productCatalogPath = path.resolve(__dirname, "../../data/product-catalog.json");
 
 const detailImageSlots = {
   image_002: "detailHero",
@@ -17,6 +21,14 @@ function normalizeAreaId(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "general";
+}
+
+function normalizeProductSlug(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function productMapById(products) {
@@ -36,17 +48,64 @@ function normalizeProductImageSrc(value) {
   return String(value || "").trim().replace(/\\/g, "/").replace(/^(\.\/|\.\.\/)+/, "");
 }
 
-function makeTranslation(product) {
-  if (!product) return null;
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function productSlugFromCatalogProduct(product) {
+  const imageSrc = String(product?.image?.src || product?.image?.url || "");
+  const imageSlug = imageSrc.match(/\/stada\/products\/([^/]+)/i)?.[1]
+    || imageSrc.match(/\/products\/([^/]+)/i)?.[1];
+  if (imageSlug) return normalizeProductSlug(imageSlug);
+
+  const explicit = String(product?.slug || "").trim();
+  if (explicit) return normalizeProductSlug(explicit);
+
+  const stableId = String(product?.id || "").trim();
+  if (stableId && stableId !== "product") return normalizeProductSlug(stableId);
+
+  return normalizeProductSlug(String(product?.nameKey || "").replace(/^product_/, "").replace(/_name$/, ""));
+}
+
+function normalizeCatalogProduct(product) {
+  const slug = productSlugFromCatalogProduct(product);
+  if (!slug) return null;
+
   return {
-    name: product.name || product.id,
-    shortDescription: product.shortDescription || "",
-    benefits: [],
+    ...product,
+    id: slug,
+    slug,
+    href: `products/${slug}.html`,
   };
+}
+
+function loadCatalogProducts(language) {
+  const catalog = readJson(productCatalogPath);
+  const products = catalog?.products?.[language];
+  return (Array.isArray(products) ? products : [])
+    .map(normalizeCatalogProduct)
+    .filter(Boolean);
 }
 
 function getPayloadText(payload, key) {
   return payload?.content?.text?.[key] || "";
+}
+
+function makeTranslation(product, payload) {
+  if (!product) return null;
+  const shortDescription = getPayloadText(payload, product.descriptionKey) || product.shortDescription || "";
+  return {
+    name: getPayloadText(payload, product.nameKey) || product.name || product.id,
+    shortDescription,
+    fullDescription: shortDescription,
+    composition: "",
+    usageText: "",
+    benefits: [],
+  };
+}
+
+function getCatalogAreaLabel(product, payload) {
+  return getPayloadText(payload, product?.categoryKey) || product?.therapeuticArea || normalizeAreaId(product?.category);
 }
 
 function getPayloadDomText(payload, id) {
@@ -161,17 +220,21 @@ function collectUsageItems(text, orderedKeys, keyPrefix) {
   }));
 }
 
-function parseProductDetailContent(productId, payload) {
+function parseProductDetailContent(productId, payload, fallbackTranslation = {}) {
   const keyPrefix = findProductKeyPrefix(payload, productId);
   const domBase = productDomBase(productId);
   const text = payload.content?.text || {};
   const orderedKeys = getPayloadTextKeysInOrder(payload);
+  const pageDescription = getPayloadText(payload, `${keyPrefix}_page_desc`) || "";
 
   return {
     translation: {
-      name: getPayloadText(payload, `${keyPrefix}_page_title`) || getPayloadText(payload, `${keyPrefix}_name`) || productId,
-      shortDescription: getPayloadText(payload, `${keyPrefix}_page_desc`) || "",
-      fullDescription: getPayloadText(payload, `${keyPrefix}_page_desc`) || "",
+      name: getPayloadText(payload, `${keyPrefix}_page_title`)
+        || getPayloadText(payload, `${keyPrefix}_name`)
+        || fallbackTranslation.name
+        || productId,
+      shortDescription: pageDescription || fallbackTranslation.shortDescription || "",
+      fullDescription: pageDescription || fallbackTranslation.fullDescription || fallbackTranslation.shortDescription || "",
       composition: getPayloadText(payload, `${keyPrefix}_formula_intro`) || "",
       usageText: getPayloadText(payload, `${keyPrefix}_note_text`) || "",
       benefits: collectBenefitsFromPayload(payload, keyPrefix),
@@ -257,8 +320,12 @@ async function importProductsFromSite() {
     applyOverrides: false,
   });
 
-  const ruProducts = ruPayload.content?.productCatalog || [];
-  const kzById = productMapById(kzPayload.content?.productCatalog || []);
+  const ruProducts = loadCatalogProducts("ru");
+  const kzById = productMapById(loadCatalogProducts("kz"));
+  if (!ruProducts.length) {
+    throw new Error(`No products found in ${productCatalogPath}.`);
+  }
+
   const featuredIds = new Set(ruPayload.content?.settings?.homeProducts || []);
   const areas = new Map();
 
@@ -266,12 +333,14 @@ async function importProductsFromSite() {
     const areaId = normalizeAreaId(product.category);
     const kzProduct = kzById.get(product.id);
     if (!areas.has(areaId)) {
+      const ruAreaName = getCatalogAreaLabel(product, ruPayload);
+      const kzAreaName = getCatalogAreaLabel(kzProduct || product, kzPayload) || ruAreaName;
       areas.set(areaId, {
         id: areaId,
         sortOrder: areas.size + 1,
         translations: {
-          ru: { name: product.therapeuticArea || areaId },
-          kz: { name: kzProduct?.therapeuticArea || product.therapeuticArea || areaId },
+          ru: { name: ruAreaName },
+          kz: { name: kzAreaName },
         },
       });
     }
@@ -299,8 +368,8 @@ async function importProductsFromSite() {
       applyOverrides: false,
     });
     const detailImages = parseProductDetailImages(product.id, ruDetailPayload);
-    const ruDetail = parseProductDetailContent(product.id, ruDetailPayload);
-    const kzDetail = parseProductDetailContent(product.id, kzDetailPayload);
+    const ruDetail = parseProductDetailContent(product.id, ruDetailPayload, makeTranslation(product, ruPayload));
+    const kzDetail = parseProductDetailContent(product.id, kzDetailPayload, makeTranslation(kzProduct || product, kzPayload));
 
     await upsertProduct({
       id: product.id,
@@ -312,8 +381,8 @@ async function importProductsFromSite() {
       accentColor: product.accent || null,
       isFeatured: featuredIds.has(product.id),
       translations: {
-        ru: ruDetail?.translation || makeTranslation(product),
-        kz: kzDetail?.translation || makeTranslation(kzProduct || product),
+        ru: ruDetail?.translation || makeTranslation(product, ruPayload),
+        kz: kzDetail?.translation || makeTranslation(kzProduct || product, kzPayload),
       },
       images: {
         card: {
