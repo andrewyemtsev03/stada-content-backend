@@ -871,8 +871,18 @@ function resolveContentSourceDomText(pageSource, language, fallbackLanguage, ite
   return String(item?.value || "");
 }
 
-function normalizeContentSourceImage(image, sectionId, assetsBaseUrl) {
-  const src = String(image?.src || "");
+function resolveCountryCloudinaryHeroImageSource(value, countryId) {
+  const targetCountry = normalizeSlug(countryId);
+  if (!targetCountry || targetCountry === "kazakhstan") return String(value || "");
+
+  return String(value || "").replace(
+    /(https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/(?:v\d+\/)?stada\/hero\/)kazakhstan(\/)/gi,
+    `$1${targetCountry}$2`
+  );
+}
+
+function normalizeContentSourceImage(image, sectionId, assetsBaseUrl, countryId) {
+  const src = resolveCountryCloudinaryHeroImageSource(image?.src, countryId);
   return {
     id: String(image?.id || ""),
     section: sectionId || "",
@@ -880,7 +890,7 @@ function normalizeContentSourceImage(image, sectionId, assetsBaseUrl) {
     url: makeAssetUrl(src, assetsBaseUrl),
     alt: String(image?.alt || ""),
     loading: String(image?.loading || ""),
-    srcset: String(image?.srcset || ""),
+    srcset: resolveCountryCloudinaryHeroImageSource(image?.srcset, countryId),
     sizes: String(image?.sizes || ""),
   };
 }
@@ -990,7 +1000,7 @@ function buildContentSourcePayload({
     const photos = (section.imageIds || [])
       .map(id => imagesById.get(id))
       .filter(Boolean)
-      .map(image => normalizeContentSourceImage(image, section.id, assetsBaseUrl));
+      .map(image => normalizeContentSourceImage(image, section.id, assetsBaseUrl, countryConfig.id));
 
     return {
       id: section.id,
@@ -1041,7 +1051,7 @@ function buildContentSourcePayload({
           tag: String(item.tag || "span").toLowerCase(),
           value: resolveContentSourceDomText(pageSource, language, fallbackLanguage, item),
         })),
-        images: (pageSource.images || []).map(image => normalizeContentSourceImage(image, "", assetsBaseUrl)),
+        images: (pageSource.images || []).map(image => normalizeContentSourceImage(image, "", assetsBaseUrl, countryConfig.id)),
       },
       settings: {
         ...(pageSource.settings && typeof pageSource.settings === "object" ? pageSource.settings : {}),
@@ -1095,14 +1105,20 @@ function applyContentOverrides(payload, countryId, language, pagePath, assetsBas
       return image;
     }
 
-    const src = typeof override.src === "string" ? override.src : image.src;
+    const src = resolveCountryCloudinaryHeroImageSource(
+      typeof override.src === "string" ? override.src : image.src,
+      countryId
+    );
     return {
       ...image,
       src,
       url: makeAssetUrl(src, assetsBaseUrl),
       alt: typeof override.alt === "string" ? override.alt : image.alt,
       loading: typeof override.loading === "string" ? override.loading : image.loading,
-      srcset: typeof override.srcset === "string" ? override.srcset : image.srcset,
+      srcset: resolveCountryCloudinaryHeroImageSource(
+        typeof override.srcset === "string" ? override.srcset : image.srcset,
+        countryId
+      ),
       sizes: typeof override.sizes === "string" ? override.sizes : image.sizes,
       source: "override",
     };
