@@ -134,6 +134,38 @@
       "flag": "https://flagcdn.com/w80/az.png"
     },
     {
+      "id": "moldova",
+      "name": "Moldova",
+      "region": "Europe",
+      "labels": {
+        "en": {
+          "name": "Moldova",
+          "region": "Europe"
+        },
+        "ro": {
+          "name": "Moldova",
+          "region": "Europa"
+        },
+        "ru": {
+          "name": "Молдова",
+          "region": "Европа"
+        },
+        "kz": {
+          "name": "Молдова",
+          "region": "Еуропа"
+        }
+      },
+      "lat": 47.4116,
+      "lng": 28.3699,
+      "locationTitle": "STADA Moldova",
+      "address": "",
+      "website": "https://stada.md/",
+      "websiteLabel": "Visit Website",
+      "email": "",
+      "phone": "",
+      "flag": "https://flagcdn.com/w80/md.png"
+    },
+    {
       "id": "germany",
       "name": "Germany",
       "region": "Europe",

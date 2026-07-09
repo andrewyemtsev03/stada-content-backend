@@ -1,4 +1,56 @@
 {
+  "moldova": {
+    "replacements": {
+      "default": [
+        ["STADA Kazakhstan", "STADA Moldova"],
+        ["Kazakhstan", "Moldova"],
+        ["Казахстане", "Молдове"],
+        ["Казахстан", "Молдова"]
+      ]
+    },
+    "pageTitles": {
+      "ro": {
+        "index.html": "STADA - Despre companie",
+        "culture.html": "STADA - Cultura corporativa",
+        "history.html": "STADA - Istoria companiei",
+        "products/index.html": "STADA - Produsele noastre",
+        "worldwide.html": "STADA - Prezenta internationala"
+      },
+      "ru": {
+        "index.html": "STADA Moldova - О компании",
+        "culture.html": "STADA Moldova - Корпоративная культура",
+        "history.html": "STADA Moldova - История компании",
+        "products/index.html": "STADA Moldova - Наши продукты",
+        "worldwide.html": "STADA Moldova - Международное присутствие"
+      }
+    },
+    "text": {
+      "ro": {
+        "site_name": "STADA Moldova",
+        "hero_kicker": "STADA Moldova",
+        "hero_sub3": "Dezvoltam solutii accesibile pentru familiile din Moldova.",
+        "hero_text3": "In Moldova, dialogul de incredere dintre pacienti si specialisti ramane esential pentru grija fata de sanatate",
+        "footer_brand_text": "Combinam experienta internationala STADA cu apropierea locala de pacienti, specialisti si parteneri din Moldova.",
+        "footer_trust_countries": "100+ tari",
+        "stats_countries": "Prezenta in peste 100 de tari"
+      },
+      "ru": {
+        "site_name": "STADA Moldova",
+        "hero_kicker": "STADA Moldova",
+        "hero_sub3": "Развиваем доступные решения для семей в Молдове.",
+        "hero_text3": "В Молдове доверительный диалог между пациентами и специалистами остается важной основой заботы о здоровье",
+        "footer_brand_text": "Мы объединяем международный опыт STADA и локальную близость к пациентам, специалистам и партнерам в Молдове."
+      }
+    },
+    "domText": {
+      "ro": {
+        "worldwide_text_001": "Moldova"
+      },
+      "ru": {
+        "worldwide_text_001": "Молдова"
+      }
+    }
+  },
   "azerbaijan": {
     "replacements": {
       "default": [

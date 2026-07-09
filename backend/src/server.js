@@ -18,10 +18,12 @@ const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "andrewyemtsevKZ").tri
 const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "andrewyemtsevKG").trim();
 const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "andrewyemtsevGE").trim();
 const adminAzLogin = String(process.env.ADMIN_AZ_LOGIN || "andrewyemtsevAZ").trim();
+const adminMdLogin = String(process.env.ADMIN_MD_LOGIN || "andrewyemtsevMD").trim();
 const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
 const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
 const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || adminPassword).trim();
 const adminAzPassword = String(process.env.ADMIN_AZ_PASSWORD || adminPassword).trim();
+const adminMdPassword = String(process.env.ADMIN_MD_PASSWORD || adminPassword).trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
@@ -31,8 +33,8 @@ const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
-const productLanguages = ["ru", "kz", "kg", "ge", "en", "az"];
-const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az"]);
+const productLanguages = ["ru", "kz", "kg", "ge", "en", "az", "ro"];
+const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az", "ro"]);
 const productSlugTransliteration = {
   "\u0430": "a",
   "\u0431": "b",
@@ -182,6 +184,11 @@ function buildAdminAccounts() {
     countryIds: ["azerbaijan"],
   });
   addAdminAccount(accounts, {
+    login: adminMdLogin,
+    password: adminMdPassword,
+    countryIds: ["moldova"],
+  });
+  addAdminAccount(accounts, {
     login: adminLogin,
     password: adminPassword,
     countryIds: allCountryIds(),
@@ -225,6 +232,8 @@ function isDefaultPublicCorsOrigin(origin) {
       || hostname.endsWith(".stada.ge")
       || hostname === "stada.az"
       || hostname.endsWith(".stada.az")
+      || hostname === "stada.md"
+      || hostname.endsWith(".stada.md")
     );
   } catch (error) {
     return false;
@@ -1139,6 +1148,9 @@ function localizedProductFallbacks(product, language) {
   if (requestedLanguage === "az") {
     return [product?.translations?.az, product?.translations?.ru, product?.translations?.en, product?.translations?.kz, product?.translations?.kg, product?.translations?.ge];
   }
+  if (requestedLanguage === "ro") {
+    return [product?.translations?.ro, product?.translations?.ru, product?.translations?.en, product?.translations?.az, product?.translations?.kz, product?.translations?.kg, product?.translations?.ge];
+  }
   if (requestedLanguage === "kg") {
     return [product?.translations?.kg, product?.translations?.ru, product?.translations?.en];
   }
@@ -1470,6 +1482,8 @@ function buildTherapeuticAreaLabelMap(areas, language = "ru") {
     const requestedLanguage = String(language || "").trim().toLowerCase();
     const translation = requestedLanguage === "az"
       ? area.translations?.az || area.translations?.ru || {}
+      : requestedLanguage === "ro"
+      ? area.translations?.ro || area.translations?.ru || area.translations?.en || {}
       : requestedLanguage === "kg" || requestedLanguage === "ge"
       ? area.translations?.[requestedLanguage] || {}
       : requestedLanguage === "en"
@@ -1595,6 +1609,9 @@ function getProductPayloadSections(product, language = "ru") {
   const requestedLanguage = String(language || "").trim().toLowerCase();
   if (requestedLanguage === "az") {
     return product.sections?.az || product.sections?.ru || product.sections?.en || product.sections?.kz || {};
+  }
+  if (requestedLanguage === "ro") {
+    return product.sections?.ro || product.sections?.ru || product.sections?.en || {};
   }
   if (requestedLanguage === "kg") {
     return product.sections?.kg || product.sections?.ru || product.sections?.en || {};
@@ -2228,6 +2245,7 @@ async function handleRequest(request, response) {
           "GET /api/homepage/kazakhstan?lang=kz",
           "GET /api/homepage/kyrgyzstan?lang=kg",
           "GET /api/homepage/azerbaijan?lang=az",
+          "GET /api/homepage/moldova?lang=ro",
           "GET /api/page/kg?lang=kg&page=products/coldrex.html",
           "GET /api/products/coldrex?country=kazakhstan&lang=ru",
           "POST /api/homepage { country, lang }",

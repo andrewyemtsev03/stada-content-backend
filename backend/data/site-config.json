@@ -61,6 +61,21 @@
         "worldwideCountriesPath": "data/worldwide-countries.json",
         "assetsBaseUrl": "https://stada.az/"
       }
+    },
+    "moldova": {
+      "id": "moldova",
+      "name": "Moldova",
+      "siteName": "STADA Moldova",
+      "domain": "stada.md",
+      "siteUrl": "https://stada.md/",
+      "aliases": ["md", "moldova", "stada.md"],
+      "defaultLanguage": "ro",
+      "supportedLanguages": ["ro", "ru"],
+      "homepage": {
+        "productCatalogPath": "data/product-catalog.json",
+        "worldwideCountriesPath": "data/worldwide-countries.json",
+        "assetsBaseUrl": "https://stada.md/"
+      }
     }
   }
 }
