@@ -89,7 +89,10 @@
             "career_fact4",
             "career_fact5"
           ],
-          "imageIds": []
+          "imageIds": [
+            "index_image_014",
+            "index_image_015"
+          ]
         },
         {
           "id": "products",
@@ -475,6 +478,22 @@
           "id": "index_image_013",
           "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_013.jpg",
           "alt": "Historic STADA pharmacy glass bottles",
+          "loading": "",
+          "srcset": "",
+          "sizes": ""
+        },
+        {
+          "id": "index_image_014",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_014.png",
+          "alt": "Top Employer Kazakhstan 2025",
+          "loading": "",
+          "srcset": "",
+          "sizes": ""
+        },
+        {
+          "id": "index_image_015",
+          "src": "https://res.cloudinary.com/ds2aaznn7/image/upload/stada/hero/kazakhstan/index/index_image_015.png",
+          "alt": "Top Employer Europe 2025",
           "loading": "",
           "srcset": "",
           "sizes": ""
