@@ -869,13 +869,19 @@ function resolveContentSourceText(pageSource, language, fallbackLanguage, key) {
 
 function resolveContentSourceDomText(pageSource, language, fallbackLanguage, item) {
   const id = String(item?.id || "");
+  const baseValue = String(item?.value || "");
+
   for (const candidateLanguage of languageFallbackOrder(language, fallbackLanguage)) {
     const value = pageSource.domTextTranslations?.[candidateLanguage]?.[id];
     if (value !== null && value !== undefined && value !== "") {
       return String(value);
     }
+
+    // The extracted DOM is authored in Russian, so reaching Russian in the
+    // fallback order means the base value is the correct localized value.
+    if (candidateLanguage === "ru") return baseValue;
   }
-  return String(item?.value || "");
+  return baseValue;
 }
 
 function resolveCountryCloudinaryHeroImageSource(value, countryId) {
