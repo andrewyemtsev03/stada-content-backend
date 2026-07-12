@@ -81,15 +81,15 @@
       "id": "uzbekistan",
       "name": "Uzbekistan",
       "siteName": "STADA Uzbekistan",
-      "domain": "new.stada.uz",
-      "siteUrl": "https://new.stada.uz/",
-      "aliases": ["uz", "uzbekistan", "stada.uz", "new.stada.uz"],
+      "domain": "stada.uz",
+      "siteUrl": "https://stada.uz/",
+      "aliases": ["uz", "uzbekistan", "stada.uz"],
       "defaultLanguage": "ru",
       "supportedLanguages": ["ru", "uz"],
       "homepage": {
         "productCatalogPath": "data/product-catalog.json",
         "worldwideCountriesPath": "data/worldwide-countries.json",
-        "assetsBaseUrl": "https://new.stada.uz/"
+        "assetsBaseUrl": "https://stada.uz/"
       }
     }
   }
