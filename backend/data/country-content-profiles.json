@@ -1,4 +1,90 @@
 {
+  "uzbekistan": {
+    "replacements": {
+      "default": [
+        ["STADA Kazakhstan", "STADA Uzbekistan"],
+        ["Kazakhstan", "Uzbekistan"],
+        ["STADA Georgia", "STADA Uzbekistan"],
+        ["Georgia", "Uzbekistan"],
+        ["Казахстане", "Узбекистане"],
+        ["Казахстан", "Узбекистан"]
+      ],
+      "uz": [
+        ["STADA Georgia", "STADA Uzbekistan"],
+        ["Georgia", "O‘zbekiston"],
+        ["Gruziya", "O‘zbekiston"],
+        ["Qozog‘iston", "O‘zbekiston"],
+        ["Qozog'iston", "O‘zbekiston"]
+      ]
+    },
+    "pageTitles": {
+      "ru": {
+        "index.html": "STADA Uzbekistan - О компании",
+        "culture.html": "STADA Uzbekistan - Корпоративная культура",
+        "history.html": "STADA Uzbekistan - История компании",
+        "products/index.html": "STADA Uzbekistan - Наши продукты",
+        "worldwide.html": "STADA Uzbekistan - Международное присутствие"
+      },
+      "uz": {
+        "index.html": "STADA Uzbekistan - Kompaniya haqida",
+        "culture.html": "STADA Uzbekistan - Korporativ madaniyat",
+        "history.html": "STADA Uzbekistan - Kompaniya tarixi",
+        "products/index.html": "STADA Uzbekistan - Mahsulotlarimiz",
+        "worldwide.html": "STADA Uzbekistan - Xalqaro faoliyat"
+      }
+    },
+    "text": {
+      "ru": {
+        "site_name": "STADA Uzbekistan",
+        "hero_kicker": "STADA Uzbekistan",
+        "hero_sub3": "Развиваем доступные решения для семей в Узбекистане.",
+        "hero_text3": "В Узбекистане доверительный диалог между пациентами и специалистами остается важной основой заботы о здоровье.",
+        "footer_brand_text": "Мы объединяем международный опыт STADA и локальную близость к пациентам, специалистам и партнерам в Узбекистане."
+      },
+      "uz": {
+        "site_name": "STADA Uzbekistan",
+        "hero_kicker": "STADA Uzbekistan",
+        "hero_sub3": "O‘zbekistondagi oilalar uchun qulay yechimlarni rivojlantiramiz.",
+        "hero_text3": "O‘zbekistonda bemorlar va mutaxassislar o‘rtasidagi ishonchli muloqot sog‘liqni saqlashning muhim asosi bo‘lib qolmoqda.",
+        "footer_brand_text": "STADA kompaniyasining xalqaro tajribasini O‘zbekistondagi bemorlar, mutaxassislar va hamkorlarga yaqinlik bilan birlashtiramiz.",
+        "footer_trust_countries": "100 dan ortiq mamlakat",
+        "stats_countries": "100 dan ortiq mamlakatda faoliyat"
+      }
+    },
+    "domText": {
+      "ru": {
+        "worldwide_text_001": "Узбекистан"
+      },
+      "uz": {
+        "worldwide_text_001": "O‘zbekiston"
+      }
+    },
+    "imageAlt": {
+      "uz": {
+        "index_image_002": "STADA Uzbekistan jamoasi",
+        "index_image_014": "Top Employer Uzbekistan 2025",
+        "products_index_image_011": "Kamistad Baby",
+        "products_index_image_015": "NO-SPA",
+        "products_index_image_016": "NO-SPA Forte",
+        "products_index_image_017": "Essentiale",
+        "products_index_image_018": "Femilex",
+        "products_index_image_019": "Nizoral",
+        "products_index_image_020": "Nizoral shampuni",
+        "products_index_image_021": "Psilo-Balsam",
+        "products_index_image_022": "Hexicon",
+        "products_index_image_023": "Aqualor",
+        "products_index_image_024": "Aqualor Active Forte",
+        "products_index_image_025": "Aqualor Baby",
+        "products_index_image_026": "Aqualor tomoq spreyi",
+        "products_index_image_027": "Aqualor Soft",
+        "products_index_image_028": "Aqualor Soft mini",
+        "products_index_image_035": "Cardiomagnyl",
+        "products_index_image_036": "Clopidogrel-Teva",
+        "products_index_image_038": "Biosfera",
+        "products_index_image_040": "Apteka Plus"
+      }
+    }
+  },
   "moldova": {
     "replacements": {
       "default": [
@@ -188,7 +274,6 @@
         "culture_fact_values": "ortaq dəyərlər",
         "culture_values_eyebrow": "Dəyərlərimiz",
         "culture_values_heading": "Gündəlik qərarlar üçün prinsiplər",
-        "culture_values_intro": "Dörd dəyər komandalarımıza məsuliyyət götürməyə, daha sürətli öyrənməyə, maneəsiz əməkdaşlıq etməyə və etimadı qorumağa kömək edir.",
         "culture_integrity_title": "Dürüstlük",
         "culture_integrity_tagline": "Doğru olanı etmək.",
         "culture_entrepreneurship_title": "Sahibkarlıq ruhu",
