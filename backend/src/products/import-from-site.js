@@ -220,6 +220,115 @@ function collectUsageItems(text, orderedKeys, keyPrefix) {
   }));
 }
 
+function mergeMissingProductContent(primary, fallback) {
+  if (Array.isArray(primary) || Array.isArray(fallback)) {
+    return Array.isArray(primary) && primary.length ? primary : (Array.isArray(fallback) ? fallback : []);
+  }
+  if ((primary && typeof primary === "object") || (fallback && typeof fallback === "object")) {
+    const primaryObject = primary && typeof primary === "object" ? primary : {};
+    const fallbackObject = fallback && typeof fallback === "object" ? fallback : {};
+    return Object.fromEntries(
+      [...new Set([...Object.keys(fallbackObject), ...Object.keys(primaryObject)])]
+        .map(key => [key, mergeMissingProductContent(primaryObject[key], fallbackObject[key])])
+    );
+  }
+  if (typeof primary === "string") return primary.trim() ? primary : (fallback ?? primary);
+  return primary ?? fallback;
+}
+
+function makeResponsibleProductFallback(productId, payload, fallbackTranslation = {}) {
+  const language = String(payload?.language || "ru").toLowerCase();
+  const isKazakh = language === "kz";
+  const name = String(fallbackTranslation.name || productId).trim();
+  const description = String(
+    fallbackTranslation.shortDescription || fallbackTranslation.fullDescription || ""
+  ).trim();
+  const copy = isKazakh ? {
+    overviewLabel: "Өнім туралы",
+    overviewHeading: `${name}: негізгі ақпарат`,
+    formulaLabel: "Құрамы мен шығарылу түрі",
+    formulaHeading: "Қолданар алдында нұсқаулықты тексеріңіз",
+    formulaIntro: `${name} препаратының құрамы, шығарылу түрі және қолдану ерекшеліктері ресми нұсқаулықта толық көрсетілген.`,
+    benefits: [
+      "Көрсетілімдері мен қолдану тәсілі ресми нұсқаулықта көрсетілген",
+      "Қарсы көрсетілімдер мен ықтимал жағымсыз реакцияларды ескеру қажет",
+      "Басқа дәрілермен бірге қолданғанда маманмен кеңескен жөн",
+      "Ұсынылған қолдану тәртібі мен сақтау шарттарын сақтаңыз",
+    ],
+    formulaPoints: [
+      { title: "Құрамы", text: "Қолданар алдында белсенді және қосымша компоненттер тізімін тексеріңіз." },
+      { title: "Шығарылу түрі", text: "Қаптамадағы дәрілік түр мен дозаның нұсқаулыққа сәйкес екенін тексеріңіз." },
+      { title: "Үйлесімділігі", text: "Қабылдап жүрген дәрілеріңіз бен созылмалы ауруларыңыз туралы маманға хабарлаңыз." },
+    ],
+    usageLabel: "Жауапты қолдану",
+    usageHeading: "Нұсқаулыққа және маман кеңесіне сәйкес",
+    usageItems: [
+      { title: "Қолданар алдында", text: "Нұсқаулықты оқып, көрсетілімдер мен қарсы көрсетілімдерді тексеріңіз." },
+      { title: "Қолдану тәртібі", text: "Дозаны, қолдану жиілігін және курс ұзақтығын нұсқаулыққа немесе дәрігер тағайындауына сай сақтаңыз." },
+      { title: "Кеңес қажет болғанда", text: "Симптомдар сақталса, күшейсе немесе жағымсыз реакциялар пайда болса, маманға жүгініңіз." },
+    ],
+    noteTitle: "Маңызды",
+    noteText: "Бұл ақпарат ресми нұсқаулықты және медицина маманының кеңесін алмастырмайды. Қолданар алдында нұсқаулықпен танысыңыз.",
+    buyIntro: `${name} өнімін Қазақстандағы STADA дәріхана серіктестерінен іздеңіз.`,
+  } : {
+    overviewLabel: "О продукте",
+    overviewHeading: `${name}: основная информация`,
+    formulaLabel: "Состав и форма выпуска",
+    formulaHeading: "Проверьте инструкцию перед применением",
+    formulaIntro: `Состав, форма выпуска и особенности применения ${name} подробно указаны в официальной инструкции.`,
+    benefits: [
+      "Показания и способ применения приведены в официальной инструкции",
+      "Необходимо учитывать противопоказания и возможные нежелательные реакции",
+      "При сочетании с другими средствами рекомендуется консультация специалиста",
+      "Соблюдайте рекомендованную схему применения и условия хранения",
+    ],
+    formulaPoints: [
+      { title: "Состав", text: "Перед применением проверьте перечень действующих и вспомогательных компонентов." },
+      { title: "Форма выпуска", text: "Убедитесь, что лекарственная форма и дозировка на упаковке соответствуют инструкции." },
+      { title: "Совместимость", text: "Сообщите специалисту о принимаемых препаратах и хронических заболеваниях." },
+    ],
+    usageLabel: "Ответственное применение",
+    usageHeading: "По инструкции и рекомендации специалиста",
+    usageItems: [
+      { title: "Перед применением", text: "Прочитайте инструкцию и проверьте показания и противопоказания." },
+      { title: "Схема применения", text: "Соблюдайте дозировку, частоту и продолжительность курса из инструкции или назначения врача." },
+      { title: "Когда нужна консультация", text: "Обратитесь к специалисту, если симптомы сохраняются, усиливаются или возникают нежелательные реакции." },
+    ],
+    noteTitle: "Важно",
+    noteText: "Информация не заменяет официальную инструкцию и консультацию медицинского специалиста. Перед применением ознакомьтесь с инструкцией.",
+    buyIntro: `Ищите ${name} у аптечных партнеров STADA в Казахстане.`,
+  };
+
+  return {
+    translation: {
+      name,
+      shortDescription: description,
+      fullDescription: description,
+      composition: copy.formulaIntro,
+      usageText: copy.noteText,
+      benefits: copy.benefits,
+    },
+    sections: {
+      hero: { lead: description, badges: [], metrics: [] },
+      overview: {
+        label: copy.overviewLabel,
+        heading: copy.overviewHeading,
+        intro: description,
+        facts: copy.benefits.map((text, index) => ({ value: String(index + 1), title: text, text })),
+      },
+      formula: {
+        label: copy.formulaLabel,
+        heading: copy.formulaHeading,
+        intro: copy.formulaIntro,
+        points: copy.formulaPoints,
+      },
+      usage: { label: copy.usageLabel, heading: copy.usageHeading, items: copy.usageItems },
+      note: { title: copy.noteTitle, text: copy.noteText },
+      buy: { intro: copy.buyIntro },
+    },
+  };
+}
+
 function parseProductDetailContent(productId, payload, fallbackTranslation = {}) {
   const keyPrefix = findProductKeyPrefix(payload, productId);
   const domBase = productDomBase(productId);
@@ -227,7 +336,7 @@ function parseProductDetailContent(productId, payload, fallbackTranslation = {})
   const orderedKeys = getPayloadTextKeysInOrder(payload);
   const pageDescription = getPayloadText(payload, `${keyPrefix}_page_desc`) || "";
 
-  return {
+  const parsed = {
     translation: {
       name: getPayloadText(payload, `${keyPrefix}_page_title`)
         || getPayloadText(payload, `${keyPrefix}_name`)
@@ -280,6 +389,11 @@ function parseProductDetailContent(productId, payload, fallbackTranslation = {})
       },
     },
   };
+
+  return mergeMissingProductContent(
+    parsed,
+    makeResponsibleProductFallback(productId, payload, fallbackTranslation)
+  );
 }
 
 function parseProductPurchaseLinks(payload) {
@@ -409,4 +523,6 @@ async function importProductsFromSite() {
 
 module.exports = {
   importProductsFromSite,
+  parseProductDetailContent,
+  parseProductPurchaseLinks,
 };

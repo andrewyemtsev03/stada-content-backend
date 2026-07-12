@@ -7,7 +7,7 @@ const { URL } = require("node:url");
 const { getHomepagePayload, getPagePayload, listCountries } = require("./content-loader");
 const { getPageOverrides, savePageOverrides } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
-const { importProductsFromSite } = require("./products/import-from-site");
+const { importProductsFromSite, parseProductDetailContent, parseProductPurchaseLinks } = require("./products/import-from-site");
 const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertProduct } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
@@ -1286,10 +1286,34 @@ function makeDefaultProductPurchaseLinks(productName = "") {
   ];
 }
 
-function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, country, language = "ru") {
+function mergeProductContentWithFallback(primary, fallback) {
+  if (Array.isArray(primary) || Array.isArray(fallback)) {
+    return Array.isArray(primary) && primary.length ? primary : (Array.isArray(fallback) ? fallback : []);
+  }
+
+  if ((primary && typeof primary === "object") || (fallback && typeof fallback === "object")) {
+    const primaryObject = primary && typeof primary === "object" ? primary : {};
+    const fallbackObject = fallback && typeof fallback === "object" ? fallback : {};
+    return Object.fromEntries(
+      [...new Set([...Object.keys(fallbackObject), ...Object.keys(primaryObject)])]
+        .map(key => [key, mergeProductContentWithFallback(primaryObject[key], fallbackObject[key])])
+    );
+  }
+
+  if (typeof primary === "string") return primary.trim() ? primary : (fallback ?? primary);
+  return primary ?? fallback;
+}
+
+function productDetailPayloadFromDatabaseProduct(product, therapeuticAreas, country, language = "ru", staticDetail = null) {
   const areaLabels = buildTherapeuticAreaLabelMap(therapeuticAreas, language);
-  const translation = getProductPayloadTranslation(product, language);
-  const sections = getProductPayloadSections(product, language);
+  const translation = mergeProductContentWithFallback(
+    getProductPayloadTranslation(product, language),
+    staticDetail?.translation || {}
+  );
+  const sections = mergeProductContentWithFallback(
+    getProductPayloadSections(product, language),
+    staticDetail?.sections || {}
+  );
   const image = getCanonicalProductImageFromSlots(product.images || {});
   const images = product.images || {};
   const imageSrc = normalizeImageSource(image.src);
@@ -2203,11 +2227,38 @@ async function handleRequest(request, response) {
         return;
       }
 
+      const countryPayload = getPagePayload({ country, lang, page: "index.html" });
+      let staticDetail = null;
+      let staticPurchaseLinks = [];
+      try {
+        const staticProductPayload = getPagePayload({
+          country,
+          lang,
+          page: `products/${product.slug || product.id}.html`,
+          applyOverrides: false,
+        });
+        staticDetail = parseProductDetailContent(
+          product.id,
+          staticProductPayload,
+          getProductPayloadTranslation(product, lang)
+        );
+        staticPurchaseLinks = parseProductPurchaseLinks(staticProductPayload);
+      } catch (error) {
+        if (error.code !== "PAGE_NOT_FOUND") throw error;
+      }
+      const productWithPurchaseFallback = {
+        ...product,
+        purchaseLinks: Array.isArray(product.purchaseLinks) && product.purchaseLinks.length
+          ? product.purchaseLinks
+          : staticPurchaseLinks,
+      };
+
       sendJson(response, 200, productDetailPayloadFromDatabaseProduct(
-        product,
+        productWithPurchaseFallback,
         await listTherapeuticAreasOrEmpty(),
-        getPagePayload({ country, lang, page: "index.html" }).country,
-        lang
+        countryPayload.country,
+        lang,
+        staticDetail
       ));
       return;
     }
@@ -2310,4 +2361,8 @@ if (require.main === module) {
   });
 }
 
-module.exports = { server };
+module.exports = {
+  server,
+  mergeProductContentWithFallback,
+  productDetailPayloadFromDatabaseProduct,
+};
