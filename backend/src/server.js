@@ -248,6 +248,8 @@ function isDefaultPublicCorsOrigin(origin) {
       || hostname.endsWith(".stada.az")
       || hostname === "stada.md"
       || hostname.endsWith(".stada.md")
+      || hostname === "stada.uz"
+      || hostname.endsWith(".stada.uz")
       || hostname === "stada.am"
       || hostname.endsWith(".stada.am")
     );
