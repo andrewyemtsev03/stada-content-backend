@@ -62,6 +62,21 @@
         "assetsBaseUrl": "https://stada.az/"
       }
     },
+    "armenia": {
+      "id": "armenia",
+      "name": "Armenia",
+      "siteName": "STADA Armenia",
+      "domain": "stada.am",
+      "siteUrl": "https://stada.am/",
+      "aliases": ["am", "armenia", "stada.am", "new.stada.am"],
+      "defaultLanguage": "hy",
+      "supportedLanguages": ["hy", "ru"],
+      "homepage": {
+        "productCatalogPath": "data/product-catalog.json",
+        "worldwideCountriesPath": "data/worldwide-countries.json",
+        "assetsBaseUrl": "https://stada.am/"
+      }
+    },
     "moldova": {
       "id": "moldova",
       "name": "Moldova",

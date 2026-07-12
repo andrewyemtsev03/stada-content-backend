@@ -32,7 +32,10 @@ function assertCountry(country, index) {
 }
 
 function makeModule({ defaultCountryId, countries }) {
-  const countryJson = JSON.stringify(countries, null, 2);
+  const countryJson = JSON.stringify(countries, null, 2)
+    .split("\n")
+    .map((line, index) => index === 0 ? line : `  ${line}`)
+    .join("\n");
   return `// Generated from backend/data/worldwide-countries.json. Do not edit by hand.
 export const defaultCountryId = ${JSON.stringify(defaultCountryId)};
 

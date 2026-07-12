@@ -2,7 +2,7 @@
 
 Small Node backend that returns country-aware page content for the STADA website.
 
-The configured sites are Kazakhstan, Kyrgyzstan, Georgia, Azerbaijan, Moldova, and Uzbekistan. Future country sites can be added in `data/site-config.json` by adding country metadata and, for editable pages, entries in `data/content-source.json`.
+The configured sites are Kazakhstan, Kyrgyzstan, Georgia, Azerbaijan, Armenia, Moldova, and Uzbekistan. Future country sites can be added in `data/site-config.json` by adding country metadata and, for editable pages, entries in `data/content-source.json`.
 
 ## Run
 
@@ -24,7 +24,7 @@ ADMIN_LOGIN=your_admin_login
 ADMIN_PASSWORD=use_a_long_random_password
 ```
 
-Country-limited admin accounts can be configured with `ADMIN_KZ_LOGIN`, `ADMIN_KG_LOGIN`, `ADMIN_GE_LOGIN`, `ADMIN_AZ_LOGIN`, `ADMIN_MD_LOGIN`, `ADMIN_UZ_LOGIN` and the matching `*_PASSWORD` variables.
+Country-limited admin accounts can be configured with `ADMIN_KZ_LOGIN`, `ADMIN_KG_LOGIN`, `ADMIN_GE_LOGIN`, `ADMIN_AZ_LOGIN`, `ADMIN_AM_LOGIN`, `ADMIN_MD_LOGIN`, `ADMIN_UZ_LOGIN` and the matching `*_PASSWORD` variables.
 
 The backend will not accept admin logins until both variables are set. For production, also set:
 

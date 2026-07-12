@@ -1,4 +1,60 @@
 {
+  "armenia": {
+    "replacements": {
+      "default": [
+        ["STADA Kazakhstan", "STADA Armenia"],
+        ["Kazakhstan", "Armenia"],
+        ["Казахстане", "Армении"],
+        ["Казахстан", "Армения"]
+      ],
+      "hy": [
+        ["STADA Kazakhstan", "STADA Armenia"],
+        ["Kazakhstan", "Հայաստան"],
+        ["Казахстане", "Հայաստանում"],
+        ["Казахстан", "Հայաստան"]
+      ]
+    },
+    "pageTitles": {
+      "hy": {
+        "index.html": "STADA Armenia - Ընկերության մասին",
+        "culture.html": "STADA Armenia - Կորպորատիվ մշակույթ",
+        "history.html": "STADA Armenia - Ընկերության պատմություն",
+        "products/index.html": "STADA Armenia - Մեր արտադրանքը",
+        "worldwide.html": "STADA Armenia - Միջազգային ներկայություն"
+      },
+      "ru": {
+        "index.html": "STADA Armenia - О компании",
+        "culture.html": "STADA Armenia - Корпоративная культура",
+        "history.html": "STADA Armenia - История компании",
+        "products/index.html": "STADA Armenia - Наши продукты",
+        "worldwide.html": "STADA Armenia - Международное присутствие"
+      }
+    },
+    "text": {
+      "hy": {
+        "site_name": "STADA Armenia",
+        "hero_kicker": "STADA Armenia",
+        "hero_sub3": "Մենք զարգացնում ենք հասանելի լուծումներ Հայաստանի ընտանիքների համար։",
+        "hero_text3": "Հայաստանում պացիենտների և մասնագետների միջև վստահելի երկխոսությունը մնում է առողջության պահպանման կարևոր հիմք։",
+        "footer_brand_text": "Մենք համատեղում ենք STADA-ի միջազգային փորձը Հայաստանում պացիենտների, մասնագետների և գործընկերների հետ տեղական մտերմության հետ։"
+      },
+      "ru": {
+        "site_name": "STADA Armenia",
+        "hero_kicker": "STADA Armenia",
+        "hero_sub3": "Развиваем доступные решения для семей в Армении.",
+        "hero_text3": "В Армении доверительный диалог между пациентами и специалистами остается важной основой заботы о здоровье.",
+        "footer_brand_text": "Мы объединяем международный опыт STADA и локальную близость к пациентам, специалистам и партнерам в Армении."
+      }
+    },
+    "domText": {
+      "hy": {
+        "worldwide_text_001": "Հայաստան"
+      },
+      "ru": {
+        "worldwide_text_001": "Армения"
+      }
+    }
+  },
   "uzbekistan": {
     "replacements": {
       "default": [

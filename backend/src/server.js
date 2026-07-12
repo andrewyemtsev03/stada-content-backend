@@ -20,12 +20,14 @@ const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "andrewyemtsevGE").tri
 const adminAzLogin = String(process.env.ADMIN_AZ_LOGIN || "andrewyemtsevAZ").trim();
 const adminMdLogin = String(process.env.ADMIN_MD_LOGIN || "andrewyemtsevMD").trim();
 const adminUzLogin = String(process.env.ADMIN_UZ_LOGIN || "andrewyemtsevUZ").trim();
+const adminAmLogin = String(process.env.ADMIN_AM_LOGIN || "andrewyemtsevAM").trim();
 const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
 const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
 const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || adminPassword).trim();
 const adminAzPassword = String(process.env.ADMIN_AZ_PASSWORD || adminPassword).trim();
 const adminMdPassword = String(process.env.ADMIN_MD_PASSWORD || adminPassword).trim();
 const adminUzPassword = String(process.env.ADMIN_UZ_PASSWORD || adminPassword).trim();
+const adminAmPassword = String(process.env.ADMIN_AM_PASSWORD || adminPassword).trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
@@ -35,8 +37,8 @@ const adminLoginAttempts = new Map();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
-const productLanguages = ["ru", "kz", "kg", "ge", "en", "az", "ro", "uz"];
-const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az", "ro", "uz"]);
+const productLanguages = ["ru", "kz", "kg", "ge", "en", "az", "ro", "uz", "hy"];
+const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az", "ro", "uz", "hy"]);
 const productSlugTransliteration = {
   "\u0430": "a",
   "\u0431": "b",
@@ -196,6 +198,11 @@ function buildAdminAccounts() {
     countryIds: ["uzbekistan"],
   });
   addAdminAccount(accounts, {
+    login: adminAmLogin,
+    password: adminAmPassword,
+    countryIds: ["armenia"],
+  });
+  addAdminAccount(accounts, {
     login: adminLogin,
     password: adminPassword,
     countryIds: allCountryIds(),
@@ -241,6 +248,8 @@ function isDefaultPublicCorsOrigin(origin) {
       || hostname.endsWith(".stada.az")
       || hostname === "stada.md"
       || hostname.endsWith(".stada.md")
+      || hostname === "stada.am"
+      || hostname.endsWith(".stada.am")
     );
   } catch (error) {
     return false;
@@ -2252,6 +2261,7 @@ async function handleRequest(request, response) {
           "GET /api/homepage/kazakhstan?lang=kz",
           "GET /api/homepage/kyrgyzstan?lang=kg",
           "GET /api/homepage/azerbaijan?lang=az",
+          "GET /api/homepage/armenia?lang=hy",
           "GET /api/homepage/moldova?lang=ro",
           "GET /api/page/kg?lang=kg&page=products/coldrex.html",
           "GET /api/products/coldrex?country=kazakhstan&lang=ru",

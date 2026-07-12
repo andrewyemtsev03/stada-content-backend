@@ -134,6 +134,34 @@
       "flag": "https://flagcdn.com/w80/az.png"
     },
     {
+      "id": "armenia",
+      "name": "Armenia",
+      "region": "Worldwide / Caucasus",
+      "labels": {
+        "en": {
+          "name": "Armenia",
+          "region": "Worldwide / Caucasus"
+        },
+        "hy": {
+          "name": "Հայաստան",
+          "region": "Աշխարհ / Կովկաս"
+        },
+        "ru": {
+          "name": "Армения",
+          "region": "Мир / Кавказ"
+        }
+      },
+      "lat": 40.0691,
+      "lng": 45.0382,
+      "locationTitle": "STADA Armenia",
+      "address": "",
+      "website": "https://stada.am/",
+      "websiteLabel": "Visit Website",
+      "email": "",
+      "phone": "",
+      "flag": "https://flagcdn.com/w80/am.png"
+    },
+    {
       "id": "moldova",
       "name": "Moldova",
       "region": "Europe",
