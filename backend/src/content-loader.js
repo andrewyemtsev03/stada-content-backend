@@ -624,6 +624,7 @@ function isOptionalEmptyProductKey(key) {
 
 function languageFallbackOrder(language, fallbackLanguage) {
   const requested = String(language || "").trim().toLowerCase();
+  if (requested === "ro") return unique([requested, "en"]);
   const regionalFallbacks = requested === "ge" ? ["en"] : requested === "en" ? ["ge"] : [];
   if (requested === "kg") return unique([requested, fallbackLanguage, "ru", "en"]);
   if (requested === "az") return unique([requested, fallbackLanguage, "ru", "en"]);
@@ -658,6 +659,7 @@ function applyCountrySpecificContent(payload, countryConfig) {
   const replacements = profile.replacements?.[language] || profile.replacements?.default || [];
   const textOverrides = { ...countryProfileLanguageBlock(profile, "text", language) };
   const domTextOverrides = countryProfileLanguageBlock(profile, "domText", language);
+  const imageAltOverrides = countryProfileLanguageBlock(profile, "imageAlt", language);
   const productCatalogOverrides = countryProfileLanguageBlock(profile, "productCatalog", language);
   const pageTitle = profile.pageTitles?.[language]?.[payload.page?.path];
 
@@ -734,8 +736,11 @@ function applyCountrySpecificContent(payload, countryConfig) {
 
   const applyProfileImageAlt = image => {
     if (!image || typeof image !== "object") return;
+    const countryAlt = imageAltOverrides[String(image.id || "")];
     const override = productImageAltOverrides.get(String(image.id || ""));
-    if (override) {
+    if (countryAlt) {
+      image.alt = countryAlt;
+    } else if (override) {
       image.alt = override;
     } else if (typeof image.alt === "string") {
       image.alt = applyReplacementRules(image.alt, replacements);

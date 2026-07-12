@@ -11,10 +11,10 @@
     "pageTitles": {
       "ro": {
         "index.html": "STADA - Despre companie",
-        "culture.html": "STADA - Cultura corporativa",
+        "culture.html": "STADA - Cultura corporativă",
         "history.html": "STADA - Istoria companiei",
         "products/index.html": "STADA - Produsele noastre",
-        "worldwide.html": "STADA - Prezenta internationala"
+        "worldwide.html": "STADA - Prezența internațională"
       },
       "ru": {
         "index.html": "STADA Moldova - О компании",
@@ -28,11 +28,11 @@
       "ro": {
         "site_name": "STADA Moldova",
         "hero_kicker": "STADA Moldova",
-        "hero_sub3": "Dezvoltam solutii accesibile pentru familiile din Moldova.",
-        "hero_text3": "In Moldova, dialogul de incredere dintre pacienti si specialisti ramane esential pentru grija fata de sanatate",
-        "footer_brand_text": "Combinam experienta internationala STADA cu apropierea locala de pacienti, specialisti si parteneri din Moldova.",
-        "footer_trust_countries": "100+ tari",
-        "stats_countries": "Prezenta in peste 100 de tari"
+        "hero_sub3": "Dezvoltăm soluții accesibile pentru familiile din Moldova.",
+        "hero_text3": "În Moldova, dialogul bazat pe încredere dintre pacienți și specialiști rămâne esențial pentru îngrijirea sănătății.",
+        "footer_brand_text": "Combinăm experiența internațională STADA cu apropierea locală de pacienți, specialiști și parteneri din Moldova.",
+        "footer_trust_countries": "100+ țări",
+        "stats_countries": "Prezență în peste 100 de țări"
       },
       "ru": {
         "site_name": "STADA Moldova",
@@ -48,6 +48,29 @@
       },
       "ru": {
         "worldwide_text_001": "Молдова"
+      }
+    },
+    "imageAlt": {
+      "ro": {
+        "products_index_image_011": "Kamistad Baby",
+        "products_index_image_015": "NO-SPA",
+        "products_index_image_016": "NO-SPA Forte",
+        "products_index_image_017": "Essentiale",
+        "products_index_image_018": "Femilex",
+        "products_index_image_019": "Nizoral",
+        "products_index_image_020": "Șampon Nizoral",
+        "products_index_image_021": "Psilo-Balsam",
+        "products_index_image_022": "Hexicon",
+        "products_index_image_023": "Aqualor",
+        "products_index_image_024": "Aqualor Active Forte",
+        "products_index_image_025": "Aqualor Baby",
+        "products_index_image_026": "Spray Aqualor pentru gât",
+        "products_index_image_027": "Aqualor Soft",
+        "products_index_image_028": "Aqualor Soft mini",
+        "products_index_image_035": "Cardiomagnyl",
+        "products_index_image_036": "Clopidogrel-Teva",
+        "products_index_image_038": "Biosfera",
+        "products_index_image_040": "Farmacia Plus"
       }
     }
   },
