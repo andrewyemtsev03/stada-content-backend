@@ -5,7 +5,13 @@ const http = require("node:http");
 const path = require("node:path");
 const { URL } = require("node:url");
 const { getHomepagePayload, getPagePayload, listCountries } = require("./content-loader");
-const { getPageOverrides, savePageOverrides } = require("./content-overrides");
+const {
+  getContentOverrideStorageStatus,
+  getPageOverrides,
+  initializeContentOverrides,
+  refreshContentOverrides,
+  savePageOverrides,
+} = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
 const { importProductsFromSite, parseProductDetailContent, parseProductPurchaseLinks } = require("./products/import-from-site");
 const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertProduct } = require("./products/repository");
@@ -1792,11 +1798,33 @@ async function listTherapeuticAreasOrEmpty() {
   }
 }
 
-async function attachDatabaseProductsToPayload(payload) {
+function legacyProductSlugFromPagePath(pagePath) {
+  const match = String(pagePath || "")
+    .replace(/\\/g, "/")
+    .match(/^products\/([^/]+)\.html$/i);
+  if (!match || ["index", "product"].includes(match[1].toLowerCase())) return "";
+  return match[1];
+}
+
+async function requirePublishedProductPage(payload) {
+  const slug = legacyProductSlugFromPagePath(payload?.page?.path);
+  if (!slug) return;
+
+  const country = payload?.country?.id || "kazakhstan";
+  const product = await getProduct(slug, country, { publishedOnly: true });
+  if (product?.status === "published") return;
+
+  throw Object.assign(new Error("Product was not found."), {
+    statusCode: 404,
+    code: "PRODUCT_NOT_FOUND",
+  });
+}
+
+async function attachDatabaseProductsToPayload(payload, { publishedOnly = true } = {}) {
   try {
     const country = payload.country?.id || "kazakhstan";
     const [products, therapeuticAreas] = await Promise.all([
-      listProducts(country),
+      listProducts(country, { publishedOnly }),
       listTherapeuticAreas(),
     ]);
     applyDatabaseProductsToPayload(payload, products, therapeuticAreas);
@@ -1977,8 +2005,20 @@ async function handleRequest(request, response) {
   }
 
   try {
+    if (
+      pathname.startsWith("/api/page")
+      || pathname.startsWith("/api/homepage")
+      || pathname.startsWith("/api/products/")
+      || pathname === "/api/admin/content"
+    ) {
+      await refreshContentOverrides();
+    }
+
     if (request.method === "GET" && pathname === "/health") {
-      sendJson(response, 200, { status: "ok" });
+      sendJson(response, 200, {
+        status: "ok",
+        contentOverrides: getContentOverrideStorageStatus(),
+      });
       return;
     }
 
@@ -2035,8 +2075,8 @@ async function handleRequest(request, response) {
       const basePayload = getPagePayload({ country, lang, page, applyOverrides: false });
       const currentPayload = getPagePayload({ country, lang: basePayload.language, page: basePayload.page.path });
       await Promise.all([
-        attachDatabaseProductsToPayload(basePayload),
-        attachDatabaseProductsToPayload(currentPayload),
+        attachDatabaseProductsToPayload(basePayload, { publishedOnly: false }),
+        attachDatabaseProductsToPayload(currentPayload, { publishedOnly: false }),
       ]);
       const editable = buildEditableContent(basePayload, currentPayload);
       await attachEditableProductCatalog(editable);
@@ -2175,9 +2215,9 @@ async function handleRequest(request, response) {
         page,
         applyOverrides: false,
       });
-      await attachDatabaseProductsToPayload(basePayload);
+      await attachDatabaseProductsToPayload(basePayload, { publishedOnly: false });
       const overrides = buildChangedOverrides(basePayload, body);
-      const savedOverrides = savePageOverrides({
+      const savedOverrides = await savePageOverrides({
         countryId: basePayload.country.id,
         language: basePayload.language,
         pagePath: basePayload.page.path,
@@ -2188,7 +2228,7 @@ async function handleRequest(request, response) {
         lang: basePayload.language,
         page: basePayload.page.path,
       });
-      await attachDatabaseProductsToPayload(currentPayload);
+      await attachDatabaseProductsToPayload(currentPayload, { publishedOnly: false });
 
       sendJson(response, 200, {
         status: "saved",
@@ -2210,13 +2250,13 @@ async function handleRequest(request, response) {
       let product = null;
       let productLookupError = null;
       try {
-        product = await getProduct(slug, country);
+        product = await getProduct(slug, country, { publishedOnly: true });
       } catch (error) {
         productLookupError = error;
         if (error.code !== "DATABASE_URL_MISSING") throw error;
       }
 
-      if (!product || product.status === "archived") {
+      if (!product || product.status !== "published") {
         if (productLookupError && productLookupError.code !== "DATABASE_URL_MISSING") throw productLookupError;
         sendJson(response, 404, {
           error: {
@@ -2278,6 +2318,7 @@ async function handleRequest(request, response) {
         lang: requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language"),
         page: requestUrl.searchParams.get("page") || requestUrl.searchParams.get("path"),
       });
+      await requirePublishedProductPage(payload);
       sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
@@ -2299,6 +2340,7 @@ async function handleRequest(request, response) {
         lang: body.lang || body.language,
         page: body.page || body.path,
       });
+      await requirePublishedProductPage(payload);
       sendJson(response, 200, await attachDatabaseProductsToPayload(payload));
       return;
     }
@@ -2356,9 +2398,17 @@ async function handleRequest(request, response) {
 const server = http.createServer(handleRequest);
 
 if (require.main === module) {
-  server.listen(port, host, () => {
-    console.log(`STADA country content backend listening on port ${port}`);
-  });
+  initializeContentOverrides()
+    .then(() => {
+      server.listen(port, host, () => {
+        console.log(`STADA country content backend listening on port ${port}`);
+      });
+    })
+    .catch(error => {
+      console.error("Content override storage initialization failed.");
+      console.error(error);
+      process.exit(1);
+    });
 }
 
 module.exports = {

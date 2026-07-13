@@ -173,8 +173,9 @@ async function attachProductDetails(products) {
   return products;
 }
 
-async function listProducts(countryId = "") {
+async function listProducts(countryId = "", options = {}) {
   const country = normalizeCountryId(countryId);
+  const publishedOnly = options?.publishedOnly === true;
   const params = country ? [country] : [];
   const result = await query(`
     select
@@ -197,7 +198,11 @@ async function listProducts(countryId = "") {
     left join product_images pi
       on pi.product_country_id = p.country_id
       and pi.product_id = p.id
-    ${country ? "where p.country_id = $1" : ""}
+    ${country
+      ? `where p.country_id = $1${publishedOnly ? " and p.status = 'published'" : ""}`
+      : publishedOnly
+        ? "where p.status = 'published'"
+        : ""}
     order by p.sort_order, p.slug, pt.language, pi.slot
   `, params);
 
@@ -236,9 +241,10 @@ async function listTherapeuticAreas() {
   return [...areasById.values()];
 }
 
-async function getProduct(slugOrId, countryId = "kazakhstan") {
+async function getProduct(slugOrId, countryId = "kazakhstan", options = {}) {
   const country = normalizeCountryId(countryId) || "kazakhstan";
   const lookup = normalizeProductLookup(slugOrId, country);
+  const publishedOnly = options?.publishedOnly === true;
   const result = await query(`
     select
       p.*,
@@ -260,7 +266,9 @@ async function getProduct(slugOrId, countryId = "kazakhstan") {
     left join product_images pi
       on pi.product_country_id = p.country_id
       and pi.product_id = p.id
-    where p.country_id = $2 and (p.id = $1 or p.slug = $1 or p.id = $3 or p.slug = $3)
+    where p.country_id = $2
+      and (p.id = $1 or p.slug = $1 or p.id = $3 or p.slug = $3)
+      ${publishedOnly ? "and p.status = 'published'" : ""}
     order by pt.language, pi.slot
   `, [slugOrId, country, lookup]);
 

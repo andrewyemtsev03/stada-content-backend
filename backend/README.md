@@ -57,13 +57,17 @@ Product image uploads use the product country as part of the stable Cloudinary p
 
 ## Content Source
 
-The backend-owned content source lives in `backend/data/content-source.json`. It defines the default page text, image slots, admin sections, and structured product-page fallback content. Admin changes are stored separately in `backend/data/content-overrides.json`.
+The backend-owned content source lives in `backend/data/content-source.json`. It defines the default page text, image slots, admin sections, and structured product-page fallback content. Admin changes are stored in PostgreSQL's `content_overrides` table. On first startup after migration `006_content_overrides.sql`, any existing values in `backend/data/content-overrides.json` are imported without overwriting database rows; the JSON file remains a one-time legacy import source only.
+
+`GET /health` reports `contentOverrides.provider: "postgresql"` after storage initialization. Use that value to verify a deployed service is no longer relying on Render's ephemeral filesystem.
 
 Country-specific replacement profiles, page-title overrides, and market-specific copy live in `backend/data/country-content-profiles.json`.
 
 Product catalog defaults live in `backend/data/product-catalog.json`, and worldwide country metadata lives in `backend/data/worldwide-countries.json`. The backend no longer carries a copied frontend snapshot folder.
 
 Database-backed products are country-native: the stable identity is `(country_id, id)`, so different markets can use the same clean product ID such as `coldrex` without storing country prefixes in `products.id`. Legacy prefixed lookups such as `kyrgyzstan-coldrex` are still accepted at the API edge for existing URLs or saved selections.
+
+Public catalogue and direct-product endpoints return only products whose status is `published`. Authenticated admin endpoints continue to return drafts, published products, and archived products for management.
 
 The public frontend and admin read configured site countries from backend endpoints (`/api/countries` and `/api/admin/countries`) instead of keeping separate country registries. The Worldwide page's static country module is generated from `backend/data/worldwide-countries.json`; after changing that JSON, run:
 

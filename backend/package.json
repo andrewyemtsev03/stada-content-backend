@@ -8,6 +8,7 @@
     "start": "node src/db/migrate.js && node src/server.js",
     "dev": "node --watch src/server.js",
     "check": "node --check src/server.js && node --check src/content-loader.js && node --check src/content-overrides.js && node --check src/db/client.js && node --check src/db/migrate.js && node --check src/products/repository.js && node --check src/products/import-from-site.js && node --check scripts/import-products-from-site.js && node --check scripts/generate-frontend-worldwide-countries.js",
+    "test": "node --test test/*.test.js",
     "db:migrate": "node src/db/migrate.js",
     "db:import-products": "node scripts/import-products-from-site.js",
     "frontend:generate-worldwide-countries": "node scripts/generate-frontend-worldwide-countries.js",
