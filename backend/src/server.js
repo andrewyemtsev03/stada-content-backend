@@ -14,10 +14,13 @@ const {
 } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
 const {
+  clearAccountLoginFailures,
   clearLoginFailures,
   createAdminSession,
+  getAccountLoginAttempt,
   getAdminSession,
   getLoginAttempt,
+  recordAccountLoginFailure,
   recordLoginFailure,
   removeExpiredAdminSessions,
   removeStaleLoginAttempts,
@@ -48,6 +51,10 @@ const adminAmPassword = String(process.env.ADMIN_AM_PASSWORD || "").trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
+const adminAccountLoginMaxAttempts = positiveNumber(
+  process.env.ADMIN_ACCOUNT_LOGIN_MAX_ATTEMPTS,
+  Math.max(adminLoginMaxAttempts * 3, 20)
+);
 const adminAccounts = buildAdminAccounts();
 const adminSessionCookieName = normalizeCookieName(process.env.ADMIN_SESSION_COOKIE_NAME || "stada_admin_session");
 const adminCookieSameSite = normalizeSameSite(process.env.ADMIN_COOKIE_SAME_SITE || (isProductionRuntime ? "None" : "Lax"));
@@ -708,16 +715,25 @@ function adminCountriesForSession(session) {
 }
 
 function requestIp(request) {
+  // Render terminates TLS and appends the connecting client to X-Forwarded-For.
+  // Use its right-most value, rather than the attacker-controlled first value.
   const forwardedFor = String(request.headers["x-forwarded-for"] || "")
-    .split(",")[0]
-    .trim();
-  return forwardedFor || request.socket?.remoteAddress || "unknown";
+    .split(",")
+    .map(value => value.trim())
+    .filter(Boolean);
+  return forwardedFor.at(-1) || request.socket?.remoteAddress || "unknown";
 }
 
 async function assertAdminLoginAllowed(request, login) {
-  const attempt = await getLoginAttempt(requestIp(request), login);
-  const blockedUntil = attempt?.blocked_until ? new Date(attempt.blocked_until).getTime() : 0;
-  if (!blockedUntil || blockedUntil <= Date.now()) return;
+  const [ipAttempt, accountAttempt] = await Promise.all([
+    getLoginAttempt(requestIp(request), login),
+    getAccountLoginAttempt(login),
+  ]);
+  const isBlocked = attempt => {
+    const blockedUntil = attempt?.blocked_until ? new Date(attempt.blocked_until).getTime() : 0;
+    return blockedUntil > Date.now();
+  };
+  if (!isBlocked(ipAttempt) && !isBlocked(accountAttempt)) return;
 
   throw Object.assign(new Error("Too many failed login attempts. Try again later."), {
     statusCode: 429,
@@ -726,16 +742,26 @@ async function assertAdminLoginAllowed(request, login) {
 }
 
 async function recordAdminLoginFailure(request, login) {
-  return recordLoginFailure({
-    ipAddress: requestIp(request),
-    login,
-    windowMs: adminLoginWindowMs,
-    maxAttempts: adminLoginMaxAttempts,
-  });
+  return Promise.all([
+    recordLoginFailure({
+      ipAddress: requestIp(request),
+      login,
+      windowMs: adminLoginWindowMs,
+      maxAttempts: adminLoginMaxAttempts,
+    }),
+    recordAccountLoginFailure({
+      login,
+      windowMs: adminLoginWindowMs,
+      maxAttempts: adminAccountLoginMaxAttempts,
+    }),
+  ]);
 }
 
 async function clearAdminLoginFailures(request, login) {
-  return clearLoginFailures(requestIp(request), login);
+  return Promise.all([
+    clearLoginFailures(requestIp(request), login),
+    clearAccountLoginFailures(login),
+  ]);
 }
 
 function assertCloudinaryConfigured() {

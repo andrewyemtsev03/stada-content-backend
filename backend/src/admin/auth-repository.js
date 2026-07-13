@@ -13,6 +13,10 @@ function loginAttemptKey(ipAddress, login) {
   return sha256(`login-attempt\0${String(ipAddress || "unknown")}\0${String(login || "").trim().toLowerCase()}`);
 }
 
+function accountLoginAttemptKey(login) {
+  return sha256(`login-attempt\0account\0${String(login || "").trim().toLowerCase()}`);
+}
+
 function clientIpHash(ipAddress) {
   return sha256(`client-ip\0${String(ipAddress || "unknown")}`);
 }
@@ -83,17 +87,24 @@ async function removeExpiredAdminSessions() {
   `);
 }
 
-async function getLoginAttempt(ipAddress, login) {
+async function getLoginAttemptByKey(key) {
   const result = await query(`
     select failed_count, first_attempt_at, blocked_until
     from admin_login_attempts
     where attempt_key = $1
-  `, [loginAttemptKey(ipAddress, login)]);
+  `, [key]);
   return result.rows[0] || null;
 }
 
-async function recordLoginFailure({ ipAddress, login, windowMs, maxAttempts }) {
-  const key = loginAttemptKey(ipAddress, login);
+async function getLoginAttempt(ipAddress, login) {
+  return getLoginAttemptByKey(loginAttemptKey(ipAddress, login));
+}
+
+async function getAccountLoginAttempt(login) {
+  return getLoginAttemptByKey(accountLoginAttemptKey(login));
+}
+
+async function recordLoginFailureByKey({ key, windowMs, maxAttempts }) {
   return withClient(async client => {
     await client.query("begin");
     try {
@@ -138,8 +149,20 @@ async function recordLoginFailure({ ipAddress, login, windowMs, maxAttempts }) {
   });
 }
 
+async function recordLoginFailure({ ipAddress, login, windowMs, maxAttempts }) {
+  return recordLoginFailureByKey({ key: loginAttemptKey(ipAddress, login), windowMs, maxAttempts });
+}
+
+async function recordAccountLoginFailure({ login, windowMs, maxAttempts }) {
+  return recordLoginFailureByKey({ key: accountLoginAttemptKey(login), windowMs, maxAttempts });
+}
+
 async function clearLoginFailures(ipAddress, login) {
   await query("delete from admin_login_attempts where attempt_key = $1", [loginAttemptKey(ipAddress, login)]);
+}
+
+async function clearAccountLoginFailures(login) {
+  await query("delete from admin_login_attempts where attempt_key = $1", [accountLoginAttemptKey(login)]);
 }
 
 async function removeStaleLoginAttempts(windowMs) {
@@ -150,11 +173,15 @@ async function removeStaleLoginAttempts(windowMs) {
 }
 
 module.exports = {
+  accountLoginAttemptKey,
+  clearAccountLoginFailures,
   clearLoginFailures,
   createAdminSession,
+  getAccountLoginAttempt,
   getAdminSession,
   getLoginAttempt,
   loginAttemptKey,
+  recordAccountLoginFailure,
   recordLoginFailure,
   removeExpiredAdminSessions,
   removeStaleLoginAttempts,
