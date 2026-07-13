@@ -11,7 +11,7 @@ cd backend
 npm start
 ```
 
-By default the API listens on `http://127.0.0.1:3001`. Override with `PORT=4000 npm start`.
+By default the API listens on port `10000` on all interfaces. Override with `PORT=4000 npm start`.
 
 This service is API-only. It does not host the admin UI. Run the separate `adminStada` frontend locally (or deploy it separately) and point it at this backend API.
 
@@ -35,11 +35,50 @@ ADMIN_CORS_ORIGINS=https://your-admin-site.example
 ADMIN_LOGIN_MAX_ATTEMPTS=8
 ADMIN_LOGIN_WINDOW_MS=900000
 ADMIN_SESSION_TTL_MS=28800000
+ADMIN_COOKIE_SAME_SITE=Strict
 ```
 
 `CORS_ORIGINS` is the public read list. `ADMIN_CORS_ORIGINS` is a separate, stricter list containing only deployed admin UI origins. The official `https://admin.stada.kz` origin is trusted explicitly by the backend; use `ADMIN_CORS_ORIGINS` for any additional admin domains. Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed so the local `adminStada` app can call the deployed backend. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
 
 Admin login uses a `Secure`, `HttpOnly` cookie and a CSRF token instead of a browser-stored bearer token. On Render, the default cookie mode is `SameSite=None` so a separately hosted or local admin can call the HTTPS backend. If the admin and API are deployed on the same site, `ADMIN_COOKIE_SAME_SITE=Lax` or `Strict` can be used. Production cookies cannot be made insecure.
+
+## Database TLS
+
+Remote PostgreSQL connections verify the database certificate and hostname by default. Localhost connections disable TLS by default. The recommended production configuration is:
+
+```text
+DATABASE_URL=postgresql://app_user:password@db.example.com:5432/stada_content
+DATABASE_SSL_MODE=verify-full
+```
+
+When the database provider uses a private certificate authority, also set `DATABASE_CA_CERT` to the PEM certificate supplied by the provider. Hosting dashboards generally support multiline secret values; a value containing literal `\n` separators is also accepted.
+
+Supported `DATABASE_SSL_MODE` values are:
+
+- `verify-full`: encrypt and verify the certificate and hostname; this is the remote default.
+- `verify-ca`: encrypt and verify that the certificate is signed by a trusted CA, without hostname verification.
+- `require`: encrypt without certificate verification. Use only as a temporary provider-compatibility mode.
+- `disable`: disable TLS, intended for local development only.
+
+The legacy `DATABASE_SSL=false` setting still disables TLS. `DATABASE_SSL_REJECT_UNAUTHORIZED=false` maps to the explicit `require` compatibility mode. Never commit `DATABASE_URL` or a private CA certificate.
+
+Do not include `sslmode`, `sslcert`, `sslkey`, or `sslrootcert` parameters in `DATABASE_URL`. `node-postgres` allows those parameters to replace programmatic TLS settings, so the backend rejects conflicting URLs and requires TLS configuration through the variables above.
+
+## Request Hardening
+
+JSON endpoints require `Content-Type: application/json` and a JSON object body. Ordinary JSON requests default to 1 MiB, login requests to 16 KiB, and image-upload requests to 12 MiB. Override the limits only when necessary:
+
+```text
+MAX_LOGIN_BODY_BYTES=16384
+MAX_JSON_BODY_BYTES=1048576
+MAX_IMAGE_UPLOAD_BODY_BYTES=12582912
+SERVER_REQUEST_TIMEOUT_MS=30000
+SERVER_HEADERS_TIMEOUT_MS=15000
+SERVER_KEEP_ALIVE_TIMEOUT_MS=5000
+SERVER_MAX_REQUESTS_PER_SOCKET=100
+```
+
+Unexpected server errors are logged with a request ID. API clients receive only a generic HTTP 500 message and the same request ID, preventing database, Cloudinary, and internal file details from leaking in responses.
 
 Migration `007_admin_security.sql` stores hashed session identifiers and hashed login-attempt keys in PostgreSQL. Raw cookie tokens and admin passwords are never written to the database. Sessions, revocation, and login throttling therefore survive backend redeployments. `POST /api/admin/logout` revokes the server-side session rather than only clearing browser state.
 
@@ -52,7 +91,7 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 CLOUDINARY_UPLOAD_FOLDER=stada/hero
-MAX_JSON_BODY_BYTES=8388608
+MAX_IMAGE_UPLOAD_BODY_BYTES=12582912
 ```
 
 Keep `CLOUDINARY_API_SECRET` backend-only. Do not expose it in frontend JavaScript.

@@ -1,15 +1,10 @@
 const { Pool } = require("pg");
+const { assertNoConnectionStringSslOverrides, getDatabaseSslConfig } = require("./tls");
 
 let pool = null;
 
 function getDatabaseUrl() {
   return String(process.env.DATABASE_URL || "").trim();
-}
-
-function shouldUseSsl(databaseUrl) {
-  if (process.env.DATABASE_SSL === "false") return false;
-  if (process.env.DATABASE_SSL === "true") return true;
-  return Boolean(databaseUrl) && !/localhost|127\.0\.0\.1/i.test(databaseUrl);
 }
 
 function getPool() {
@@ -22,10 +17,11 @@ function getPool() {
       code: "DATABASE_URL_MISSING",
     });
   }
+  assertNoConnectionStringSslOverrides(connectionString);
 
   pool = new Pool({
     connectionString,
-    ssl: shouldUseSsl(connectionString) ? { rejectUnauthorized: false } : false,
+    ssl: getDatabaseSslConfig(connectionString),
     max: Number(process.env.DATABASE_POOL_MAX || 5),
   });
 

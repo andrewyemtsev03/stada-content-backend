@@ -98,7 +98,16 @@ const productSlugTransliteration = {
   "\u04e9": "o",
   "\u04af": "u",
 };
-const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 8 * 1024 * 1024);
+const maxJsonBodyBytes = positiveNumber(process.env.MAX_JSON_BODY_BYTES, 1024 * 1024);
+const maxImageUploadBodyBytes = positiveNumber(process.env.MAX_IMAGE_UPLOAD_BODY_BYTES, 12 * 1024 * 1024);
+const maxLoginBodyBytes = positiveNumber(process.env.MAX_LOGIN_BODY_BYTES, 16 * 1024);
+const serverRequestTimeoutMs = positiveNumber(process.env.SERVER_REQUEST_TIMEOUT_MS, 30 * 1000);
+const serverHeadersTimeoutMs = Math.min(
+  serverRequestTimeoutMs,
+  positiveNumber(process.env.SERVER_HEADERS_TIMEOUT_MS, 15 * 1000)
+);
+const serverKeepAliveTimeoutMs = positiveNumber(process.env.SERVER_KEEP_ALIVE_TIMEOUT_MS, 5 * 1000);
+const serverMaxRequestsPerSocket = positiveNumber(process.env.SERVER_MAX_REQUESTS_PER_SOCKET, 100);
 const cloudinaryCloudName = String(process.env.CLOUDINARY_CLOUD_NAME || "").trim();
 const cloudinaryApiKey = String(process.env.CLOUDINARY_API_KEY || "").trim();
 const cloudinaryApiSecret = String(process.env.CLOUDINARY_API_SECRET || "").trim();
@@ -386,29 +395,122 @@ function sendFile(response, filePath) {
   response.end(fs.readFileSync(filePath));
 }
 
-function readJsonBody(request) {
+function isJsonContentType(value) {
+  return /^application\/(?:[a-z0-9!#$&^_.+-]+\+)?json(?:\s*;|$)/i.test(String(value || "").trim());
+}
+
+function requestBodyError(message, statusCode, code) {
+  return Object.assign(new Error(message), { statusCode, code });
+}
+
+function readJsonBody(request, { maxBytes = maxJsonBodyBytes } = {}) {
   return new Promise((resolve, reject) => {
-    let body = "";
-    request.setEncoding("utf8");
-    request.on("data", chunk => {
-      body += chunk;
-      if (body.length > maxJsonBodyBytes) {
-        reject(Object.assign(new Error("Request body is too large."), { statusCode: 413 }));
-        request.destroy();
+    const contentType = request.headers["content-type"];
+    if (!isJsonContentType(contentType)) {
+      request.resume();
+      reject(requestBodyError("Content-Type must be application/json.", 415, "JSON_CONTENT_TYPE_REQUIRED"));
+      return;
+    }
+
+    const rawContentLength = String(request.headers["content-length"] || "").trim();
+    if (rawContentLength && !/^\d+$/.test(rawContentLength)) {
+      request.resume();
+      reject(requestBodyError("Content-Length must be a non-negative integer.", 400, "CONTENT_LENGTH_INVALID"));
+      return;
+    }
+    if (rawContentLength && Number(rawContentLength) > maxBytes) {
+      request.resume();
+      reject(requestBodyError("Request body is too large.", 413, "REQUEST_BODY_TOO_LARGE"));
+      return;
+    }
+
+    let settled = false;
+    let receivedBytes = 0;
+    let chunks = [];
+
+    const cleanup = () => {
+      request.removeListener("data", onData);
+      request.removeListener("end", onEnd);
+      request.removeListener("error", onError);
+      request.removeListener("aborted", onAborted);
+    };
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      callback(value);
+    };
+    const onData = chunk => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      receivedBytes += buffer.length;
+      if (receivedBytes > maxBytes) {
+        chunks = [];
+        settle(reject, requestBodyError("Request body is too large.", 413, "REQUEST_BODY_TOO_LARGE"));
+        request.resume();
+        return;
       }
-    });
-    request.on("end", () => {
+      chunks.push(buffer);
+    };
+    const onEnd = () => {
+      const body = Buffer.concat(chunks, receivedBytes).toString("utf8");
       if (!body.trim()) {
-        resolve({});
+        settle(resolve, {});
         return;
       }
       try {
-        resolve(JSON.parse(body));
+        const parsed = JSON.parse(body);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          settle(reject, requestBodyError("Request body must be a JSON object.", 400, "JSON_OBJECT_REQUIRED"));
+          return;
+        }
+        settle(resolve, parsed);
       } catch (error) {
-        reject(Object.assign(new Error("Request body must be valid JSON."), { statusCode: 400 }));
+        settle(reject, requestBodyError("Request body must be valid JSON.", 400, "JSON_BODY_INVALID"));
       }
+    };
+    const onError = error => settle(reject, error);
+    const onAborted = () => settle(
+      reject,
+      requestBodyError("The request body was interrupted.", 400, "REQUEST_BODY_ABORTED")
+    );
+
+    request.on("data", onData);
+    request.on("end", onEnd);
+    request.on("error", onError);
+    request.on("aborted", onAborted);
+  });
+}
+
+function requestErrorStatus(error) {
+  const statusCode = Number(error?.statusCode);
+  return Number.isInteger(statusCode) && statusCode >= 400 && statusCode <= 599 ? statusCode : 500;
+}
+
+function sendRequestError(response, error, requestId) {
+  const statusCode = requestErrorStatus(error);
+  const isUnexpected = statusCode >= 500;
+
+  if (isUnexpected) {
+    console.error("Backend request failed.", {
+      requestId,
+      code: error?.code || "SERVER_ERROR",
+      error,
     });
-    request.on("error", reject);
+  }
+
+  if (response.destroyed || response.writableEnded) return;
+  if (response.headersSent) {
+    response.end();
+    return;
+  }
+
+  sendJson(response, statusCode, {
+    error: {
+      code: isUnexpected ? "SERVER_ERROR" : error?.code || "REQUEST_FAILED",
+      message: isUnexpected ? "An unexpected server error occurred." : error?.message || "Request failed.",
+      requestId,
+      ...(!isUnexpected && error?.knownCountries ? { knownCountries: error.knownCountries } : {}),
+    },
   });
 }
 
@@ -2106,17 +2208,20 @@ function runProductImageCloudinarySync() {
 }
 
 async function handleRequest(request, response) {
-  applyRequestHeaders(request, response);
-  const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
-  const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
-
-  if (request.method === "OPTIONS") {
-    response.writeHead(204);
-    response.end();
-    return;
-  }
+  const requestId = crypto.randomUUID();
 
   try {
+    response.setHeader("X-Request-ID", requestId);
+    applyRequestHeaders(request, response);
+    const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
+    const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
+
+    if (request.method === "OPTIONS") {
+      response.writeHead(204);
+      response.end();
+      return;
+    }
+
     if (
       pathname.startsWith("/api/page")
       || pathname.startsWith("/api/homepage")
@@ -2150,7 +2255,7 @@ async function handleRequest(request, response) {
 
     if (request.method === "POST" && pathname === "/api/admin/login") {
       assertAllowedAdminOrigin(request);
-      const body = await readJsonBody(request);
+      const body = await readJsonBody(request, { maxBytes: maxLoginBodyBytes });
       const submittedLogin = body.login || body.username;
       assertAdminCredentialsConfigured();
       await assertAdminLoginAllowed(request, submittedLogin);
@@ -2323,7 +2428,7 @@ async function handleRequest(request, response) {
 
     if (request.method === "POST" && pathname === "/api/admin/upload-image") {
       const session = await requireAdmin(request, { csrf: true });
-      const body = await readJsonBody(request);
+      const body = await readJsonBody(request, { maxBytes: maxImageUploadBodyBytes });
       const country = requireAdminCountry(session, body.country || body.countryId);
       const image = await uploadImageToCloudinary({
         dataUrl: body.dataUrl,
@@ -2527,17 +2632,48 @@ async function handleRequest(request, response) {
       },
     });
   } catch (error) {
-    sendJson(response, error.statusCode || 500, {
-      error: {
-        code: error.code || "SERVER_ERROR",
-        message: error.message,
-        knownCountries: error.knownCountries,
-      },
-    });
+    sendRequestError(response, error, requestId);
   }
 }
 
-const server = http.createServer(handleRequest);
+const server = http.createServer((request, response) => {
+  void handleRequest(request, response).catch(error => {
+    const requestId = String(response.getHeader("X-Request-ID") || crypto.randomUUID());
+    try {
+      sendRequestError(response, error, requestId);
+    } catch (sendError) {
+      console.error("Unable to send the backend error response.", { requestId, error: sendError });
+      response.destroy();
+    }
+  });
+});
+
+server.requestTimeout = Math.floor(serverRequestTimeoutMs);
+server.headersTimeout = Math.floor(serverHeadersTimeoutMs);
+server.keepAliveTimeout = Math.floor(serverKeepAliveTimeoutMs);
+server.maxRequestsPerSocket = Math.floor(serverMaxRequestsPerSocket);
+server.maxHeadersCount = 100;
+
+server.on("clientError", (error, socket) => {
+  if (error.code === "ECONNRESET" || !socket.writable) return;
+  const statusCode = error.code === "HPE_HEADER_OVERFLOW" ? 431 : 400;
+  const payload = JSON.stringify({
+    error: {
+      code: statusCode === 431 ? "REQUEST_HEADERS_TOO_LARGE" : "BAD_REQUEST",
+      message: statusCode === 431 ? "Request headers are too large." : "Malformed HTTP request.",
+    },
+  });
+  socket.end([
+    `HTTP/1.1 ${statusCode} ${statusCode === 431 ? "Request Header Fields Too Large" : "Bad Request"}`,
+    "Connection: close",
+    "Content-Type: application/json; charset=utf-8",
+    "Cache-Control: no-store",
+    "X-Content-Type-Options: nosniff",
+    `Content-Length: ${Buffer.byteLength(payload)}`,
+    "",
+    payload,
+  ].join("\r\n"));
+});
 
 if (require.main === module) {
   initializeContentOverrides()
