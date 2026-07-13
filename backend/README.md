@@ -24,18 +24,24 @@ ADMIN_LOGIN=your_admin_login
 ADMIN_PASSWORD=use_a_long_random_password
 ```
 
-Country-limited admin accounts can be configured with `ADMIN_KZ_LOGIN`, `ADMIN_KG_LOGIN`, `ADMIN_GE_LOGIN`, `ADMIN_AZ_LOGIN`, `ADMIN_AM_LOGIN`, `ADMIN_MD_LOGIN`, `ADMIN_UZ_LOGIN` and the matching `*_PASSWORD` variables.
+Country-limited admin accounts can be configured with `ADMIN_KZ_LOGIN`, `ADMIN_KG_LOGIN`, `ADMIN_GE_LOGIN`, `ADMIN_AZ_LOGIN`, `ADMIN_AM_LOGIN`, `ADMIN_MD_LOGIN`, `ADMIN_UZ_LOGIN` and the matching `*_PASSWORD` variables. A country account is enabled only when both its login and its country-specific password are set; country accounts do not inherit `ADMIN_PASSWORD`.
 
 The backend will not accept admin logins until both variables are set. For production, also set:
 
 ```text
 NODE_ENV=production
-CORS_ORIGINS=https://your-public-site.example,https://your-admin-site.example
+CORS_ORIGINS=https://your-public-site.example
+ADMIN_CORS_ORIGINS=https://your-admin-site.example
 ADMIN_LOGIN_MAX_ATTEMPTS=8
 ADMIN_LOGIN_WINDOW_MS=900000
+ADMIN_SESSION_TTL_MS=28800000
 ```
 
-Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed by default so the local `adminStada` app can call the deployed backend. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
+`CORS_ORIGINS` is the public read list. `ADMIN_CORS_ORIGINS` is a separate, stricter list containing only deployed admin UI origins. Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed so the local `adminStada` app can call the deployed backend. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
+
+Admin login uses a `Secure`, `HttpOnly` cookie and a CSRF token instead of a browser-stored bearer token. On Render, the default cookie mode is `SameSite=None` so a separately hosted or local admin can call the HTTPS backend. If the admin and API are deployed on the same site, `ADMIN_COOKIE_SAME_SITE=Lax` or `Strict` can be used. Production cookies cannot be made insecure.
+
+Migration `007_admin_security.sql` stores hashed session identifiers and hashed login-attempt keys in PostgreSQL. Raw cookie tokens and admin passwords are never written to the database. Sessions, revocation, and login throttling therefore survive backend redeployments. `POST /api/admin/logout` revokes the server-side session rather than only clearing browser state.
 
 ## Cloudinary Uploads
 
@@ -59,7 +65,7 @@ Product image uploads use the product country as part of the stable Cloudinary p
 
 The backend-owned content source lives in `backend/data/content-source.json`. It defines the default page text, image slots, admin sections, and structured product-page fallback content. Admin changes are stored in PostgreSQL's `content_overrides` table. On first startup after migration `006_content_overrides.sql`, any existing values in `backend/data/content-overrides.json` are imported without overwriting database rows; the JSON file remains a one-time legacy import source only.
 
-`GET /health` reports `contentOverrides.provider: "postgresql"` after storage initialization. Use that value to verify a deployed service is no longer relying on Render's ephemeral filesystem.
+`GET /health` reports `contentOverrides.provider: "postgresql"` after storage initialization and `adminSecurity.sessionProvider: "postgresql"` for Phase 2 authentication. Use those values to verify the deployed service is using persistent database storage.
 
 Country-specific replacement profiles, page-title overrides, and market-specific copy live in `backend/data/country-content-profiles.json`.
 
@@ -94,6 +100,8 @@ POST /api/homepage
 POST /api/page
 GET /admin
 POST /api/admin/login
+GET /api/admin/session
+POST /api/admin/logout
 GET /api/admin/content?country=kazakhstan&lang=ru
 POST /api/admin/upload-image
 POST /api/admin/content

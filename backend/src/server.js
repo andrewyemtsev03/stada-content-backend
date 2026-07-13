@@ -13,33 +13,48 @@ const {
   savePageOverrides,
 } = require("./content-overrides");
 const { checkDatabaseConnection } = require("./db/client");
+const {
+  clearLoginFailures,
+  createAdminSession,
+  getAdminSession,
+  getLoginAttempt,
+  recordLoginFailure,
+  removeExpiredAdminSessions,
+  removeStaleLoginAttempts,
+  revokeAdminSession,
+} = require("./admin/auth-repository");
 const { importProductsFromSite, parseProductDetailContent, parseProductPurchaseLinks } = require("./products/import-from-site");
 const { deleteProduct, getProduct, listProducts, listTherapeuticAreas, upsertProduct } = require("./products/repository");
 
 const port = Number(process.env.PORT || 10000);
 const host = "0.0.0.0";
+const isProductionRuntime = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 const adminLogin = String(process.env.ADMIN_LOGIN || process.env.ADMIN_USERNAME || "").trim();
 const adminPassword = String(process.env.ADMIN_PASSWORD || "").trim();
-const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "andrewyemtsevKZ").trim();
-const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "andrewyemtsevKG").trim();
-const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "andrewyemtsevGE").trim();
-const adminAzLogin = String(process.env.ADMIN_AZ_LOGIN || "andrewyemtsevAZ").trim();
-const adminMdLogin = String(process.env.ADMIN_MD_LOGIN || "andrewyemtsevMD").trim();
-const adminUzLogin = String(process.env.ADMIN_UZ_LOGIN || "andrewyemtsevUZ").trim();
-const adminAmLogin = String(process.env.ADMIN_AM_LOGIN || "andrewyemtsevAM").trim();
-const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || adminPassword).trim();
-const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || adminPassword).trim();
-const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || adminPassword).trim();
-const adminAzPassword = String(process.env.ADMIN_AZ_PASSWORD || adminPassword).trim();
-const adminMdPassword = String(process.env.ADMIN_MD_PASSWORD || adminPassword).trim();
-const adminUzPassword = String(process.env.ADMIN_UZ_PASSWORD || adminPassword).trim();
-const adminAmPassword = String(process.env.ADMIN_AM_PASSWORD || adminPassword).trim();
+const adminKzLogin = String(process.env.ADMIN_KZ_LOGIN || "").trim();
+const adminKgLogin = String(process.env.ADMIN_KG_LOGIN || "").trim();
+const adminGeLogin = String(process.env.ADMIN_GE_LOGIN || "").trim();
+const adminAzLogin = String(process.env.ADMIN_AZ_LOGIN || "").trim();
+const adminMdLogin = String(process.env.ADMIN_MD_LOGIN || "").trim();
+const adminUzLogin = String(process.env.ADMIN_UZ_LOGIN || "").trim();
+const adminAmLogin = String(process.env.ADMIN_AM_LOGIN || "").trim();
+const adminKzPassword = String(process.env.ADMIN_KZ_PASSWORD || "").trim();
+const adminKgPassword = String(process.env.ADMIN_KG_PASSWORD || "").trim();
+const adminGePassword = String(process.env.ADMIN_GE_PASSWORD || "").trim();
+const adminAzPassword = String(process.env.ADMIN_AZ_PASSWORD || "").trim();
+const adminMdPassword = String(process.env.ADMIN_MD_PASSWORD || "").trim();
+const adminUzPassword = String(process.env.ADMIN_UZ_PASSWORD || "").trim();
+const adminAmPassword = String(process.env.ADMIN_AM_PASSWORD || "").trim();
 const adminSessionTtlMs = positiveNumber(process.env.ADMIN_SESSION_TTL_MS, 8 * 60 * 60 * 1000);
 const adminLoginWindowMs = positiveNumber(process.env.ADMIN_LOGIN_WINDOW_MS, 15 * 60 * 1000);
 const adminLoginMaxAttempts = positiveNumber(process.env.ADMIN_LOGIN_MAX_ATTEMPTS, 8);
 const adminAccounts = buildAdminAccounts();
-const adminSessions = new Map();
-const adminLoginAttempts = new Map();
+const adminSessionCookieName = normalizeCookieName(process.env.ADMIN_SESSION_COOKIE_NAME || "stada_admin_session");
+const adminCookieSameSite = normalizeSameSite(process.env.ADMIN_COOKIE_SAME_SITE || (isProductionRuntime ? "None" : "Lax"));
+const adminCookieSecure = isProductionRuntime
+  || process.env.ADMIN_COOKIE_SECURE === "true"
+  || (process.env.ADMIN_COOKIE_SECURE !== "false" && adminCookieSameSite === "None");
+const adminCookieDomain = String(process.env.ADMIN_COOKIE_DOMAIN || "").trim();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
@@ -91,7 +106,8 @@ const cloudinaryUploadFolder = String(process.env.CLOUDINARY_UPLOAD_FOLDER || "s
 const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLOAD_FOLDER || "stada/products").trim();
 const productImageSyncTimeoutMs = positiveNumber(process.env.PRODUCT_IMAGE_SYNC_TIMEOUT_MS, 5 * 60 * 1000);
 const allowedCorsOrigins = parseOriginList(process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || "");
-const allowAnyCorsOrigin = allowedCorsOrigins.length === 0 && process.env.NODE_ENV !== "production";
+const allowedAdminCorsOrigins = parseOriginList(process.env.ADMIN_CORS_ORIGINS || process.env.ADMIN_ORIGINS || "");
+const allowAnyCorsOrigin = allowedCorsOrigins.length === 0 && allowedAdminCorsOrigins.length === 0 && !isProductionRuntime;
 const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
@@ -113,6 +129,18 @@ const securityHeaders = {
 function positiveNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function normalizeSameSite(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "strict") return "Strict";
+  if (normalized === "none") return "None";
+  return "Lax";
+}
+
+function normalizeCookieName(value) {
+  const name = String(value || "").trim();
+  return /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(name) ? name : "stada_admin_session";
 }
 
 function normalizeCountrySlug(value) {
@@ -274,33 +302,53 @@ function isLocalAdminDevCorsOrigin(origin) {
   }
 }
 
+function normalizeRequestOrigin(request) {
+  const origin = String(request.headers.origin || "").trim();
+  if (!origin) return "";
+  try {
+    return new URL(origin).origin;
+  } catch (error) {
+    return "";
+  }
+}
+
+function isAllowedCorsOrigin(origin) {
+  return Boolean(origin) && (
+    allowAnyCorsOrigin
+    || allowedCorsOrigins.includes(origin)
+    || allowedAdminCorsOrigins.includes(origin)
+    || isDefaultPublicCorsOrigin(origin)
+    || isLocalAdminDevCorsOrigin(origin)
+  );
+}
+
+function assertAllowedAdminOrigin(request) {
+  const origin = normalizeRequestOrigin(request);
+  const allowed = origin && (
+    allowedAdminCorsOrigins.includes(origin)
+    || isLocalAdminDevCorsOrigin(origin)
+    || allowAnyCorsOrigin
+  );
+  if (allowed || (!origin && !isProductionRuntime)) return;
+
+  throw Object.assign(new Error("This origin is not allowed to use the admin API."), {
+    statusCode: 403,
+    code: "ADMIN_ORIGIN_FORBIDDEN",
+  });
+}
+
 function applyRequestHeaders(request, response) {
   Object.entries(securityHeaders).forEach(([header, value]) => response.setHeader(header, value));
 
-  const origin = String(request.headers.origin || "").trim();
-  if (!origin) return;
+  const origin = normalizeRequestOrigin(request);
+  if (!isAllowedCorsOrigin(origin)) return;
 
-  let normalizedOrigin = "";
-  try {
-    normalizedOrigin = new URL(origin).origin;
-  } catch (error) {
-    return;
-  }
-
-  const allowedOrigin = allowAnyCorsOrigin
-    ? "*"
-    : allowedCorsOrigins.includes(normalizedOrigin)
-      || isDefaultPublicCorsOrigin(normalizedOrigin)
-      || isLocalAdminDevCorsOrigin(normalizedOrigin)
-      ? normalizedOrigin
-      : "";
-  if (!allowedOrigin) return;
-
-  response.setHeader("Access-Control-Allow-Origin", allowedOrigin);
-  response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  response.setHeader("Access-Control-Allow-Origin", origin);
+  response.setHeader("Access-Control-Allow-Credentials", "true");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token");
   response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   response.setHeader("Access-Control-Max-Age", "600");
-  if (allowedOrigin !== "*") appendVaryHeader(response, "Origin");
+  appendVaryHeader(response, "Origin");
 }
 
 function sendJson(response, statusCode, payload) {
@@ -363,15 +411,6 @@ function timingSafeEqualText(left, right) {
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
-function cleanupAdminSessions() {
-  const now = Date.now();
-  for (const [token, session] of adminSessions.entries()) {
-    if (!session || session.expiresAt <= now) {
-      adminSessions.delete(token);
-    }
-  }
-}
-
 function publicAdminAccount(account) {
   const countryIds = account?.countryIds?.length ? account.countryIds : allCountryIds();
   const countries = listCountries().filter(country => countryIds.includes(country.id));
@@ -382,33 +421,110 @@ function publicAdminAccount(account) {
   };
 }
 
-function issueAdminToken(account) {
-  cleanupAdminSessions();
-  const token = crypto.randomBytes(32).toString("hex");
-  const expiresAt = Date.now() + adminSessionTtlMs;
-  const publicAccount = publicAdminAccount(account);
-  adminSessions.set(token, { expiresAt, account: publicAccount });
+function parseCookies(request) {
+  return String(request.headers.cookie || "")
+    .split(";")
+    .map(part => part.trim())
+    .filter(Boolean)
+    .reduce((cookies, part) => {
+      const separator = part.indexOf("=");
+      if (separator <= 0) return cookies;
+      const name = part.slice(0, separator).trim();
+      const value = part.slice(separator + 1).trim();
+      try {
+        cookies[name] = decodeURIComponent(value);
+      } catch (error) {
+        cookies[name] = value;
+      }
+      return cookies;
+    }, {});
+}
+
+function adminSessionTokenFromRequest(request) {
+  return parseCookies(request)[adminSessionCookieName] || "";
+}
+
+function adminCookieAttributes(maxAgeSeconds) {
+  const attributes = [
+    "Path=/api/admin",
+    "HttpOnly",
+    `SameSite=${adminCookieSameSite}`,
+    `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
+  ];
+  if (adminCookieSecure) attributes.push("Secure");
+  if (adminCookieDomain && /^[A-Za-z0-9.-]+$/.test(adminCookieDomain)) {
+    attributes.push(`Domain=${adminCookieDomain}`);
+  }
+  return attributes.join("; ");
+}
+
+function setAdminSessionCookie(response, token) {
+  response.setHeader(
+    "Set-Cookie",
+    `${adminSessionCookieName}=${encodeURIComponent(token)}; ${adminCookieAttributes(adminSessionTtlMs / 1000)}`
+  );
+}
+
+function clearAdminSessionCookie(response) {
+  response.setHeader(
+    "Set-Cookie",
+    `${adminSessionCookieName}=; ${adminCookieAttributes(0)}`
+  );
+}
+
+function adminSessionResponse(session) {
   return {
-    token,
-    expiresAt: new Date(expiresAt).toISOString(),
-    account: publicAccount,
+    expiresAt: session.expiresAt,
+    csrfToken: session.csrfToken,
+    account: publicAdminAccount(session.account),
   };
 }
 
-function requireAdmin(request) {
-  cleanupAdminSessions();
-  const header = request.headers.authorization || "";
-  const match = header.match(/^Bearer\s+(.+)$/i);
-  const token = match ? match[1].trim() : "";
-  const session = token ? adminSessions.get(token) : null;
+async function issueAdminSession(account, request, response) {
+  const token = crypto.randomBytes(32).toString("hex");
+  const csrfToken = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + adminSessionTtlMs).toISOString();
+  const publicAccount = publicAdminAccount(account);
+  await createAdminSession({
+    token,
+    csrfToken,
+    account: publicAccount,
+    expiresAt,
+    ipAddress: requestIp(request),
+    userAgent: request.headers["user-agent"],
+  });
+  setAdminSessionCookie(response, token);
+  return adminSessionResponse({ expiresAt, csrfToken, account: publicAccount });
+}
 
-  if (!session) {
+async function requireAdmin(request, { csrf = false } = {}) {
+  const token = adminSessionTokenFromRequest(request);
+  const storedSession = await getAdminSession(token);
+  const activeAccount = storedSession ? findAdminAccountByLogin(storedSession.account?.login) : null;
+
+  if (!storedSession || !activeAccount) {
+    if (storedSession && token) await revokeAdminSession(token);
     throw Object.assign(new Error("Admin authorization is required."), {
       statusCode: 401,
       code: "ADMIN_UNAUTHORIZED",
     });
   }
 
+  const session = {
+    ...storedSession,
+    token,
+    account: publicAdminAccount(activeAccount),
+  };
+  if (csrf) {
+    assertAllowedAdminOrigin(request);
+    const submittedCsrfToken = String(request.headers["x-csrf-token"] || "");
+    if (!timingSafeEqualText(submittedCsrfToken, session.csrfToken)) {
+      throw Object.assign(new Error("The admin security token is missing or invalid."), {
+        statusCode: 403,
+        code: "ADMIN_CSRF_INVALID",
+      });
+    }
+  }
   return session;
 }
 
@@ -429,6 +545,14 @@ function findMatchingAdminAccount(login, password) {
     if (isValidLogin && isValidPassword) matchedAccount = account;
   }
 
+  return matchedAccount;
+}
+
+function findAdminAccountByLogin(login) {
+  let matchedAccount = null;
+  for (const account of adminAccounts) {
+    if (timingSafeEqualText(login, account.login)) matchedAccount = account;
+  }
   return matchedAccount;
 }
 
@@ -468,23 +592,10 @@ function requestIp(request) {
   return forwardedFor || request.socket?.remoteAddress || "unknown";
 }
 
-function adminLoginAttemptKey(request, login) {
-  return `${requestIp(request)}:${String(login || "").trim().toLowerCase() || "unknown"}`;
-}
-
-function cleanupAdminLoginAttempts(now = Date.now()) {
-  for (const [key, attempt] of adminLoginAttempts.entries()) {
-    const isExpired = attempt.blockedUntil
-      ? attempt.blockedUntil <= now
-      : attempt.firstAttemptAt + adminLoginWindowMs <= now;
-    if (isExpired) adminLoginAttempts.delete(key);
-  }
-}
-
-function assertAdminLoginAllowed(request, login) {
-  cleanupAdminLoginAttempts();
-  const attempt = adminLoginAttempts.get(adminLoginAttemptKey(request, login));
-  if (!attempt?.blockedUntil || attempt.blockedUntil <= Date.now()) return;
+async function assertAdminLoginAllowed(request, login) {
+  const attempt = await getLoginAttempt(requestIp(request), login);
+  const blockedUntil = attempt?.blocked_until ? new Date(attempt.blocked_until).getTime() : 0;
+  if (!blockedUntil || blockedUntil <= Date.now()) return;
 
   throw Object.assign(new Error("Too many failed login attempts. Try again later."), {
     statusCode: 429,
@@ -492,25 +603,17 @@ function assertAdminLoginAllowed(request, login) {
   });
 }
 
-function recordAdminLoginFailure(request, login) {
-  const now = Date.now();
-  cleanupAdminLoginAttempts(now);
-  const key = adminLoginAttemptKey(request, login);
-  const current = adminLoginAttempts.get(key);
-  const firstAttemptAt = current?.firstAttemptAt && current.firstAttemptAt + adminLoginWindowMs > now
-    ? current.firstAttemptAt
-    : now;
-  const count = firstAttemptAt === current?.firstAttemptAt ? current.count + 1 : 1;
-
-  adminLoginAttempts.set(key, {
-    firstAttemptAt,
-    count,
-    blockedUntil: count >= adminLoginMaxAttempts ? now + adminLoginWindowMs : 0,
+async function recordAdminLoginFailure(request, login) {
+  return recordLoginFailure({
+    ipAddress: requestIp(request),
+    login,
+    windowMs: adminLoginWindowMs,
+    maxAttempts: adminLoginMaxAttempts,
   });
 }
 
-function clearAdminLoginFailures(request, login) {
-  adminLoginAttempts.delete(adminLoginAttemptKey(request, login));
+async function clearAdminLoginFailures(request, login) {
+  return clearLoginFailures(requestIp(request), login);
 }
 
 function assertCloudinaryConfigured() {
@@ -2018,6 +2121,11 @@ async function handleRequest(request, response) {
       sendJson(response, 200, {
         status: "ok",
         contentOverrides: getContentOverrideStorageStatus(),
+        adminSecurity: {
+          sessionProvider: "postgresql",
+          csrfProtection: true,
+          httpOnlyCookie: true,
+        },
       });
       return;
     }
@@ -2032,15 +2140,16 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/login") {
+      assertAllowedAdminOrigin(request);
       const body = await readJsonBody(request);
       const submittedLogin = body.login || body.username;
       assertAdminCredentialsConfigured();
-      assertAdminLoginAllowed(request, submittedLogin);
+      await assertAdminLoginAllowed(request, submittedLogin);
 
       const account = findMatchingAdminAccount(submittedLogin, body.password);
 
       if (!account) {
-        recordAdminLoginFailure(request, submittedLogin);
+        await recordAdminLoginFailure(request, submittedLogin);
         sendJson(response, 401, {
           error: {
             code: "INVALID_ADMIN_CREDENTIALS",
@@ -2050,16 +2159,37 @@ async function handleRequest(request, response) {
         return;
       }
 
-      clearAdminLoginFailures(request, submittedLogin);
+      await clearAdminLoginFailures(request, submittedLogin);
+      await Promise.all([
+        removeExpiredAdminSessions(),
+        removeStaleLoginAttempts(adminLoginWindowMs),
+      ]);
       sendJson(response, 200, {
         status: "ok",
-        session: issueAdminToken(account),
+        session: await issueAdminSession(account, request, response),
       });
       return;
     }
 
+    if (request.method === "GET" && pathname === "/api/admin/session") {
+      const session = await requireAdmin(request);
+      sendJson(response, 200, {
+        status: "ok",
+        session: adminSessionResponse(session),
+      });
+      return;
+    }
+
+    if (request.method === "POST" && pathname === "/api/admin/logout") {
+      const session = await requireAdmin(request, { csrf: true });
+      await revokeAdminSession(session.token);
+      clearAdminSessionCookie(response);
+      sendJson(response, 200, { status: "signed-out" });
+      return;
+    }
+
     if (request.method === "GET" && pathname === "/api/admin/countries") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request);
       sendJson(response, 200, {
         countries: adminCountriesForSession(session),
         account: session.account,
@@ -2068,7 +2198,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "GET" && pathname === "/api/admin/content") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request);
       const country = requireAdminCountry(session, requestUrl.searchParams.get("country"));
       const lang = requestUrl.searchParams.get("lang") || requestUrl.searchParams.get("language");
       const page = adminEditablePagePath;
@@ -2090,7 +2220,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "GET" && pathname === "/api/admin/products") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request);
       const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       sendJson(response, 200, {
         products: await listProducts(country),
@@ -2100,7 +2230,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products/import-from-site") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       requireAdminCountry(session, "kazakhstan");
       const result = await importProductsFromSite();
       sendJson(response, 200, {
@@ -2111,7 +2241,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products/sync-cloudinary-images") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       requireAdminCountry(session, "kazakhstan");
       const result = await runProductImageCloudinarySync();
       sendJson(response, 200, {
@@ -2122,7 +2252,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/products") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       const body = await readJsonBody(request);
       const country = requireAdminCountry(session, body.country || body.countryId);
       const product = await upsertProduct(normalizeProductPayload(body, "", country));
@@ -2134,7 +2264,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "PUT" && pathname.startsWith("/api/admin/products/")) {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       const body = await readJsonBody(request);
       const country = requireAdminCountry(session, body.country || body.countryId);
       const product = await upsertProduct(normalizeProductPayload(body, routeProductSlugFromAdminPath(pathname), country));
@@ -2146,7 +2276,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "DELETE" && pathname.startsWith("/api/admin/products/")) {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       const deleted = await deleteProduct(routeProductSlugFromAdminPath(pathname), country);
       if (!deleted) {
@@ -2163,7 +2293,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "GET" && pathname.startsWith("/api/admin/products/")) {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request);
       const country = requireAdminCountry(session, requestUrl.searchParams.get("country") || requestUrl.searchParams.get("countryId"));
       const product = await getProduct(routeProductSlugFromAdminPath(pathname), country);
       if (!product) {
@@ -2182,7 +2312,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/upload-image") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       const body = await readJsonBody(request);
       const country = requireAdminCountry(session, body.country || body.countryId);
       const image = await uploadImageToCloudinary({
@@ -2205,7 +2335,7 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/content") {
-      const session = requireAdmin(request);
+      const session = await requireAdmin(request, { csrf: true });
       const body = await readJsonBody(request);
       const page = adminEditablePagePath;
       const country = requireAdminCountry(session, body.country || body.countryId);
@@ -2363,6 +2493,8 @@ async function handleRequest(request, response) {
           "POST /api/homepage { country, lang }",
           "POST /api/page { country, lang, page }",
           "POST /api/admin/login { login, password }",
+          "GET /api/admin/session",
+          "POST /api/admin/logout",
           "GET /api/admin/countries",
           "GET /api/admin/content?country=kazakhstan&lang=ru",
           "POST /api/admin/content { country, lang, text, domText, domImages }",
@@ -2414,5 +2546,7 @@ if (require.main === module) {
 module.exports = {
   server,
   mergeProductContentWithFallback,
+  normalizeProductPayload,
+  normalizePublicUrl,
   productDetailPayloadFromDatabaseProduct,
 };
