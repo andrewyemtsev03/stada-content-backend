@@ -445,12 +445,14 @@ function adminSessionTokenFromRequest(request) {
 }
 
 function adminCookieAttributes(maxAgeSeconds) {
+  const maxAge = Math.max(0, Math.floor(maxAgeSeconds));
   const attributes = [
     "Path=/api/admin",
     "HttpOnly",
     `SameSite=${adminCookieSameSite}`,
-    `Max-Age=${Math.max(0, Math.floor(maxAgeSeconds))}`,
+    `Max-Age=${maxAge}`,
   ];
+  if (maxAge === 0) attributes.push("Expires=Thu, 01 Jan 1970 00:00:00 GMT");
   if (adminCookieSecure) attributes.push("Secure");
   if (adminCookieDomain && /^[A-Za-z0-9.-]+$/.test(adminCookieDomain)) {
     attributes.push(`Domain=${adminCookieDomain}`);
@@ -2181,8 +2183,9 @@ async function handleRequest(request, response) {
     }
 
     if (request.method === "POST" && pathname === "/api/admin/logout") {
-      const session = await requireAdmin(request, { csrf: true });
-      await revokeAdminSession(session.token);
+      assertAllowedAdminOrigin(request);
+      const token = adminSessionTokenFromRequest(request);
+      if (token) await revokeAdminSession(token);
       clearAdminSessionCookie(response);
       sendJson(response, 200, { status: "signed-out" });
       return;

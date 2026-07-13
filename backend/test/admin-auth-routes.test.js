@@ -90,19 +90,18 @@ test("admin login uses an HttpOnly cookie, requires CSRF, and logout revokes the
   });
   assert.equal(sessionResponse.status, 200);
 
-  const rejectedLogout = await fetch(`${baseUrl}/api/admin/logout`, {
-    method: "POST",
+  const rejectedWrite = await fetch(`${baseUrl}/api/admin/products/example?country=kazakhstan`, {
+    method: "DELETE",
     headers: { Cookie: cookie, Origin: origin },
   });
-  assert.equal(rejectedLogout.status, 403);
-  assert.equal((await rejectedLogout.json()).error.code, "ADMIN_CSRF_INVALID");
+  assert.equal(rejectedWrite.status, 403);
+  assert.equal((await rejectedWrite.json()).error.code, "ADMIN_CSRF_INVALID");
 
   const logoutResponse = await fetch(`${baseUrl}/api/admin/logout`, {
     method: "POST",
     headers: {
       Cookie: cookie,
       Origin: origin,
-      "X-CSRF-Token": loginPayload.session.csrfToken,
     },
   });
   assert.equal(logoutResponse.status, 200);
