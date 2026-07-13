@@ -117,6 +117,8 @@ const productImageSyncTimeoutMs = positiveNumber(process.env.PRODUCT_IMAGE_SYNC_
 const allowedCorsOrigins = parseOriginList(process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || "");
 const allowedAdminCorsOrigins = parseOriginList(process.env.ADMIN_CORS_ORIGINS || process.env.ADMIN_ORIGINS || "");
 const defaultAdminCorsOrigins = new Set(["https://admin.stada.kz"]);
+const allowLocalAdminCorsOrigins = !isProductionRuntime
+  || String(process.env.ALLOW_LOCAL_ADMIN_ORIGINS || "").trim().toLowerCase() === "true";
 const allowAnyCorsOrigin = allowedCorsOrigins.length === 0 && allowedAdminCorsOrigins.length === 0 && !isProductionRuntime;
 const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
@@ -316,6 +318,10 @@ function isDefaultAdminCorsOrigin(origin) {
   return defaultAdminCorsOrigins.has(origin);
 }
 
+function isAdminApiPath(pathname) {
+  return pathname === "/api/admin" || pathname.startsWith("/api/admin/");
+}
+
 function normalizeRequestOrigin(request) {
   const origin = String(request.headers.origin || "").trim();
   if (!origin) return "";
@@ -326,25 +332,30 @@ function normalizeRequestOrigin(request) {
   }
 }
 
-function isAllowedCorsOrigin(origin) {
+function isAllowedAdminCorsOrigin(origin) {
+  return Boolean(origin) && (
+    allowedAdminCorsOrigins.includes(origin)
+    || isDefaultAdminCorsOrigin(origin)
+    || (allowLocalAdminCorsOrigins && isLocalAdminDevCorsOrigin(origin))
+  );
+}
+
+function isAllowedCorsOrigin(origin, pathname) {
+  if (isAdminApiPath(pathname)) return isAllowedAdminCorsOrigin(origin);
+
   return Boolean(origin) && (
     allowAnyCorsOrigin
     || allowedCorsOrigins.includes(origin)
     || allowedAdminCorsOrigins.includes(origin)
     || isDefaultAdminCorsOrigin(origin)
     || isDefaultPublicCorsOrigin(origin)
-    || isLocalAdminDevCorsOrigin(origin)
+    || (allowLocalAdminCorsOrigins && isLocalAdminDevCorsOrigin(origin))
   );
 }
 
 function assertAllowedAdminOrigin(request) {
   const origin = normalizeRequestOrigin(request);
-  const allowed = origin && (
-    allowedAdminCorsOrigins.includes(origin)
-    || isDefaultAdminCorsOrigin(origin)
-    || isLocalAdminDevCorsOrigin(origin)
-    || allowAnyCorsOrigin
-  );
+  const allowed = isAllowedAdminCorsOrigin(origin);
   if (allowed || (!origin && !isProductionRuntime)) return;
 
   throw Object.assign(new Error("This origin is not allowed to use the admin API."), {
@@ -353,11 +364,11 @@ function assertAllowedAdminOrigin(request) {
   });
 }
 
-function applyRequestHeaders(request, response) {
+function applyRequestHeaders(request, response, pathname) {
   Object.entries(securityHeaders).forEach(([header, value]) => response.setHeader(header, value));
 
   const origin = normalizeRequestOrigin(request);
-  if (!isAllowedCorsOrigin(origin)) return;
+  if (!isAllowedCorsOrigin(origin, pathname)) return;
 
   response.setHeader("Access-Control-Allow-Origin", origin);
   response.setHeader("Access-Control-Allow-Credentials", "true");
@@ -2212,9 +2223,9 @@ async function handleRequest(request, response) {
 
   try {
     response.setHeader("X-Request-ID", requestId);
-    applyRequestHeaders(request, response);
     const requestUrl = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
     const pathname = requestUrl.pathname.replace(/\/+$/, "") || "/";
+    applyRequestHeaders(request, response, pathname);
 
     if (request.method === "OPTIONS") {
       response.writeHead(204);

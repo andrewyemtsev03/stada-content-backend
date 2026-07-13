@@ -4,6 +4,7 @@ const test = require("node:test");
 process.env.NODE_ENV = "production";
 delete process.env.CORS_ORIGINS;
 delete process.env.ADMIN_CORS_ORIGINS;
+delete process.env.ALLOW_LOCAL_ADMIN_ORIGINS;
 process.env.ADMIN_LOGIN = "phase2-admin";
 process.env.ADMIN_PASSWORD = "a-long-random-test-password";
 
@@ -90,6 +91,46 @@ test("admin login uses an HttpOnly cookie, requires CSRF, and logout revokes the
     headers: { Cookie: cookie, Origin: origin },
   });
   assert.equal(sessionResponse.status, 200);
+  assert.equal(sessionResponse.headers.get("access-control-allow-origin"), origin);
+  assert.equal(sessionResponse.headers.get("access-control-allow-credentials"), "true");
+
+  const publicSubdomainSessionResponse = await fetch(`${baseUrl}/api/admin/session`, {
+    headers: { Cookie: cookie, Origin: "https://preview.stada.kz" },
+  });
+  assert.equal(publicSubdomainSessionResponse.status, 200);
+  assert.equal(publicSubdomainSessionResponse.headers.get("access-control-allow-origin"), null);
+  assert.equal(publicSubdomainSessionResponse.headers.get("access-control-allow-credentials"), null);
+
+  const localSessionResponse = await fetch(`${baseUrl}/api/admin/session`, {
+    headers: { Cookie: cookie, Origin: "http://localhost:5500" },
+  });
+  assert.equal(localSessionResponse.status, 200);
+  assert.equal(localSessionResponse.headers.get("access-control-allow-origin"), null);
+  assert.equal(localSessionResponse.headers.get("access-control-allow-credentials"), null);
+
+  const publicContentResponse = await fetch(`${baseUrl}/api/countries`, {
+    headers: { Origin: "https://preview.stada.kz" },
+  });
+  assert.equal(publicContentResponse.status, 200);
+  assert.equal(publicContentResponse.headers.get("access-control-allow-origin"), "https://preview.stada.kz");
+
+  const rejectedAdminPreflight = await fetch(`${baseUrl}/api/admin/content`, {
+    method: "OPTIONS",
+    headers: {
+      Origin: "https://preview.stada.kz",
+      "Access-Control-Request-Method": "POST",
+    },
+  });
+  assert.equal(rejectedAdminPreflight.status, 204);
+  assert.equal(rejectedAdminPreflight.headers.get("access-control-allow-origin"), null);
+
+  const rejectedLocalLogin = await fetch(`${baseUrl}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: "http://localhost:5500" },
+    body: JSON.stringify({ login: "phase2-admin", password: "a-long-random-test-password" }),
+  });
+  assert.equal(rejectedLocalLogin.status, 403);
+  assert.equal((await rejectedLocalLogin.json()).error.code, "ADMIN_ORIGIN_FORBIDDEN");
 
   const rejectedWrite = await fetch(`${baseUrl}/api/admin/products/example?country=kazakhstan`, {
     method: "DELETE",

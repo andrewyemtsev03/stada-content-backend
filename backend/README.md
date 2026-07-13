@@ -36,9 +36,12 @@ ADMIN_LOGIN_MAX_ATTEMPTS=8
 ADMIN_LOGIN_WINDOW_MS=900000
 ADMIN_SESSION_TTL_MS=28800000
 ADMIN_COOKIE_SAME_SITE=Strict
+ALLOW_LOCAL_ADMIN_ORIGINS=false
 ```
 
-`CORS_ORIGINS` is the public read list. `ADMIN_CORS_ORIGINS` is a separate, stricter list containing only deployed admin UI origins. The official `https://admin.stada.kz` origin is trusted explicitly by the backend; use `ADMIN_CORS_ORIGINS` for any additional admin domains. Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed so the local `adminStada` app can call the deployed backend. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
+`CORS_ORIGINS` is the public read list. `ADMIN_CORS_ORIGINS` is a separate, stricter list containing only exact deployed admin UI origins. The official `https://admin.stada.kz` origin is trusted explicitly by the backend; use `ADMIN_CORS_ORIGINS` for any additional admin domains. Public STADA site origins never grant browser access to `/api/admin/*` responses.
+
+Local admin development origins such as `http://localhost:5500` and `http://127.0.0.1:5500` are allowed automatically only when the backend is not running in production mode. If a local admin UI must connect directly to the deployed backend, set `ALLOW_LOCAL_ADMIN_ORIGINS=true` temporarily and remove it when that work is complete. Do not put `ADMIN_LOGIN` or `ADMIN_PASSWORD` into frontend JavaScript; type them into the admin login form.
 
 Admin login uses a `Secure`, `HttpOnly` cookie and a CSRF token instead of a browser-stored bearer token. On Render, the default cookie mode is `SameSite=None` so a separately hosted or local admin can call the HTTPS backend. If the admin and API are deployed on the same site, `ADMIN_COOKIE_SAME_SITE=Lax` or `Strict` can be used. Production cookies cannot be made insecure.
 
