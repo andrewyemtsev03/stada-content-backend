@@ -3,6 +3,7 @@ const path = require("node:path");
 const { withClient } = require("./client");
 
 const migrationsDir = path.join(__dirname, "migrations");
+const migrationLockKey = "stada-content-backend:schema-migrations";
 
 async function ensureMigrationsTable(client) {
   await client.query(`
@@ -40,15 +41,23 @@ async function applyMigration(client, fileName) {
 
 async function runMigrations() {
   return withClient(async client => {
-    await ensureMigrationsTable(client);
+    // Keep the advisory lock for this database connection until every migration
+    // has been checked. This prevents concurrent deploys from racing to record
+    // the same migration.
+    await client.query("select pg_advisory_lock(hashtext($1))", [migrationLockKey]);
+    try {
+      await ensureMigrationsTable(client);
 
-    const applied = [];
-    for (const fileName of listMigrationFiles()) {
-      const didApply = await applyMigration(client, fileName);
-      if (didApply) applied.push(fileName);
+      const applied = [];
+      for (const fileName of listMigrationFiles()) {
+        const didApply = await applyMigration(client, fileName);
+        if (didApply) applied.push(fileName);
+      }
+
+      return applied;
+    } finally {
+      await client.query("select pg_advisory_unlock(hashtext($1))", [migrationLockKey]);
     }
-
-    return applied;
   });
 }
 
