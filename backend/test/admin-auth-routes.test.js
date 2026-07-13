@@ -2,7 +2,8 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 process.env.NODE_ENV = "production";
-process.env.CORS_ORIGINS = "http://127.0.0.1:5500";
+delete process.env.CORS_ORIGINS;
+delete process.env.ADMIN_CORS_ORIGINS;
 process.env.ADMIN_LOGIN = "phase2-admin";
 process.env.ADMIN_PASSWORD = "a-long-random-test-password";
 
@@ -65,7 +66,7 @@ test("admin login uses an HttpOnly cookie, requires CSRF, and logout revokes the
   const baseUrl = await startServer();
   t.after(stopServer);
 
-  const origin = "http://127.0.0.1:5500";
+  const origin = "https://admin.stada.kz";
   const loginResponse = await fetch(`${baseUrl}/api/admin/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Origin: origin },
@@ -112,4 +113,11 @@ test("admin login uses an HttpOnly cookie, requires CSRF, and logout revokes the
     headers: { Cookie: cookie, Origin: origin },
   });
   assert.equal(expiredSessionResponse.status, 401);
+
+  const rejectedOriginResponse = await fetch(`${baseUrl}/api/admin/logout`, {
+    method: "POST",
+    headers: { Origin: "https://untrusted.example" },
+  });
+  assert.equal(rejectedOriginResponse.status, 403);
+  assert.equal((await rejectedOriginResponse.json()).error.code, "ADMIN_ORIGIN_FORBIDDEN");
 });

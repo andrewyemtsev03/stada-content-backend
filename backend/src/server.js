@@ -107,6 +107,7 @@ const cloudinaryProductUploadFolder = String(process.env.CLOUDINARY_PRODUCT_UPLO
 const productImageSyncTimeoutMs = positiveNumber(process.env.PRODUCT_IMAGE_SYNC_TIMEOUT_MS, 5 * 60 * 1000);
 const allowedCorsOrigins = parseOriginList(process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || "");
 const allowedAdminCorsOrigins = parseOriginList(process.env.ADMIN_CORS_ORIGINS || process.env.ADMIN_ORIGINS || "");
+const defaultAdminCorsOrigins = new Set(["https://admin.stada.kz"]);
 const allowAnyCorsOrigin = allowedCorsOrigins.length === 0 && allowedAdminCorsOrigins.length === 0 && !isProductionRuntime;
 const securityHeaders = {
   "X-Content-Type-Options": "nosniff",
@@ -302,6 +303,10 @@ function isLocalAdminDevCorsOrigin(origin) {
   }
 }
 
+function isDefaultAdminCorsOrigin(origin) {
+  return defaultAdminCorsOrigins.has(origin);
+}
+
 function normalizeRequestOrigin(request) {
   const origin = String(request.headers.origin || "").trim();
   if (!origin) return "";
@@ -317,6 +322,7 @@ function isAllowedCorsOrigin(origin) {
     allowAnyCorsOrigin
     || allowedCorsOrigins.includes(origin)
     || allowedAdminCorsOrigins.includes(origin)
+    || isDefaultAdminCorsOrigin(origin)
     || isDefaultPublicCorsOrigin(origin)
     || isLocalAdminDevCorsOrigin(origin)
   );
@@ -326,6 +332,7 @@ function assertAllowedAdminOrigin(request) {
   const origin = normalizeRequestOrigin(request);
   const allowed = origin && (
     allowedAdminCorsOrigins.includes(origin)
+    || isDefaultAdminCorsOrigin(origin)
     || isLocalAdminDevCorsOrigin(origin)
     || allowAnyCorsOrigin
   );
