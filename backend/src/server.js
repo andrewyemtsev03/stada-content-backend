@@ -65,6 +65,17 @@ const adminCookieDomain = String(process.env.ADMIN_COOKIE_DOMAIN || "").trim();
 const hiddenTextKeys = new Set(["hero_kicker", "site_name"]);
 const adminEditablePagePath = "index.html";
 const editableImageFields = ["src", "alt", "loading", "srcset", "sizes"];
+const maxNewsCards = 30;
+const defaultNewsCardFields = [
+  { date: "index_text_013", title: "hero_text1", text: "news_1_text", image: "index_image_006" },
+  { date: "index_text_014", title: "hero_text2", text: "news_2_text", image: "index_image_007" },
+  { date: "index_text_015", title: "hero_text3", text: "news_3_text", image: "index_image_008" },
+  { date: "index_text_016", title: "news_4_title", text: "news_4_text", image: "index_image_009" },
+  { date: "index_text_017", title: "news_5_title", text: "news_5_text", image: "index_image_010" },
+  { date: "index_text_018", title: "news_6_title", text: "news_6_text", image: "index_image_011" },
+  { date: "index_text_019", title: "news_7_title", text: "news_7_text", image: "index_image_012" },
+  { date: "index_text_020", title: "news_8_title", text: "news_8_text", image: "index_image_013" },
+];
 const productLanguages = ["ru", "kz", "kg", "ge", "en", "az", "ro", "uz", "hy"];
 const productNameFallbackLanguages = new Set(["ru", "kz", "en", "az", "ro", "uz", "hy"]);
 const productSlugTransliteration = {
@@ -982,6 +993,60 @@ function isLockedEditableSection(section) {
   return String(section?.label || section?.id || "").trim().toLowerCase() === "footer";
 }
 
+function normalizeNewsCardText(value, maxLength) {
+  return String(value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function normalizeNewsCards(value) {
+  if (!Array.isArray(value)) return [];
+
+  const usedIds = new Set();
+  return value.slice(0, maxNewsCards).map((card, index) => {
+    const baseId = String(card?.id || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || `news-${index + 1}`;
+    let id = baseId;
+    let suffix = 2;
+    while (usedIds.has(id)) {
+      id = `${baseId}-${suffix}`.slice(0, 70);
+      suffix += 1;
+    }
+    usedIds.add(id);
+
+    return {
+      id,
+      date: normalizeNewsCardText(card?.date, 120),
+      title: normalizeNewsCardText(card?.title, 500),
+      text: normalizeNewsCardText(card?.text, 3000),
+      image: normalizeEditableImage(card?.image),
+    };
+  });
+}
+
+function defaultNewsCardsFromPayload(payload) {
+  const text = payload?.content?.text || {};
+  const images = new Map((payload?.content?.dom?.images || []).map(image => [image.id, image]));
+  return normalizeNewsCards(defaultNewsCardFields.map((fields, index) => ({
+    id: `news-${index + 1}`,
+    date: text[fields.date] || "",
+    title: text[fields.title] || "",
+    text: text[fields.text] || "",
+    image: images.get(fields.image) || {},
+  })));
+}
+
+function editableNewsCardsFromPayload(payload) {
+  const configuredCards = payload?.content?.settings?.newsCards;
+  return Array.isArray(configuredCards)
+    ? normalizeNewsCards(configuredCards)
+    : defaultNewsCardsFromPayload(payload);
+}
+
 function buildEditableContent(basePayload, currentPayload) {
   const baseText = basePayload.content?.text || {};
   const currentText = currentPayload.content?.text || {};
@@ -1055,6 +1120,8 @@ function buildEditableContent(basePayload, currentPayload) {
     overrides: getPageOverrides(currentPayload.country.id, currentPayload.language, currentPayload.page.path),
     settings: currentPayload.content?.settings || {},
     originalSettings: basePayload.content?.settings || {},
+    newsCards: editableNewsCardsFromPayload(currentPayload),
+    originalNewsCards: editableNewsCardsFromPayload(basePayload),
     productCatalog: currentPayload.content?.productCatalog || [],
     sections: [
       ...new Map(
@@ -2126,10 +2193,12 @@ function buildChangedOverrides(basePayload, body) {
   const submittedDomTextIds = Object.keys(submittedDomText);
   const submittedDomImageIds = Object.keys(submittedDomImages);
   const submittedSettingKeys = [];
+  const submittedLanguageSettingKeys = [];
   const text = {};
   const domText = {};
   const domImages = {};
   const settings = {};
+  const languageSettings = {};
 
   for (const [key, value] of Object.entries(submittedText)) {
     if (isHiddenEditableTextKey(key) || !Object.prototype.hasOwnProperty.call(baseText, key)) continue;
@@ -2163,15 +2232,22 @@ function buildChangedOverrides(basePayload, body) {
     }
   }
 
+  if (Object.prototype.hasOwnProperty.call(submittedSettings, "newsCards")) {
+    languageSettings.newsCards = normalizeNewsCards(submittedSettings.newsCards);
+    submittedLanguageSettingKeys.push("newsCards");
+  }
+
   return {
     text,
     domText,
     domImages,
     settings,
+    languageSettings,
     submittedTextKeys,
     submittedDomTextIds,
     submittedDomImageIds,
     submittedSettingKeys: submittedSettingKeys.length ? submittedSettingKeys : null,
+    submittedLanguageSettingKeys: submittedLanguageSettingKeys.length ? submittedLanguageSettingKeys : null,
   };
 }
 

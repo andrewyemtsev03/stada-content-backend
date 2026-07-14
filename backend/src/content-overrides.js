@@ -310,10 +310,12 @@ async function savePageOverridesNow({
   domText = {},
   domImages = {},
   settings = {},
+  languageSettings = {},
   submittedTextKeys = null,
   submittedDomTextIds = null,
   submittedDomImageIds = null,
   submittedSettingKeys = null,
+  submittedLanguageSettingKeys = null,
 }) {
   await initializeContentOverrides();
 
@@ -347,7 +349,11 @@ async function savePageOverridesNow({
       const nextSettings = submittedSettingKeys
         ? { ...omitKeys(existingGlobal.settings, submittedSettingKeys), ...settings }
         : existingGlobal.settings;
-      const nextLanguageSettings = submittedSettingKeys ? omitKeys(existing.settings, submittedSettingKeys) : settings;
+      const nextLanguageSettings = submittedLanguageSettingKeys
+        ? { ...omitKeys(existing.settings, submittedLanguageSettingKeys), ...languageSettings }
+        : submittedSettingKeys
+          ? omitKeys(existing.settings, submittedSettingKeys)
+          : settings;
 
       await persistBucket(client, countryId, language, pagePath, {
         text: nextText,
