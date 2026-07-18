@@ -30,14 +30,17 @@ require.cache[authRepositoryPath] = {
   filename: authRepositoryPath,
   loaded: true,
   exports: {
+    clearAccountLoginFailures: async () => {},
     clearLoginFailures: async () => {},
     createAdminSession: async ({ token, csrfToken, account, expiresAt }) => {
       storedToken = token;
       storedSession = { csrfToken, account, expiresAt };
       revoked = false;
     },
+    getAccountLoginAttempt: async () => null,
     getAdminSession: async token => token === storedToken && !revoked ? storedSession : null,
     getLoginAttempt: async () => null,
+    recordAccountLoginFailure: async () => {},
     recordLoginFailure: async () => {},
     removeExpiredAdminSessions: async () => {},
     removeStaleLoginAttempts: async () => {},
