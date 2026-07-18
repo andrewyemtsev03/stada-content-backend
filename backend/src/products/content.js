@@ -1,3 +1,4 @@
+const { normalizeCatalogProductId } = require("../content/editable");
 const {
   getCanonicalProductImageFromSlots,
   normalizeExternalLink,
